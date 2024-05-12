@@ -89,10 +89,6 @@
 #ifdef FEATURE_CPUMEMHISTORY
 #ifndef C64DTV /* FIXME: fix DTV and remove this */
 
-/* NOTE: the functions called here are in src/plus4/plus4cpu.c, src/c128/c128cpu.c,
- * src/cbm2/cbm2cpu.c, src/c64/vsidcpu.c, src/c64/c64cpu.c, src/pet/petcpu.c,
- * src/c64dtv/c64dtvcpu.c */
-
 /* map access functions to memmap hooks */
 #ifndef STORE
 #define STORE(addr, value) \
@@ -465,7 +461,7 @@ void maincpu_resync_limits(void)
 
 void maincpu_mainloop(void)
 {
-#define ORIGIN_MEMSPACE (e_comp_space)
+#define origin (0)
 #ifndef C64DTV
     /* Notice that using a struct for these would make it a lot slower (at
        least, on gcc 2.7.2.x).  */

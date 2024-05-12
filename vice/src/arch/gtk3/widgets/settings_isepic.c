@@ -76,7 +76,7 @@ static GtkWidget *create_isepic_image_widget(void)
     image = cart_image_widget_new(CARTRIDGE_ISEPIC,
                                   CARTRIDGE_NAME_ISEPIC,
                                   CART_IMAGE_PRIMARY,
-                                  "RAM",
+                                  "cartridge",
                                   "Isepicfilename",
                                   TRUE,
                                   TRUE);

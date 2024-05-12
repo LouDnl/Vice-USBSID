@@ -150,7 +150,7 @@ void set_yydebug(int val);
 %token CMD_BLOAD CMD_BSAVE CMD_SCREEN CMD_UNTIL CMD_CPU CMD_YYDEBUG
 %token CMD_BACKTRACE CMD_SCREENSHOT CMD_PWD CMD_DIR CMD_MKDIR CMD_RMDIR
 %token CMD_RESOURCE_GET CMD_RESOURCE_SET CMD_LOAD_RESOURCES CMD_SAVE_RESOURCES
-%token CMD_ATTACH CMD_DETACH CMD_MON_RESET CMD_TAPECTRL CMD_TAPEOFFS CMD_CARTFREEZE CMD_UPDB CMD_JPDB
+%token CMD_ATTACH CMD_DETACH CMD_MON_RESET CMD_TAPECTRL CMD_CARTFREEZE CMD_UPDB CMD_JPDB
 %token CMD_CPUHISTORY CMD_MEMMAPZAP CMD_MEMMAPSHOW CMD_MEMMAPSAVE
 %token CMD_COMMENT CMD_LIST CMD_STOPWATCH RESET
 %token CMD_EXPORT CMD_AUTOSTART CMD_AUTOLOAD CMD_MAINCPU_TRACE
@@ -236,27 +236,27 @@ machine_state_rules: CMD_BANK end_cmd
                    | CMD_CPU CPUTYPE end_cmd
                      { monitor_cpu_type_set($2); }
                    | CMD_CPUHISTORY end_cmd
-                     { mon_cpuhistory(-1, e_invalid_space,  e_invalid_space, e_invalid_space, e_invalid_space, e_invalid_space); }
+                     { mon_cpuhistory(-1,  0,  0,  0,   0,   0); }
                    | CMD_CPUHISTORY opt_sep memspace end_cmd
-                     { mon_cpuhistory(-1, $3, e_invalid_space, e_invalid_space, e_invalid_space, e_invalid_space); }
+                     { mon_cpuhistory(-1, $3,  0,  0,   0,   0); }
                    | CMD_CPUHISTORY opt_sep memspace opt_sep memspace end_cmd
-                     { mon_cpuhistory(-1, $3, $5, e_invalid_space, e_invalid_space, e_invalid_space); }
+                     { mon_cpuhistory(-1, $3, $5,  0,   0,   0); }
                    | CMD_CPUHISTORY opt_sep memspace opt_sep memspace opt_sep memspace end_cmd
-                     { mon_cpuhistory(-1, $3, $5, $7, e_invalid_space, e_invalid_space); }
+                     { mon_cpuhistory(-1, $3, $5, $7,   0,   0); }
                    | CMD_CPUHISTORY opt_sep memspace opt_sep memspace opt_sep memspace opt_sep memspace end_cmd
-                     { mon_cpuhistory(-1, $3, $5, $7,  $9, e_invalid_space); }
+                     { mon_cpuhistory(-1, $3, $5, $7,  $9,   0); }
                    | CMD_CPUHISTORY opt_sep memspace opt_sep memspace opt_sep memspace opt_sep memspace opt_sep memspace end_cmd
                      { mon_cpuhistory(-1, $3, $5, $7,  $9, $11); }
                    | CMD_CPUHISTORY opt_sep d_number end_cmd
-                     { mon_cpuhistory($3, e_invalid_space, e_invalid_space, e_invalid_space, e_invalid_space, e_invalid_space); }
+                     { mon_cpuhistory($3,  0,  0,  0,   0,   0); }
                    | CMD_CPUHISTORY opt_sep d_number opt_sep memspace end_cmd
-                     { mon_cpuhistory($3, $5, e_invalid_space, e_invalid_space, e_invalid_space, e_invalid_space); }
+                     { mon_cpuhistory($3, $5,  0,  0,   0,   0); }
                    | CMD_CPUHISTORY opt_sep d_number opt_sep memspace opt_sep memspace end_cmd
-                     { mon_cpuhistory($3, $5, $7, e_invalid_space, e_invalid_space, e_invalid_space); }
+                     { mon_cpuhistory($3, $5, $7,  0,   0,   0); }
                    | CMD_CPUHISTORY opt_sep d_number opt_sep memspace opt_sep memspace opt_sep memspace end_cmd
-                     { mon_cpuhistory($3, $5, $7, $9, e_invalid_space, e_invalid_space); }
+                     { mon_cpuhistory($3, $5, $7, $9,   0,   0); }
                    | CMD_CPUHISTORY opt_sep d_number opt_sep memspace opt_sep memspace opt_sep memspace opt_sep memspace end_cmd
-                     { mon_cpuhistory($3, $5, $7, $9, $11, e_invalid_space); }
+                     { mon_cpuhistory($3, $5, $7, $9, $11,   0); }
                    | CMD_CPUHISTORY opt_sep d_number opt_sep memspace opt_sep memspace opt_sep memspace opt_sep memspace opt_sep memspace end_cmd
                      { mon_cpuhistory($3, $5, $7, $9, $11, $13); }
                    | CMD_RETURN end_cmd
@@ -292,7 +292,7 @@ machine_state_rules: CMD_BANK end_cmd
                      }
                    | CMD_WARP TOGGLE end_cmd
                      {
-                        vsync_set_warp_mode((($2 == e_TOGGLE) ? (vsync_get_warp_mode() ^ 1) : $2));
+                        vsync_set_warp_mode(!vsync_get_warp_mode());
                      }
                    | register_mod
                    ;
@@ -376,13 +376,13 @@ memory_rules: CMD_MOVE address_range opt_sep address end_cmd
             | CMD_SPRITE_DISPLAY end_cmd
               { mon_memory_display_data(BAD_ADDR, BAD_ADDR, 24, 21); }
             | CMD_TEXT_DISPLAY address_opt_range end_cmd
-              { mon_memory_display(e_text, $2[0], $2[1], DF_PETSCII); }
+              { mon_memory_display(0, $2[0], $2[1], DF_PETSCII); }
             | CMD_TEXT_DISPLAY end_cmd
-              { mon_memory_display(e_text, BAD_ADDR, BAD_ADDR, DF_PETSCII); }
+              { mon_memory_display(0, BAD_ADDR, BAD_ADDR, DF_PETSCII); }
             | CMD_SCREENCODE_DISPLAY address_opt_range end_cmd
-              { mon_memory_display(e_text, $2[0], $2[1], DF_SCREEN_CODE); }
+              { mon_memory_display(0, $2[0], $2[1], DF_SCREEN_CODE); }
             | CMD_SCREENCODE_DISPLAY end_cmd
-              { mon_memory_display(e_text, BAD_ADDR, BAD_ADDR, DF_SCREEN_CODE); }
+              { mon_memory_display(0, BAD_ADDR, BAD_ADDR, DF_SCREEN_CODE); }
             | CMD_MEMMAPZAP end_cmd
               { mon_memmap_zap(); }
             | CMD_MEMMAPSHOW end_cmd
@@ -587,10 +587,6 @@ monitor_misc_rules: CMD_DISK rest_of_line end_cmd
                     { mon_reset_machine($3); }
                   | CMD_TAPECTRL opt_sep expression end_cmd
                     { mon_tape_ctrl(TAPEPORT_PORT_1, $3); }  /* FIXME: hardcoded to port 1 for now */
-                  | CMD_TAPEOFFS end_cmd
-                    { mon_tape_offs(TAPEPORT_PORT_1, -1); }  /* FIXME: hardcoded to port 1 for now */
-                  | CMD_TAPEOFFS opt_sep expression end_cmd
-                    { mon_tape_offs(TAPEPORT_PORT_1, $3); }  /* FIXME: hardcoded to port 1 for now */
                   | CMD_CARTFREEZE end_cmd
                     { mon_cart_freeze(); }
                   | CMD_UPDB number end_cmd

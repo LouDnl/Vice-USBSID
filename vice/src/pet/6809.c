@@ -107,11 +107,11 @@ h6809_regs_t h6809_regs;
 
 #define DO_INTERRUPT(int_kind)                                             \
   do {                                                                     \
-        uint8_t ik = (int_kind);                                           \
+        uint8_t ik = (int_kind);                                              \
         if (ik & (IK_TRAP | IK_RESET)) {                                   \
             if (ik & IK_TRAP) {                                            \
                 EXPORT_REGISTERS();                                        \
-                interrupt_do_trap(CPU_INT_STATUS, (uint16_t)PC);           \
+                interrupt_do_trap(CPU_INT_STATUS, (uint16_t)PC);               \
                 IMPORT_REGISTERS();                                        \
                 if (CPU_INT_STATUS->global_pending_int & IK_RESET) {       \
                     ik |= IK_RESET;                                        \
@@ -125,20 +125,23 @@ h6809_regs_t h6809_regs;
         }                                                                  \
         if (ik & (IK_MONITOR | IK_DMA)) {                                  \
             if (ik & IK_MONITOR) {                                         \
-                if (monitor_mask[CALLER] & (MI_STEP)) {                    \
+                if (monitor_force_import(CALLER)) {                        \
+                    IMPORT_REGISTERS();                                    \
+                }                                                          \
+                if (monitor_mask[CALLER]) {                                \
                     EXPORT_REGISTERS();                                    \
-                    monitor_check_icount((uint16_t)PC);                    \
+                }                                                          \
+                if (monitor_mask[CALLER] & (MI_STEP)) {                    \
+                    monitor_check_icount((uint16_t)PC);                        \
                     IMPORT_REGISTERS();                                    \
                 }                                                          \
                 if (monitor_mask[CALLER] & (MI_BREAK)) {                   \
-                    EXPORT_REGISTERS();                                    \
-                    if (monitor_check_breakpoints(CALLER, (uint16_t)PC)) { \
+                    if (monitor_check_breakpoints(CALLER, (uint16_t)PC)) {     \
                         monitor_startup(CALLER);                           \
+                        IMPORT_REGISTERS();                                \
                     }                                                      \
-                    IMPORT_REGISTERS();                                    \
                 }                                                          \
                 if (monitor_mask[CALLER] & (MI_WATCH)) {                   \
-                    EXPORT_REGISTERS();                                    \
                     monitor_check_watchpoints(LAST_OPCODE_ADDR, (uint16_t)PC); \
                     IMPORT_REGISTERS();                                    \
                 }                                                          \

@@ -233,8 +233,6 @@ void machine_reset(void)
 
     machine_specific_reset();
 
-    kbdbuf_abort();
-
     autostart_reset();
 
     mem_initialize_memory();

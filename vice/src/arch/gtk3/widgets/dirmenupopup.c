@@ -51,7 +51,6 @@
 #include "machine.h"
 #include "tape.h"
 #include "tapeport.h"
-#include "unicodehelpers.h"
 #include "util.h"
 #include "widgethelpers.h"
 
@@ -272,15 +271,15 @@ GtkWidget *dir_menu_popup_create(
                    reverse only name/od and then concat them */
                 char *utf8a, *utf8b;
                 *sep = 0;
-                utf8a = (char *)vice_gtk3_petscii_upper_to_utf8((unsigned char *)tmp, 0);
+                utf8a = (char *)vice_gtk3_petscii_to_utf8((unsigned char *)tmp, 0, false);
                 *sep = '"';
-                utf8b = (char *)vice_gtk3_petscii_upper_to_utf8((unsigned char *)sep, 1);
+                utf8b = (char *)vice_gtk3_petscii_to_utf8((unsigned char *)sep, 1, false);
                 utf8 = util_concat(utf8a, utf8b, NULL);
                 lib_free(utf8a);
                 lib_free(utf8b);
             } else {
                 /* if start of disk name was not found use the entire string */
-                utf8 = (char *)vice_gtk3_petscii_upper_to_utf8((unsigned char *)tmp, 1);
+                utf8 = (char *)vice_gtk3_petscii_to_utf8((unsigned char *)tmp, 1, false);
             }
 
             item = gtk_menu_item_new_with_label(utf8);
@@ -301,7 +300,7 @@ GtkWidget *dir_menu_popup_create(
                     entry = entry->next) {
 
                 tmp = image_contents_file_to_string(entry, IMAGE_CONTENTS_STRING_PETSCII);
-                utf8 = (char *)vice_gtk3_petscii_upper_to_utf8((unsigned char *)tmp, 0);
+                utf8 = (char *)vice_gtk3_petscii_to_utf8((unsigned char *)tmp, 0, false);
                 item = gtk_menu_item_new_with_label(utf8);
                 /* set extra data to used in the event handler */
                 g_object_set_data(G_OBJECT(item),

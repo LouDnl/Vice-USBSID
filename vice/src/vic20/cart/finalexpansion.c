@@ -128,10 +128,10 @@ static uint8_t register_b;
 static uint8_t lock_bit;
 
 static int finalexpansion_writeback;
-static log_t fe_log = LOG_ERR;
+static char *cartfile = NULL;   /* perhaps the one in vic20cart.c could
+                                   be used instead? */
 
-static char *finalexpansion_filename = NULL;
-static int finalexpansion_filetype = 0;
+static log_t fe_log = LOG_ERR;
 
 /* ------------------------------------------------------------------------- */
 
@@ -193,9 +193,7 @@ static io_source_t finalexpansion_device = {
 static io_source_list_t *finalexpansion_list_item = NULL;
 
 static const export_resource_t export_res = {
-    CARTRIDGE_VIC20_NAME_FINAL_EXPANSION, 0,
-    VIC_CART_RAM123 | VIC_CART_BLK1 | VIC_CART_BLK2 | VIC_CART_BLK3 | VIC_CART_BLK5,
-    NULL, &finalexpansion_device, CARTRIDGE_VIC20_FINAL_EXPANSION
+    CARTRIDGE_VIC20_NAME_FINAL_EXPANSION, 0, 0, NULL, &finalexpansion_device, CARTRIDGE_VIC20_FINAL_EXPANSION
 };
 
 /* ------------------------------------------------------------------------- */
@@ -684,14 +682,11 @@ static int zfile_load(const char *filename, uint8_t *dest)
     return 0;
 }
 
-int finalexpansion_crt_attach(FILE *fd, uint8_t *rawcart, const char *filename)
+int finalexpansion_crt_attach(FILE *fd, uint8_t *rawcart)
 {
     crt_chip_header_t chip;
     int idx = 0;
     uint8_t *cart_flash;
-
-    finalexpansion_filetype = 0;
-    finalexpansion_filename = NULL;
 
     if (!cart_ram) {
         cart_ram = lib_malloc(CART_RAM_SIZE);
@@ -733,9 +728,6 @@ int finalexpansion_crt_attach(FILE *fd, uint8_t *rawcart, const char *filename)
 
     finalexpansion_list_item = io_source_register(&finalexpansion_device);
 
-    finalexpansion_filetype = CARTRIDGE_FILETYPE_CRT;
-    finalexpansion_filename = lib_strdup(filename);
-
     return 0;
 
 exiterror:
@@ -746,9 +738,6 @@ exiterror:
 int finalexpansion_bin_attach(const char *filename)
 {
     uint8_t *cart_flash;
-
-    finalexpansion_filetype = 0;
-    finalexpansion_filename = NULL;
 
     if (!cart_ram) {
         cart_ram = lib_malloc(CART_RAM_SIZE);
@@ -764,6 +753,7 @@ int finalexpansion_bin_attach(const char *filename)
 
     flash040core_init(&flash_state, maincpu_alarm_context, FLASH040_TYPE_B, cart_flash);
 
+    util_string_set(&cartfile, filename);
     if (zfile_load(filename, flash_state.flash_data) < 0) {
         finalexpansion_detach();
         return -1;
@@ -780,9 +770,6 @@ int finalexpansion_bin_attach(const char *filename)
 
     finalexpansion_list_item = io_source_register(&finalexpansion_device);
 
-    finalexpansion_filetype = CARTRIDGE_FILETYPE_BIN;
-    finalexpansion_filename = lib_strdup(filename);
-
     return 0;
 }
 
@@ -791,102 +778,41 @@ void finalexpansion_detach(void)
     /* try to write back cartridge contents if write back is enabled
        and cartridge wasn't from a snapshot */
     if (finalexpansion_writeback && !cartridge_is_from_snapshot) {
-        finalexpansion_flush_image();
+        if (flash_state.flash_dirty) {
+            long n;
+            FILE *fd;
+
+            n = 0;
+            log_message(fe_log, "Flash dirty, trying to write back...");
+            fd = fopen(cartfile, "wb");
+            if (fd) {
+                n = fwrite(flash_state.flash_data, (size_t)CART_ROM_SIZE, 1, fd);
+                fclose(fd);
+            }
+            if (n < 1) {
+                log_message(fe_log, "Failed to write back image `%s'!", cartfile);
+            } else {
+                log_message(fe_log, "Wrote back image `%s'.", cartfile);
+            }
+        } else {
+            log_message(fe_log, "Flash clean, skipping write back.");
+        }
     }
 
     mem_cart_blocks = 0;
     mem_initialize_memory();
     lib_free(flash_state.flash_data);
     flash040core_shutdown(&flash_state);
-    lib_free(finalexpansion_filename);
-    finalexpansion_filename = NULL;
     lib_free(cart_ram);
     cart_ram = NULL;
+    lib_free(cartfile);
+    cartfile = NULL;
 
     if (finalexpansion_list_item != NULL) {
         io_source_unregister(finalexpansion_list_item);
         finalexpansion_list_item = NULL;
         export_remove(&export_res);
     }
-}
-
-int finalexpansion_bin_save(const char *filename)
-{
-    FILE *fd;
-
-    if (filename == NULL) {
-        return -1;
-    }
-
-    fd = fopen(filename, MODE_WRITE);
-
-    if (fd == NULL) {
-        return -1;
-    }
-
-        if (fwrite(flash_state.flash_data, 1, CART_ROM_SIZE, fd) != CART_ROM_SIZE) {
-            fclose(fd);
-            return -1;
-        }
-
-    fclose(fd);
-
-    return 0;
-}
-
-int finalexpansion_crt_save(const char *filename)
-{
-    FILE *fd;
-    crt_chip_header_t chip;
-    uint8_t *data;
-    int i;
-
-    fd = crt_create_vic20(filename, CARTRIDGE_VIC20_FINAL_EXPANSION, 0, CARTRIDGE_VIC20_NAME_FINAL_EXPANSION);
-
-    if (fd == NULL) {
-        return -1;
-    }
-
-    chip.type = 2;
-    chip.size = 0x2000;
-    chip.start = 0xa000;
-
-    data = flash_state.flash_data;
-
-    for (i = 0; i < (CART_ROM_SIZE / chip.size); i++) {
-        chip.bank = i; /* bank */
-
-        if (crt_write_chip(data, &chip, fd)) {
-            fclose(fd);
-            return -1;
-        }
-        data += chip.size;
-    }
-
-    fclose(fd);
-
-    return 0;
-}
-
-int finalexpansion_flush_image(void)
-{
-    int ret = 0;
-    if (flash_state.flash_dirty) {
-        log_message(fe_log, "Flash dirty, trying to write back...");
-        if (finalexpansion_filetype == CARTRIDGE_FILETYPE_BIN) {
-            ret = finalexpansion_bin_save(finalexpansion_filename);
-        } else if (finalexpansion_filetype == CARTRIDGE_FILETYPE_CRT) {
-            ret = finalexpansion_crt_save(finalexpansion_filename);
-        }
-        if (ret < 1) {
-            log_message(fe_log, "Failed to write back image `%s'!", finalexpansion_filename);
-        } else {
-            log_message(fe_log, "Wrote back image `%s'.", finalexpansion_filename);
-        }
-    } else {
-        log_message(fe_log, "Flash clean, skipping write back.");
-    }
-    return ret;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -1019,10 +945,6 @@ int finalexpansion_snapshot_read_module(snapshot_t *s)
                       VIC_CART_BLK1 | VIC_CART_BLK2 | VIC_CART_BLK3 | VIC_CART_BLK5 |
                       VIC_CART_IO2 | VIC_CART_IO3;
     mem_initialize_memory();
-
-    /* set filetype to none */
-    finalexpansion_filename = NULL;
-    finalexpansion_filetype = 0;
 
     return 0;
 }

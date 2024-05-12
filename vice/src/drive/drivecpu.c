@@ -190,7 +190,6 @@ void drivecpu_reset_clk(diskunit_context_t *drv)
     drv->cpu->stop_clk = 0;
 }
 
-/* called by drive_reset() (via machine_specific_reset()) */
 void drivecpu_reset(diskunit_context_t *drv)
 {
     int preserve_monitor;
@@ -210,7 +209,6 @@ void drivecpu_reset(diskunit_context_t *drv)
     interrupt_trigger_reset(drv->cpu->int_status, *(drv->clk_ptr));
 }
 
-/* called by drive_cpu_trigger_reset() */
 void drivecpu_trigger_reset(unsigned int dnr)
 {
     interrupt_trigger_reset(drivecpu_int_status_ptr[dnr], diskunit_clk[dnr] + 1);
@@ -367,7 +365,7 @@ void drivecpu_execute(diskunit_context_t *drv, CLOCK clk_value)
 #define reg_p   (cpu->cpu_regs.p)
 #define flag_z  (cpu->cpu_regs.z)
 #define flag_n  (cpu->cpu_regs.n)
-#define ORIGIN_MEMSPACE  (drv->mynumber + e_disk8_space)
+#define origin  (drv->mynumber + 1)
 
     cpu = drv->cpu;
 

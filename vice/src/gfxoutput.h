@@ -52,7 +52,6 @@ typedef struct gfxoutputdrv_format_s {
 } gfxoutputdrv_format_t;
 
 typedef struct gfxoutputdrv_s {
-    const int type;
     const char *name;
     const char *displayname;
     const char *default_extension;
@@ -129,14 +128,6 @@ enum {
     NATIVE_SS_CRTC_WHITE = 0,
     NATIVE_SS_CRTC_AMBER,
     NATIVE_SS_CRTC_GREEN
-};
-
-enum {
-    GFXOUTPUTDRV_TYPE_SCREENSHOT_NATIVE = 0,
-    GFXOUTPUTDRV_TYPE_SCREENSHOT_IMAGE,
-    GFXOUTPUTDRV_TYPE_VIDEO,
-
-    GFXOUTPUTDRV_TYPE_MAX
 };
 
 #endif

@@ -162,23 +162,10 @@ console_t *uimonfb_window_resume(void)
  */
 int uimonfb_out(const char *buffer)
 {
-    return native_console_out(console_log_local, "%s", buffer);
+    native_console_out(console_log_local, "%s", buffer);
+    return 0;
 }
 
-int uimonfb_petscii_out(const char *buffer, int len)
-{
-    return native_console_petscii_out(len, console_log_local, "%s", buffer);
-}
-
-int uimonfb_petscii_upper_out(const char *buffer, int len)
-{
-    return native_console_petscii_upper_out(len, console_log_local, "%s", buffer);
-}
-
-int uimonfb_scrcode_out(const char *buffer, int len)
-{
-    return native_console_scrcode_out(len, console_log_local, "%s", buffer);
-}
 
 /** \brief  Read a string
  *

@@ -29,6 +29,7 @@
 
 void ui_media_dialog_show(void);
 void ui_media_stop_recording(void);
+void ui_media_auto_screenshot(void);
 void ui_media_shutdown(void);
 
 #endif

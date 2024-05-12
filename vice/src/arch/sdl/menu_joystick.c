@@ -92,9 +92,6 @@ static const char *joystick_device_dynmenu_helper(int port)
     int j = 0, id;
     ui_menu_entry_t *entry = joystick_device_dyn_menu[port];
     const char *device_name;
-#ifdef HAVE_SDL_NUMJOYSTICKS
-    int n;
-#endif
 
     /* rebuild menu if it already exists. */
     if (joystick_device_dyn_menu_init[port] != 0) {
@@ -108,41 +105,39 @@ static const char *joystick_device_dynmenu_helper(int port)
         entry[j].string   = lib_strdup("None");
         entry[j].type     = MENU_ENTRY_RESOURCE_RADIO;
         entry[j].callback = uijoystick_device_callbacks[port];
-        entry[j].data     = (ui_callback_data_t)vice_int_to_ptr(JOYDEV_NONE);
+        entry[j].data     = (ui_callback_data_t)int_to_void_ptr(JOYDEV_NONE);
         j++;
 
         entry[j].action   = ACTION_NONE;
         entry[j].string   = lib_strdup("Numpad");
         entry[j].type     = MENU_ENTRY_RESOURCE_RADIO;
         entry[j].callback = uijoystick_device_callbacks[port];
-        entry[j].data     = (ui_callback_data_t)vice_int_to_ptr(JOYDEV_NUMPAD);
+        entry[j].data     = (ui_callback_data_t)int_to_void_ptr(JOYDEV_NUMPAD);
         j++;
 
         entry[j].action   = ACTION_NONE;
         entry[j].string   = lib_strdup("Keyset 1");
         entry[j].type     = MENU_ENTRY_RESOURCE_RADIO;
         entry[j].callback = uijoystick_device_callbacks[port];
-        entry[j].data     = (ui_callback_data_t)vice_int_to_ptr(JOYDEV_KEYSET1);
+        entry[j].data     = (ui_callback_data_t)int_to_void_ptr(JOYDEV_KEYSET1);
         j++;
 
         entry[j].action   = ACTION_NONE;
         entry[j].string   = lib_strdup("Keyset 2");
         entry[j].type     = MENU_ENTRY_RESOURCE_RADIO;
         entry[j].callback = uijoystick_device_callbacks[port];
-        entry[j].data     = (ui_callback_data_t)vice_int_to_ptr(JOYDEV_KEYSET2);
+        entry[j].data     = (ui_callback_data_t)int_to_void_ptr(JOYDEV_KEYSET2);
         j++;
 
 #ifdef HAVE_SDL_NUMJOYSTICKS
-        n = 0;
         joystick_ui_reset_device_list();
         while (j < JOYPORT_MAX_PORTS - 1 && (device_name = joystick_ui_get_next_device_name(&id)) != NULL) {
             entry[j].action   = ACTION_NONE;
             entry[j].string   = lib_strdup(device_name);
             entry[j].type     = MENU_ENTRY_RESOURCE_RADIO;
             entry[j].callback = uijoystick_device_callbacks[port];
-            entry[j].data     = (ui_callback_data_t)vice_int_to_ptr(JOYDEV_JOYSTICK + n);
+            entry[j].data     = (ui_callback_data_t)int_to_void_ptr(JOYDEV_JOYSTICK);
             j++;
-            n++;
         }
 #endif
         entry[j].string = NULL;
@@ -208,7 +203,6 @@ static UI_MENU_CALLBACK(Joystick11Device_dynmenu_callback)
 }
 
 UI_MENU_DEFINE_TOGGLE(JoyOpposite)
-UI_MENU_DEFINE_TOGGLE(JoyMenuControl)
 
 UI_MENU_DEFINE_TOGGLE(JoyStick1AutoFire)
 UI_MENU_DEFINE_TOGGLE(JoyStick2AutoFire)
@@ -733,7 +727,7 @@ static const char *joystick_mapping_dynmenu_helper(int port)
                     entry[j].string   = mapname;
                     entry[j].type     = MENU_ENTRY_DIALOG;
                     entry[j].callback = custom_joymap_callback;
-                    entry[j].data     = (ui_callback_data_t)vice_int_to_ptr((mappings->pinmap[i].pin | (port << 5)));
+                    entry[j].data     = (ui_callback_data_t)int_to_void_ptr((mappings->pinmap[i].pin | (port << 5)));
                     joy_pin[port][mappings->pinmap[i].pin] = mapname;
                     j++;
                 }
@@ -744,7 +738,7 @@ static const char *joystick_mapping_dynmenu_helper(int port)
                     entry[j].string   = lib_strdup(mappings->potmap[i].name);
                     entry[j].type     = MENU_ENTRY_DIALOG;
                     entry[j].callback = custom_joymap_axis_callback;
-                    entry[j].data     = (ui_callback_data_t)vice_int_to_ptr((mappings->potmap[i].pin | (port << 5)));
+                    entry[j].data     = (ui_callback_data_t)int_to_void_ptr((mappings->potmap[i].pin | (port << 5)));
                     j++;
                 }
             }
@@ -752,7 +746,7 @@ static const char *joystick_mapping_dynmenu_helper(int port)
             entry[j].string   = lib_strdup("Clear all mappings");
             entry[j].type     = MENU_ENTRY_DIALOG;
             entry[j].callback = clear_joymap_callback;
-            entry[j].data     = (ui_callback_data_t)vice_int_to_ptr(port << 5);
+            entry[j].data     = (ui_callback_data_t)int_to_void_ptr(port << 5);
             j++;
         }
         entry[j].string = NULL;
@@ -950,10 +944,6 @@ const ui_menu_entry_t joystick_menu[] = {
         .type     = MENU_ENTRY_RESOURCE_TOGGLE,
         .resource = "KeySetEnable"
     },
-    {   .string   = "Enable joystick menu navigation",
-        .type     = MENU_ENTRY_RESOURCE_TOGGLE,
-        .callback = toggle_JoyMenuControl_callback
-    },
     {   .string   = "Define keysets",
         .type     = MENU_ENTRY_SUBMENU,
         .callback = submenu_callback,
@@ -1054,10 +1044,6 @@ const ui_menu_entry_t joystick_c64_menu[] = {
         .type     = MENU_ENTRY_RESOURCE_TOGGLE,
         .resource = "KeySetEnable"
     },
-    {   .string   = "Enable joystick menu navigation",
-        .type     = MENU_ENTRY_RESOURCE_TOGGLE,
-        .callback = toggle_JoyMenuControl_callback
-    },
     {   .string   = "Define keysets",
         .type     = MENU_ENTRY_SUBMENU,
         .callback = submenu_callback,
@@ -1157,10 +1143,6 @@ const ui_menu_entry_t joystick_c64dtv_menu[] = {
         .string   = "Allow keyset joystick",
         .type     = MENU_ENTRY_RESOURCE_TOGGLE,
         .resource = "KeySetEnable"
-    },
-    {   .string   = "Enable joystick menu navigation",
-        .type     = MENU_ENTRY_RESOURCE_TOGGLE,
-        .callback = toggle_JoyMenuControl_callback
     },
     {   .string   = "Define keysets",
         .type     = MENU_ENTRY_SUBMENU,
@@ -1269,10 +1251,6 @@ const ui_menu_entry_t joystick_plus4_menu[] = {
         .type     = MENU_ENTRY_RESOURCE_TOGGLE,
         .resource = "KeySetEnable"
     },
-    {   .string   = "Enable joystick menu navigation",
-        .type     = MENU_ENTRY_RESOURCE_TOGGLE,
-        .callback = toggle_JoyMenuControl_callback
-    },
     {   .string   = "Define keysets",
         .type     = MENU_ENTRY_SUBMENU,
         .callback = submenu_callback,
@@ -1369,10 +1347,6 @@ const ui_menu_entry_t joystick_vic20_menu[] = {
         .type     = MENU_ENTRY_RESOURCE_TOGGLE,
         .resource = "KeySetEnable"
     },
-    {   .string   = "Enable joystick menu navigation",
-        .type     = MENU_ENTRY_RESOURCE_TOGGLE,
-        .callback = toggle_JoyMenuControl_callback
-    },
     {   .string   = "Define keysets",
         .type     = MENU_ENTRY_SUBMENU,
         .callback = submenu_callback,
@@ -1457,10 +1431,6 @@ const ui_menu_entry_t joystick_userport_only_menu[] = {
         .string   = "Allow keyset joystick",
         .type     = MENU_ENTRY_RESOURCE_TOGGLE,
         .resource = "KeySetEnable"
-    },
-    {   .string   = "Enable joystick menu navigation",
-        .type     = MENU_ENTRY_RESOURCE_TOGGLE,
-        .callback = toggle_JoyMenuControl_callback
     },
     {   .string   = "Define keysets",
         .type     = MENU_ENTRY_SUBMENU,

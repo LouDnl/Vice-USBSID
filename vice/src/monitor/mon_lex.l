@@ -235,7 +235,6 @@ HDIGIT  [0-9a-f]
         stop            { BEGIN(INITIAL);       return CMD_MON_STOP; }
         stopwatch|sw    { BEGIN(INITIAL);       return CMD_STOPWATCH; }
         tapectrl        { BEGIN(INITIAL);       return CMD_TAPECTRL; }
-        tapeoffs        { BEGIN(INITIAL);       return CMD_TAPEOFFS; }
         trace|tr        { BEGIN(INITIAL);       return CMD_TRACE; }
         until|un        { BEGIN(INITIAL);       return CMD_UNTIL; }
         undump          { BEGIN(FNAME);         return CMD_UNDUMP; }
@@ -274,8 +273,6 @@ clear		{ return CLEAR; }
 
 load { yylval.i = e_load; return MEM_OP; }
 store { yylval.i = e_store; return MEM_OP; }
-read { yylval.i = e_load; return MEM_OP; }
-write { yylval.i = e_store; return MEM_OP; }
 exec { yylval.i = e_exec; return MEM_OP; }
 
 reset		{ return RESET; }

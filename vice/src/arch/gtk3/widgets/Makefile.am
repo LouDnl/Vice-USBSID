@@ -105,6 +105,8 @@ libwidgets_a_SOURCES = \
 	printeremulationtypewidget.c \
 	printeroutputdevicewidget.c \
 	printeroutputmodewidget.c \
+	rommanager.c \
+	romsetmanagerwidget.c \
 	settings_autofire.c \
 	settings_autostart.c \
 	settings_burstmode.c \
@@ -165,7 +167,7 @@ libwidgets_a_SOURCES = \
 	settings_retroreplay.c \
 	settings_reu.c \
 	settings_rexramfloppy.c \
-	settings_rom.c \
+	settings_romset.c \
 	settings_rrnetmk3.c \
 	settings_rs232.c \
 	settings_sampler.c \
@@ -276,6 +278,8 @@ EXTRA_DIST = \
 	printeremulationtypewidget.h \
 	printeroutputdevicewidget.h \
 	printeroutputmodewidget.h \
+	rommanager.h \
+	romsetmanagerwidget.h \
 	settings_autofire.h \
 	settings_autostart.h \
 	settings_burstmode.h \
@@ -336,7 +340,7 @@ EXTRA_DIST = \
 	settings_retroreplay.h \
 	settings_reu.h \
 	settings_rexramfloppy.h \
-	settings_rom.h \
+	settings_romset.h \
 	settings_rrnetmk3.h \
 	settings_rs232.h \
 	settings_sampler.h \

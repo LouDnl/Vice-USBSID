@@ -47,7 +47,7 @@
 
 
 /* forward declarations of functions */
-static gboolean create_tape_image(GtkWindow *parent, const char *filename, int port);
+static gboolean create_tape_image(const char *filename, int port);
 
 
 /** \brief  Reference to the 'auto-attach' check button
@@ -74,38 +74,37 @@ static void on_destroy(GtkWidget *dialog, gpointer port)
  *
  * This handler is called when the user clicks a button in the dialog.
  *
- * \param[in]   dialog      the dialog
- * \param[in]   response_id response ID
- * \param[in]   data        port number (integer, 1 or 2)
+ * \param[in,out]   widget      the dialog
+ * \param[in]       response_id response ID
+ * \param[in]       data        port number (integer, 1 or 2)
  */
-static void on_response(GtkDialog *dialog, gint response_id, gpointer data)
+static void on_response(GtkWidget *widget, gint response_id, gpointer data)
 {
-    gchar    *filename;
-    gboolean  status = TRUE;
-    int       port = GPOINTER_TO_INT(data);
+    gchar *filename;
+    int status = TRUE;
+    int port = GPOINTER_TO_INT(data);
 
     switch (response_id) {
 
         case GTK_RESPONSE_ACCEPT:
-            filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+            filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(widget));
             if (filename != NULL) {
                 gchar *filename_locale = file_chooser_convert_to_locale(filename);
 
                 /* create tape */
-                status = create_tape_image(GTK_WINDOW(dialog), filename_locale, port);
+                status = create_tape_image(filename_locale, port);
                 g_free(filename_locale);
             }
             g_free(filename);
             if (status) {
                 /* image creation and attaching was succesful, exit dialog */
-                gtk_widget_destroy(GTK_WIDGET(dialog));
+                gtk_widget_destroy(widget);
             }
             break;
 
         case GTK_RESPONSE_REJECT:
-            gtk_widget_destroy(GTK_WIDGET(dialog));
+            gtk_widget_destroy(widget);
             break;
-
         default:
             break;
     }
@@ -114,35 +113,29 @@ static void on_response(GtkDialog *dialog, gint response_id, gpointer data)
 
 /** \brief  Actually create the tape image and attach it
  *
- * \param[in]   parent      parent dialog
  * \param[in]   filename    filename of the new image
  * \param[in]   port        datasette port number (1 or 2)
  *
  * \return  bool
  */
-static gboolean create_tape_image(GtkWindow  *parent,
-                                  const char *filename,
-                                  int         port)
+static gboolean create_tape_image(const char *filename, int port)
 {
-    char     *fname_copy;
-    gboolean  status = TRUE;
+    gboolean status = TRUE;
+    char *fname_copy;
 
     /* fix extension */
     fname_copy = util_add_extension_const(filename, "tap");
 
     /* try to create the image */
     if (cbmimage_create_image(fname_copy, DISK_IMAGE_TYPE_TAP) < 0) {
-        vice_gtk3_message_error(parent,
-                                "VICE error",
-                                "Failed to create tape image '%s'",
-                                fname_copy);
+        vice_gtk3_message_error("VICE error",
+                "Failed to create tape image '%s'", fname_copy);
         status = FALSE;
     } else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(auto_attach))) {
         /* try to attach the image */
         if (tape_image_attach(port, fname_copy) < 0) {
-            vice_gtk3_message_error(parent,
-                                    "Failed to attach tape image '%s' to port #%d",
-                                    fname_copy, port);
+            ui_error("Failed to attach tape image '%s' to port #%d",
+                     fname_copy, port);
             status = FALSE;
         }
     }

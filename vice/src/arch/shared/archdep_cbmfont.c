@@ -43,18 +43,6 @@
  */
 #define VICE_CBM_FONT_TTF "C64_Pro_Mono-STYLE.ttf"
 
-/** \brief  List of fonts to register with the OS */
-static const char *font_files[] = {
-    "C64_Pro_Mono-STYLE.ttf",
-    "PetMe1282Y.ttf",
-    "PetMe128.ttf",
-    "PetMe2X.ttf",
-    "PetMe2Y.ttf",
-    "PetMe642Y.ttf",
-    "PetMe64.ttf",
-    "PetMe.ttf"
-};
-
 
 /** \fn  int archdep_register_cbmfont(void)
  * \brief    Try to register the CBM font with the OS
@@ -112,32 +100,22 @@ int archdep_register_cbmfont(void)
 int archdep_register_cbmfont(void)
 {
     FcConfig *fc_config;
-    char     *path;
-    size_t    i;
+    int result;
+    char *path;
 
     if (!FcInit()) {
         return 0;
     }
 
     fc_config = FcConfigGetCurrent();
-
-    for (i = 0; i < sizeof font_files / sizeof font_files[0]; i++) {
-        if (sysfile_locate(font_files[i], "common", &path) < 0) {
-            log_error(LOG_ERR,
-                      "failed to find resource data '%s'.",
-                      font_files[i]);
-            return 0;
-        }
-        if (!FcConfigAppFontAddFile(fc_config, (FcChar8 *)path)) {
-            lib_free(path);
-            return 0;
-        } else {
-            log_message(LOG_DEFAULT, "registered font '%s'.", path);
-            lib_free(path);
-        }
+    if (sysfile_locate(VICE_CBM_FONT_TTF, "common", &path) < 0) {
+        log_error(LOG_ERR, "failed to find resource data '%s'.",
+                VICE_CBM_FONT_TTF);
+        return 0;
     }
-
-    return 1;
+    result = FcConfigAppFontAddFile(fc_config, (FcChar8 *)path) ? 1 : 0;
+    lib_free(path);
+    return result;
 }
 
 #  else     /* HAVE_FONTCONFIG */
@@ -179,38 +157,19 @@ static bool font_registered = false;
 
 int archdep_register_cbmfont(void)
 {
-    size_t i;
-    int    nfonts = 0;
+    char *path;
+    int result;
 
     log_message(LOG_DEFAULT,
-                "%s(): Registering CBM fonts using Pango %s",
+                "%s(): Registering CBM font using Pango %s",
                 __func__, pango_version_string());
 
-    for (i = 0; i < sizeof font_files / sizeof font_files[0]; i++) {
-        char *path = NULL;
-
-        if (sysfile_locate(font_files[i], "common", &path) < 0) {
-            log_warning(LOG_DEFAULT,
-                        "failed to find resource data '%s', continuing...",
-                        font_files[i]);
-        } else {
-            int result = AddFontResourceA(path);
-
-            if (result > 0) {
-                font_registered = true;
-                log_message(LOG_DEFAULT,
-                            "succesfully registered %d font(s) from %s.",
-                            result, path);
-                lib_free(path);
-                nfonts += result;
-            } else {
-                log_warning(LOG_DEFAULT, "no fonts found in %s.", path);
-            }
-        }
+    if (sysfile_locate(VICE_CBM_FONT_TTF, "common", &path) < 0) {
+        log_error(LOG_ERR, "failed to find resource data '%s'.",
+                VICE_CBM_FONT_TTF);
+        return 0;
     }
 
-    log_message(LOG_DEFAULT, "registered %d font(s) total.", nfonts);
-#if 0
     /* Work around the fact that Pango, starting with 1.50.12, has switched to
        (only) using DirectWrite for enumarating fonts, and DirectWrite doesn't
        find fonts added with AddFontResourceEx().
@@ -244,8 +203,7 @@ int archdep_register_cbmfont(void)
     log_warning(LOG_DEFAULT,
                 "%s(): According to Windows, registering the font failed",
                 __func__);
-#endif
-    return 1;
+    return 0;
 }
 
 #  else
@@ -267,7 +225,6 @@ int archdep_register_cbmfont(void)
 void archdep_unregister_cbmfont(void)
 {
 # ifdef WINDOWS_COMPILE
-#if 0
     if (font_registered) {
         char *path;
 
@@ -304,8 +261,7 @@ void archdep_unregister_cbmfont(void)
 #endif
         }
         lib_free(path);
-   }
-#endif
+    }
 # endif
 }
 # else  /* !USE_GTK3UI */

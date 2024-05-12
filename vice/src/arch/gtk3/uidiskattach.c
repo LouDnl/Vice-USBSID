@@ -57,6 +57,7 @@
 #include "ui.h"
 #include "uiactions.h"
 #include "uiapi.h"
+#include "uistatusbar.h"
 
 #include "uidiskattach.h"
 
@@ -223,10 +224,7 @@ static void do_autostart(GtkWidget *widget, int index, int autostart)
                 autostart ? AUTOSTART_MODE_RUN : AUTOSTART_MODE_LOAD) < 0) {
         /* oeps */
         log_error(LOG_ERR, "autostart disk attach failed.");
-        vice_gtk3_message_error(GTK_WINDOW(widget),
-                                "Autostart failure",
-                                "Autostarting disk image '%s' failed.",
-                                filename);
+        ui_error("Autostart disk attach failed.");
     }
     g_free(filename);
     g_free(filename_locale);
@@ -254,15 +252,15 @@ static void do_attach(GtkWidget *widget, gpointer user_data)
         * through file types is 'smart', but hell, it works */
     if (file_system_attach_disk(unit_number, drive_number, filename_locale) < 0) {
         /* failed */
-        g_snprintf(buffer, sizeof buffer,
+        g_snprintf(buffer, sizeof(buffer),
                    "Unit #%d: failed to attach '%s'",
                    unit_number, filename);
     } else {
-        g_snprintf(buffer, sizeof buffer,
+        g_snprintf(buffer, sizeof(buffer),
                    "Unit #%d: attached '%s'",
                    unit_number, filename);
     }
-    ui_display_statustext(buffer, true);
+    ui_display_statustext(buffer, 1);
     g_free(filename_locale);
 }
 

@@ -59,7 +59,6 @@
 #include "drive-resources.h"
 #include "drive-sound.h"
 #include "drive.h"
-#include "export.h"
 #include "fliplist.h"
 #include "fsdevice.h"
 #include "gfxoutput.h"
@@ -298,10 +297,6 @@ int machine_resources_init(void)
     }
     if (cbm2_resources_init() < 0) {
         init_resource_fail("cbm2");
-        return -1;
-    }
-    if (export_resources_init() < 0) {
-        init_resource_fail("cbm2export");
         return -1;
     }
     if (cartio_resources_init() < 0) {
@@ -877,8 +872,6 @@ void machine_specific_reset(void)
                 machine_timing.cycles_per_rfsh * delay));
 
     sampler_reset();
-
-    cartridge_reset();
 }
 
 void machine_specific_powerup(void)
@@ -886,7 +879,6 @@ void machine_specific_powerup(void)
     userport_powerup();
     tapeport_powerup();
     joyport_powerup();
-    cartridge_powerup();
 }
 
 void machine_specific_shutdown(void)

@@ -58,7 +58,7 @@ typedef struct disk_image_type_s {
 
 
 /* forward declaration */
-static gboolean create_disk_image(GtkWindow *parent, const char *filename);
+static gboolean create_disk_image(const char *filename);
 
 
 /** \brief  List of supported disk image types
@@ -120,35 +120,35 @@ static void on_destroy(GtkWidget *self, gpointer unused)
  *
  * This handler is called when the user clicks a button in the dialog.
  *
- * \param[in,out]   dialog      the dialog
+ * \param[in,out]   widget      the dialog
  * \param[in]       response_id response ID
  * \param[in]       data        extra data (unused)
  */
-static void on_response(GtkDialog *dialog, gint response_id, gpointer data)
+static void on_response(GtkWidget *widget, gint response_id, gpointer data)
 {
-    gchar    *filename;
-    gboolean  status = TRUE;
+    gchar *filename;
+    int status = TRUE;
 
     switch (response_id) {
 
         case GTK_RESPONSE_ACCEPT:
-            filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+            filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(widget));
             if (filename != NULL) {
                 gchar *filename_locale;
 
                 filename_locale = file_chooser_convert_to_locale(filename);
-                status = create_disk_image(GTK_WINDOW(dialog), filename_locale);
+                status = create_disk_image(filename_locale);
                 g_free(filename_locale);
             }
             g_free(filename);
             if (status) {
                 /* image creation and attaching was succesful, exit dialog */
-                gtk_widget_destroy(GTK_WIDGET(dialog));
+                gtk_widget_destroy(widget);
             }
             break;
 
         case GTK_RESPONSE_REJECT:
-            gtk_widget_destroy(GTK_WIDGET(dialog));
+            gtk_widget_destroy(widget);
             break;
         default:
             break;
@@ -210,25 +210,24 @@ static const char *get_ext_by_image_type(int type)
 
 /** \brief  Actually create the disk image and attach it
  *
- * \param[in]   parent      parent dialog
  * \param[in]   filename    filename of the new image
  *
  * \return  bool
  */
-static gboolean create_disk_image(GtkWindow *parent, const char *filename)
+static gboolean create_disk_image(const char *filename)
 {
-    char       *fname_copy;
-    char        name_vice[IMAGE_CONTENTS_NAME_LEN + 1];
-    char        id_vice[IMAGE_CONTENTS_ID_LEN + 1];
+    char *fname_copy;
+    char name_vice[IMAGE_CONTENTS_NAME_LEN + 1];
+    char id_vice[IMAGE_CONTENTS_ID_LEN + 1];
     const char *name_gtk3;
     const char *id_gtk3;
-    char       *vdr_text;
-    gboolean    status = TRUE;
+    char *vdr_text;
+    int status = TRUE;
 
-    memset(name_vice, 0, sizeof name_vice);
-    memset(id_vice, 0, sizeof id_vice);
+    memset(name_vice, 0, IMAGE_CONTENTS_NAME_LEN + 1);
+    memset(id_vice, 0, IMAGE_CONTENTS_ID_LEN + 1);
     name_gtk3 = gtk_entry_get_text(GTK_ENTRY(disk_name));
-    id_gtk3   = gtk_entry_get_text(GTK_ENTRY(disk_id));
+    id_gtk3 = gtk_entry_get_text(GTK_ENTRY(disk_id));
 
     /* fix extension of filename */
     fname_copy = util_add_extension_const(filename,
@@ -247,33 +246,35 @@ static gboolean create_disk_image(GtkWindow *parent, const char *filename)
     }
 
     vdr_text = util_concat(name_vice, ",", id_vice, NULL);
+#if 0
+    vice_gtk3_message_info("Creating disk image",
+            "Attaching '%s' at unit #%d, type %d, name '%s', ID '%s'\n"
+            "Passing \"%s\" to vdrive",
+            filename, unit_number, image_type, name_gtk3, id_gtk3,
+            vdr_text);
+#endif
 
     /* create image */
     if (vdrive_internal_create_format_disk_image(fname_copy, vdr_text,
                 image_type) < 0) {
-        vice_gtk3_message_error(parent,
-                                "Fail",
-                                "Could not create image '%s'",
-                                fname_copy);
+        vice_gtk3_message_error("Fail", "Could not create image '%s'",
+                fname_copy);
         status = FALSE;
     } else {
         /* do we need to attempt to set the proper drive type? */
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(set_drive_type))) {
             /* try to set the proper drive type, but keep going if it fails */
             if (!attempt_to_set_drive_type()) {
-                vice_gtk3_message_error(parent,
-                                        "Core error",
-                                        "Failed to set drive type to %d\nContinuing.",
-                                        image_type);
+                vice_gtk3_message_error("Core error",
+                        "Failed to set drive type to %d\nContinuing.",
+                        image_type);
             }
         }
 
         /* finally attach the disk image */
         if (file_system_attach_disk(unit_number, drive_number, fname_copy) < 0) {
-            vice_gtk3_message_error(parent,
-                                    "fail",
-                                    "Could not attach image '%s'",
-                                    fname_copy);
+            vice_gtk3_message_error("fail", "Could not attach image '%s'",
+                    fname_copy);
             status = FALSE;
         }
     }

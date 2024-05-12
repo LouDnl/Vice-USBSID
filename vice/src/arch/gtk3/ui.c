@@ -94,9 +94,11 @@
 #include "mainlock.h"
 #include "mixerwidget.h"
 #include "monitor.h"
+#ifdef HAVE_DEBUG_GTK3UI
+#include "rommanager.h"
+#endif
 #include "resources.h"
 #include "settings_keyboard.h"
-#include "settings_rom.h"
 #include "types.h"
 #include "uiactions.h"
 #include "uiapi.h"
@@ -181,11 +183,11 @@ static void ui_action_dispatch(ui_action_map_t *);
  * mime-types.
  */
 GtkTargetEntry ui_drag_targets[UI_DRAG_TARGETS_COUNT] = {
-    { "text/plain",     0, DT_TEXT_PLAIN    },  /* we get this on at least my
-                                                   Linux box with Mate */
-    { "text/uri",       0, DT_TEXT_URI      },  /* not yet encountered */
-    { "text/uri-list",  0, DT_TEXT_URI_LIST }   /* we get this using Windows
-                                                   Explorer or macOS Finder */
+    { "text/plain",     0, DT_TEXT },   /* we get this on at least my Linux
+                                           box with Mate */
+    { "text/uri",       0, DT_URI },
+    { "text/uri-list",  0, DT_URI_LIST }    /* we get this using Windows
+                                               Explorer or macOS Finder */
 };
 
 
@@ -262,8 +264,7 @@ enum {
  */
 static const resource_string_t resources_string[] = {
     /* VTE-monitor font */
-    /* { "MonitorFont", "Mono 11", RES_EVENT_NO, NULL, */
-    { "MonitorFont", "C64 Pro Mono Regular 9", RES_EVENT_NO, NULL,
+    { "MonitorFont", "monospace 11", RES_EVENT_NO, NULL,
         &ui_resources.monitor_font, set_monitor_font, NULL },
     { "MonitorFG", "#ffffff", RES_EVENT_NO, NULL,
         &ui_resources.monitor_fg, set_monitor_fg, NULL },
@@ -824,57 +825,6 @@ static gboolean on_drag_drop(GtkWidget *widget,
     return TRUE;
 }
 
-/** \brief  Extract filename from drag data
- *
- * \param[in]   data    drag data from dropping media onto the emulator window
- * \param[in]   info    drag target mime type info
- *
- * \return  filename or \c NULL
- * \note    the filename should be freed with \c g_free() after use
- *
- * \todo    Perhaps make public, VSID uses duplicate code.
- */
-static gchar *drag_data_get_filename(GtkSelectionData *data,
-                                     guint             info)
-{
-    guchar  *text;
-    gchar  **uri_list = NULL;
-    gchar   *filename = NULL;
-
-    switch (info) {
-
-        case DT_TEXT_URI_LIST:  /* 'text/uri-list */
-            /* Windows and MacOS */
-            uri_list = gtk_selection_data_get_uris(data);
-           break;
-
-        case DT_TEXT_PLAIN:     /* 'text/plain' */
-            /* Qt- and Gtk-based WM's on Linux */
-            text = gtk_selection_data_get_text(data);
-            /* text contains newline-separated lines of 'file://' URIs and a
-             * trailing newline */
-            g_strchomp((gchar *)text);
-            uri_list = g_strsplit((const gchar *)text, "\n", -1);
-            g_free(text);
-            break;
-
-        case DT_TEXT_URI:       /* fall through ('text/uri') */
-        default:
-            log_error(LOG_ERR, "Unhandled drag target %u", info);
-            break;
-    }
-
-    if (uri_list != NULL) {
-        if (uri_list[0] != NULL) {
-            /* grab first URI in list */
-            filename = g_filename_from_uri(uri_list[0], NULL, NULL);
-        }
-        g_strfreev(uri_list);
-    }
-
-    return filename;
-}
-
 /** \brief  Handler for the 'drag-data-received' event
  *
  * Autostarts an image/prg when valid. Please note that VSID now has its own
@@ -888,51 +838,109 @@ static gchar *drag_data_get_filename(GtkSelectionData *data,
  * \param[in]   info        int declared in the targets array (unclear)
  * \param[in]   time        no idea
  */
-static void on_drag_data_received(GtkWidget        *widget,
-                                  GdkDragContext   *context,
-                                  gint              x,
-                                  gint              y,
+static void on_drag_data_received(GtkWidget *widget,
+                                  GdkDragContext *context,
+                                  gint x,
+                                  gint y,
                                   GtkSelectionData *data,
-                                  guint             info,
-                                  guint             time)
+                                  guint info,
+                                  guint time)
 {
-    gchar *filename = drag_data_get_filename(data, info);
+    gchar **uris;
+    gchar *filename = NULL;
+    gchar **files = NULL;
+    guchar *text = NULL;
+    GdkDragAction action = gdk_drag_context_get_selected_action (context);
 
+    switch (info) {
+
+        case DT_URI_LIST:
+            /*
+             * This branch appears to be taken on both Windows and macOS.
+             */
+
+            /* got possible list of URI's */
+            uris = gtk_selection_data_get_uris(data);
+            if (uris != NULL) {
+                /* keep this debugging output, drag'n'drop is pretty flaky */
+#if 0
+                /* dump URI's on stdout */
+                debug_gtk3("got URI's:");
+                for (i = 0; uris[i] != NULL; i++) {
+
+                    debug_gtk3("URI: '%s'\n", uris[i]);
+                    filename = g_filename_from_uri(uris[i], NULL, NULL);
+                    debug_gtk3("filename: '%s'.", filename);
+                    if (filename != NULL) {
+                        g_free(filename);
+                    }
+                }
+#endif
+
+                /* use the first/only entry as the autostart file
+                 *
+                 * XXX: perhaps add any additional files to the fliplist
+                 *      if Dxx?
+                 */
+                if (uris[0] != NULL) {
+                    filename = g_filename_from_uri(uris[0], NULL, NULL);
+                } else {
+                    filename = NULL;
+                }
+
+                g_strfreev(uris);
+            }
+            break;
+
+        case DT_TEXT:
+            /*
+             * this branch appears to be taken on both Gtk and Qt based WM's
+             * on Linux
+             */
+
+
+            /* text will contain a newline separated list of 'file://' URIs,
+             * and a trailing newline */
+            text = gtk_selection_data_get_text(data);
+            /* remove trailing whitespace */
+            g_strchomp((gchar *)text);
+
+            files = g_strsplit((const gchar *)text, "\n", -1);
+            g_free(text);
+
+#if 0
+# ifdef HAVE_DEBUG_GTK3UI
+            for (i = 0; files[i] != NULL; i++) {
+                /* keep this as well */
+                gchar *tmp = g_filename_from_uri(files[i], NULL, NULL);
+                debug_gtk3("URI: '%s', filename: '%s'.",
+                        files[i], tmp);
+            }
+# endif
+#endif
+            /* now grab the first file */
+            filename = g_filename_from_uri(files[0], NULL, NULL);
+            g_strfreev(files);
+            break;
+
+        default:
+            filename = NULL;
+            break;
+    }
+
+    /* can we attempt autostart? */
     if (filename != NULL) {
-        GdkDragAction action;
-        int           drop_mode = 0;
-
-        action = gdk_drag_context_get_selected_action(context);
-
-        /* determine autostart behaviour */
-        switch (action) {
-            case GDK_ACTION_COPY: /* fall through */
-            default:
-                /* no modifier key held, use the resource value */
-                resources_get_int("AutostartDropMode", &drop_mode);
-                break;
-            case GDK_ACTION_MOVE:
-                /* Shift ("move"): attach image */
-                drop_mode = AUTOSTART_DROP_MODE_ATTACH;
-                break;
-            case GDK_ACTION_LINK:
-                /* Alt ("link"): attach and load  */
-                drop_mode = AUTOSTART_DROP_MODE_LOAD;
-                break;
-        }
-
-        switch (drop_mode) {
-            case AUTOSTART_DROP_MODE_ATTACH:
-                file_system_attach_disk(8, 0, filename);
-                break;
-            case AUTOSTART_DROP_MODE_LOAD:
-                autostart_autodetect(filename, NULL, 0, AUTOSTART_MODE_LOAD);
-                break;
-            case AUTOSTART_DROP_MODE_RUN:
-                autostart_autodetect(filename, NULL, 0, AUTOSTART_MODE_RUN);
-                break;
-            default:
-                break;
+        if (action != GDK_ACTION_MOVE) {
+            /* drop with alt ("link") -> only load, not run */
+            int mode = (action == GDK_ACTION_LINK) ? AUTOSTART_MODE_LOAD : AUTOSTART_MODE_RUN;
+            if (autostart_autodetect(filename, NULL, 0, mode) != 0) {
+                /* TODO: add proper UI error */
+            }
+        } else {
+            /* drop with shift ("move") -> only mount the disk */
+            if (file_system_attach_disk(8, 0, filename) < 0) {
+                /* TODO: add proper UI error */
+            }
         }
         g_free(filename);
     }
@@ -2175,12 +2183,6 @@ int ui_init(void)
     variant = g_variant_new("b", TRUE);
     /* floating ref is consumed here */
     g_settings_set_value(settings, "sort-directories-first", variant);
-
-    /* disable the "Recent files" crap when opening without explicitly setting
-     * a directory */
-    variant = g_variant_new("s", "cwd");
-    g_settings_set_value(settings, "startup-mode", variant);
-
     /* this should be unref'ed after use */
     g_object_unref(settings);
 
@@ -2418,7 +2420,9 @@ void ui_shutdown(void)
     cart_image_widgets_shutdown();
     settings_keyboard_widget_shutdown();
     actions_settings_shutdown();
-    settings_rom_widget_shutdown();
+#ifdef HAVE_DEBUG_GTK3UI
+    rom_manager_shutdown();
+#endif
     /* hotkeys are shut down in src/main.c */
 }
 
@@ -2506,16 +2510,21 @@ void arch_ui_activate(void)
 
 /** \brief  Error dialog handler for the threaded UI
  *
- * \param[in]   user_data   error message (allocated by VICE)
+ * \param[in]   user_data   error message
  *
- * \return  \c G_SOURCE_REMOVE to only run once
+ * \return  FALSE
  */
 static gboolean ui_error_impl(gpointer user_data)
 {
-    vice_gtk3_message_error(NULL, /* current emu window as parent */
-                            "VICE Error", "%s", (const char*)user_data);
-    lib_free(user_data);
-    return G_SOURCE_REMOVE;
+    char *buffer = (char *)user_data;
+    GtkWidget *dialog;
+
+    dialog = vice_gtk3_message_error("VICE Error", "%s", buffer);
+    gtk_dialog_run(GTK_DIALOG(dialog));
+
+    lib_free(buffer);
+
+    return FALSE;
 }
 
 
@@ -2545,9 +2554,15 @@ void ui_error(const char *format, ...)
  */
 static gboolean ui_message_impl(gpointer user_data)
 {
-    vice_gtk3_message_info(NULL, "VICE Message", "%s", (const char *)user_data);
-    lib_free(user_data);
-    return G_SOURCE_REMOVE;
+    char *buffer = (char *)user_data;
+    GtkWidget *dialog;
+
+    dialog = vice_gtk3_message_info("VICE Message", "%s", buffer);
+    gtk_dialog_run(GTK_DIALOG(dialog));
+
+    lib_free(buffer);
+
+    return FALSE;
 }
 
 

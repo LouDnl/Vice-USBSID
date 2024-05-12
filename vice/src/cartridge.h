@@ -458,11 +458,8 @@ void cartridge_sound_chip_init(void);
 #define CARTRIDGE_VIC20_FP              3   /* vic-fp.c */
 #define CARTRIDGE_VIC20_UM              4   /* ultimem.c */
 #define CARTRIDGE_VIC20_FINAL_EXPANSION 5   /* finalexpansion.c */
-#define CARTRIDGE_VIC20_RABBIT          6   /* rabbit.c */
-#define CARTRIDGE_VIC20_SUPEREXPANDER   7   /* superexpander.c */
-#define CARTRIDGE_VIC20_MIKRO_ASSEMBLER 8   /* mikroassembler.c */
 
-#define CARTRIDGE_VIC20_LAST            8   /* cartconv: last cartridge in list */
+#define CARTRIDGE_VIC20_LAST            5   /* cartconv: last cartridge in list */
 
 /*
  * VIC20 Generic cartridges
@@ -517,7 +514,6 @@ void cartridge_sound_chip_init(void);
 #define CARTRIDGE_VIC20_32KB_2000       CARTRIDGE_VIC20_TYPEDEF(0, 1, 1,  1, 1, 1, 1)
 
 /* list of canonical names for the VIC20 cartridges: */
-#define CARTRIDGE_VIC20_NAME_GENERIC         "generic cartridge ROM"
 #define CARTRIDGE_VIC20_NAME_BEHRBONZ        "Behr Bonz"
 #define CARTRIDGE_VIC20_NAME_FINAL_EXPANSION "Final Expansion"
 #define CARTRIDGE_VIC20_NAME_MEGACART        "Mega-Cart" /* http://mega-cart.com/ */
@@ -528,16 +524,10 @@ void cartridge_sound_chip_init(void);
 #define CARTRIDGE_VIC20_NAME_IEEE488         "VIC-1112 IEEE-488 Interface"  /*https://sleepingelephant.com/denial/wiki/index.php/File:Chipitos.be-VIC-1112.jpg */
 #define CARTRIDGE_VIC20_NAME_MIDI            "MIDI"
 #define CARTRIDGE_VIC20_NAME_SIDCART         "SIDCART"
-#define CARTRIDGE_VIC20_NAME_RABBIT          "Rabbit Tape"
-#define CARTRIDGE_VIC20_NAME_SUPEREXPANDER   "Super Expander"
-#define CARTRIDGE_VIC20_NAME_MIKRO_ASSEMBLER "Mikro Assembler"
 
 /*
  * plus4 cartridge system
  */
-
-#define CARTRIDGE_PLUS4_DIGIBLASTER   -201 /* digiblaster.c */
-#define CARTRIDGE_PLUS4_SIDCART       -200 /* plus4-sidcart.c */
 
 #define CARTRIDGE_PLUS4_GENERIC         -2 /* plus4-generic.c */
 
@@ -564,9 +554,6 @@ void cartridge_sound_chip_init(void);
 #define CARTRIDGE_PLUS4_GENERIC_ALL     (CARTRIDGE_PLUS4_GENERIC_C1 | CARTRIDGE_PLUS4_GENERIC_C2)
 
 /* list of canonical names for the Plus4 cartridges: */
-#define CARTRIDGE_PLUS4_NAME_GENERIC    "generic cartridge ROM"
-#define CARTRIDGE_PLUS4_NAME_DIGIBLASTER    "Digiblaster Add-on"
-#define CARTRIDGE_PLUS4_NAME_SIDCART        "SID cartridge"
 #define CARTRIDGE_PLUS4_NAME_JACINT1MB  "1MB Cartridge"
 #define CARTRIDGE_PLUS4_NAME_MAGIC      "c264 magic cart"
 #define CARTRIDGE_PLUS4_NAME_MULTI      "Plus4 multi cart"
@@ -574,23 +561,12 @@ void cartridge_sound_chip_init(void);
 /*
  * cbm2 cartridge system
  */
-#define CARTRIDGE_CBM2_GENERIC         -2 /* cbm2-generic.c */
 /* #define CARTRIDGE_NONE               -1 */
-#define CARTRIDGE_CBM2_LAST            0
-
-#define CARTRIDGE_CBM2_DETECT          0x8200 /* not implemented yet */
-
-#define CARTRIDGE_CBM2_GENERIC_TYPE_MASK    0x000f
-
-#define CARTRIDGE_CBM2_IS_GENERIC(x)   (((x) & 0xff00) == 0x8200)
-
-#define CARTRIDGE_CBM2_GENERIC_C1   0x8201  /* 4kb at 0x1000 */
-#define CARTRIDGE_CBM2_GENERIC_C2   0x8202  /* 8kb at 0x2000 */
-#define CARTRIDGE_CBM2_GENERIC_C4   0x8204  /* 8kb at 0x4000 */
-#define CARTRIDGE_CBM2_GENERIC_C6   0x8208  /* 8kb at 0x6000 */
-
-/* list of canonical names for the CBM2 cartridges: */
-#define CARTRIDGE_CBM2_NAME_GENERIC         "generic cartridge ROM"
+/* #define CARTRIDGE_CBM2_DETECT          0x9000 */ /* not implemented yet */
+#define CARTRIDGE_CBM2_8KB_1000        0x9001
+#define CARTRIDGE_CBM2_8KB_2000        0x9002
+#define CARTRIDGE_CBM2_16KB_4000       0x9004
+#define CARTRIDGE_CBM2_16KB_6000       0x9008
 
 /* FIXME: cartconv: the sizes are used in a bitfield and also by their absolute values */
 #define CARTRIDGE_SIZE_2KB     0x00000800

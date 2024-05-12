@@ -83,7 +83,6 @@
 #include "resources.h"
 #include "screenshot.h"
 #include "sysfile.h"
-#include "tape.h"
 #include "traps.h"
 #include "types.h"
 #include "ui.h"
@@ -187,6 +186,7 @@ static unsigned int watch_load_count[NUM_MEMSPACES];
 static unsigned int watch_store_count[NUM_MEMSPACES];
 static symbol_table_t monitor_labels[NUM_MEMSPACES];
 static CLOCK stopwatch_start_time[NUM_MEMSPACES];
+bool force_array[NUM_MEMSPACES];
 monitor_interface_t *mon_interfaces[NUM_MEMSPACES];
 
 MON_ADDR dot_addr[NUM_MEMSPACES];
@@ -259,7 +259,7 @@ static const char * const cond_op_string[] = {
 
 const char * const mon_memspace_string[] = { "default", "C", "8", "9", "10", "11" };
 
-/* CAUTION: must match order in enum t_reg_id, and contain all of its elements */
+/* must match order in enum t_reg_id */
 static const char * const register_string[] = {
 /* 6502/65c02 */
     "A",
@@ -327,8 +327,6 @@ static const char * const register_string[] = {
 
     "RL",   /* Rasterline */
     "CY",   /* Cycle in line */
-    "P00",  /* CPU port DDR (6510) */
-    "P01"   /* CPU port Data (6510) */
 };
 
 bool monitor_is_inside_monitor(void)
@@ -1268,10 +1266,10 @@ void mon_show_dir(const char *path)
             if (isdir) {
                 mon_out("     <dir> %s\n", name);
             } else {
-                mon_out("%10"PRI_SIZE_T" %s\n", len, name);
+                mon_out("%"PRI_SIZE_T" %s\n", len, name);
             }
         } else {
-            mon_out("     %-20s ?????\n", name);
+            mon_out("%-20s?????\n", name);
         }
     }
     lib_free(mpath);
@@ -1332,23 +1330,6 @@ void mon_tape_ctrl(int port, int command)
         mon_out("Unknown command.\n");
     } else {
         datasette_control(port, command);
-    }
-}
-
-void mon_tape_offs(int port, int offset)
-{
-    tape_image_t *tape_image = tape_image_dev[port];
-
-    if (tape_image && tape_image->data) {
-        if (offset < 0) {
-            offset = (int)tape_get_offset(tape_image);
-            mon_out("Current tape offset is: %d\n", offset);
-        } else {
-            mon_out("Setting tape to offset: %d\n", offset);
-            tape_seek_to_offset(tape_image, offset);
-        }
-    } else {
-        mon_out("No tape attached.\n");
     }
 }
 
@@ -1912,12 +1893,6 @@ void mon_display_screen(long addr)
     uint8_t rows, cols;
     unsigned int r, c;
     int bank;
-    /* FIXME: this should really be handled by the UI instead, ie the UI should
-              always just give us valid numbers */
-    static int last_known_xres = 40;
-    if (console_log) {
-        last_known_xres = console_log->console_xres;
-    }
 #if 0
     printf("Address = %ld\n", addr);
 #endif
@@ -1937,9 +1912,10 @@ void mon_display_screen(long addr)
     mon_out("Displaying %dx%d screen at $%04x:\n", cols, rows, base);
 
     for (r = 0; r < rows; r++) {
-        if ((cols + 9) < last_known_xres) {
-            mon_out("*C:%04x  ", base);
-        }
+        /* Only show addresses of each line in non-SDL */
+#if !defined(USE_SDLUI) && !defined(USE_SDL2UI)
+        mon_out("%04x  ", base);
+#endif
         for (c = 0; c < cols; c++) {
             uint8_t data;
 
@@ -1947,7 +1923,9 @@ void mon_display_screen(long addr)
                Do we want monitor sidefx in a function that's *supposed*
                to just read from screen memory? */
             data = mon_get_mem_val_ex_nosfx(e_comp_space, bank, (uint16_t)ADDR_LIMIT(base++));
-            mon_scrcode_out(1, "%c", data);
+            data = charset_p_toascii(charset_screencode_to_petcii(data), CONVERT_WITH_CTRLCODES);
+
+            mon_out("%c", data);
         }
         mon_out("\n");
     }
@@ -2853,6 +2831,17 @@ static bool watchpoints_check_stores(MEMSPACE mem, unsigned int lastpc, unsigned
 
 /* *** CPU INTERFACES *** */
 
+
+int monitor_force_import(MEMSPACE mem)
+{
+    bool result;
+
+    result = force_array[mem];
+    force_array[mem] = false;
+
+    return result;
+}
+
 /* called by cpu core */
 void monitor_check_icount(uint16_t pc)
 {
@@ -3132,40 +3121,6 @@ static void monitor_open(void)
         mon_interfaces[default_memspace]->current_bank = monbank; /* restore value used in monitor */
         disassemble_on_entry = 0;
     }
-
-#if 0
-    /* FIXME: the first time the console opens the font might not be initialized
-       correctly, so close and repopen the monitor once */
-    {
-        int ch;
-        char str[2] = { 0, 0 };
-        mon_out("petscii:\n");
-        for (ch = 0; ch < 0x100; ch++) {
-            if ((ch && !(ch & 0x0f))) { mon_out("\n"); }
-            str[0] = ch;
-            mon_petscii_out(1, "%s", str);
-        }
-        mon_out("\n\npetscii (upper):\n");
-        for (ch = 0; ch < 0x100; ch++) {
-            if ((ch && !(ch & 0x0f))) { mon_out("\n"); }
-            str[0] = ch;
-            mon_petscii_upper_out(1, "%s", str);
-        }
-        mon_out("\n\nscrcode:\n");
-        for (ch = 0; ch < 0x100; ch++) {
-            if ((ch && !(ch & 0x0f))) { mon_out("\n"); }
-            str[0] = ch;
-            mon_scrcode_out(1, "%s", str);
-        }
-        mon_out("\n\nscrcode (upper):\n");
-        for (ch = 0; ch < 0x100; ch++) {
-            if ((ch && !(ch & 0x0f))) { mon_out("\n"); }
-            str[0] = ch;
-            mon_scrcode_upper_out(1, "%s", str);
-        }
-        mon_out("\n");
-    }
-#endif
 }
 
 static int monitor_process(char *cmd)

@@ -391,7 +391,6 @@ static int pcxdrv_save_memmap(const char *filename, int x_size, int y_size, uint
 
 static gfxoutputdrv_t pcx_drv =
 {
-    GFXOUTPUTDRV_TYPE_SCREENSHOT_IMAGE,
     "PCX",
     "PCX screenshot",
     "pcx",

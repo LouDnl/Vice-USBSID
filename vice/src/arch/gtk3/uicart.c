@@ -59,7 +59,9 @@ typedef enum ui_cart_type_e {
 
     /* C64 cart types */
     UICART_C64_SMART = 0,
-    UICART_C64_GENERIC,
+    UICART_C64_8KB,
+    UICART_C64_16KB,
+    UICART_C64_ULTIMAX,
     UICART_C64_FREEZER,
     UICART_C64_GAME,
     UICART_C64_UTIL,
@@ -69,25 +71,34 @@ typedef enum ui_cart_type_e {
 
     /* VIC20 cart types */
     UICART_VIC20_SMART,
+    UICART_VIC20_BEHRBONZ,
+    UICART_VIC20_MEGACART,
+    UICART_VIC20_FINALEXP,
+    UICART_VIC20_ULTIMEM,
+    UICART_VIC20_FLASHPLUGIN,
     UICART_VIC20_GENERIC,
-    /* UICART_VIC20_ADD_GENERIC, */
-    UICART_VIC20_FREEZER,
-    UICART_VIC20_GAME,
-    UICART_VIC20_UTIL,
+    UICART_VIC20_ADD_GENERIC,
+    /* FIXME: add the groups */
 
     /* Plus4 cart types */
     UICART_PLUS4_SMART,
-    UICART_PLUS4_GENERIC,
+    UICART_PLUS4_16KB_C1LO,
+    UICART_PLUS4_16KB_C1HI,
+    UICART_PLUS4_16KB_C2LO,
+    UICART_PLUS4_16KB_C2HI,
+    UICART_PLUS4_32KB_C1,
+    UICART_PLUS4_32KB_C2,
     UICART_PLUS4_FREEZER,
     UICART_PLUS4_GAME,
     UICART_PLUS4_UTIL,
 
     /* CBM2 cart types */
-    UICART_CBM2_SMART,
-    UICART_CBM2_GENERIC,
-    UICART_CBM2_FREEZER,
-    UICART_CBM2_GAME,
-    UICART_CBM2_UTIL
+    /*UICART_CBM2_SMART,*/
+    UICART_CBM2_8KB_1000,
+    UICART_CBM2_8KB_2000,
+    UICART_CBM2_16KB_4000,
+    UICART_CBM2_16KB_6000
+    /* FIXME: add the groups */
 
 } ui_cart_type_t;
 
@@ -96,7 +107,7 @@ typedef enum ui_cart_type_e {
  */
 enum {
     UICART_PATTERN_CRT = 0, /* '*.crt' */
-    /*UICART_PATTERN_BIN,*/     /* '*.bin' */
+    UICART_PATTERN_BIN,     /* '*.bin' */
     UICART_PATTERN_BIN_PRG, /* '*.bin;*.prg' */
     UICART_PATTERN_ALL      /* '*' */
 };
@@ -117,7 +128,9 @@ typedef struct cart_type_list_s {
  */
 static const cart_type_list_t c64_cart_types[] = {
     { "Smart-attach",   UICART_C64_SMART },
-    { "Generic",        UICART_C64_GENERIC },
+    { "Raw 8KiB",       UICART_C64_8KB },
+    { "Raw 16iKB",      UICART_C64_16KB },
+    { "Raw Ultimax",    UICART_C64_ULTIMAX },
     { "Freezer",        UICART_C64_FREEZER },
     { "Games",          UICART_C64_GAME },
     { "Utilities",      UICART_C64_UTIL },
@@ -131,7 +144,10 @@ static const cart_type_list_t c64_cart_types[] = {
  */
 static const cart_type_list_t c128_cart_types[] = {
     { "Smart-attach",   UICART_C64_SMART },
-    { "Generic",        UICART_C64_GENERIC },
+    { "Function ROM",   UICART_C128_FUNCROM },
+    { "Raw 8KiB",       UICART_C64_8KB },
+    { "Raw 16iKB",      UICART_C64_16KB },
+    { "Raw Ultimax",    UICART_C64_ULTIMAX },
     { "Freezer",        UICART_C64_FREEZER },
     { "Games",          UICART_C64_GAME },
     { "Utilities",      UICART_C64_UTIL },
@@ -145,11 +161,14 @@ static const cart_type_list_t c128_cart_types[] = {
  */
 static const cart_type_list_t vic20_cart_types[] = {
     { "Smart-attach",               UICART_VIC20_SMART },
+    { "Behr Bonz",                  UICART_VIC20_BEHRBONZ },
+    { "Mega Cart",                  UICART_VIC20_MEGACART },
+    { "Final Expansion",            UICART_VIC20_FINALEXP },
+    { "UltiMem",                    UICART_VIC20_ULTIMEM },
+    { "Vic Flash Plugin",           UICART_VIC20_FLASHPLUGIN },
     { "Generic",                    UICART_VIC20_GENERIC },
-/*  { "Add to generic cartridge",   UICART_VIC20_ADD_GENERIC }, */
-    { "Freezer",                    UICART_VIC20_FREEZER },
-    { "Games",                      UICART_VIC20_GAME },
-    { "Utilities",                  UICART_VIC20_UTIL },
+    { "Add to generic cartridge",   UICART_VIC20_ADD_GENERIC },
+    /* FIXME: add the groups */
     { NULL, -1 }
 };
 
@@ -158,7 +177,12 @@ static const cart_type_list_t vic20_cart_types[] = {
  */
 static const cart_type_list_t plus4_cart_types[] = {
     { "Smart-attach",               UICART_PLUS4_SMART },
-    { "Generic",                    UICART_PLUS4_GENERIC },
+    { "Raw 16KiB C1 Low",           UICART_PLUS4_16KB_C1LO },
+    { "Raw 16KiB C1 High",          UICART_PLUS4_16KB_C1HI },
+    { "Raw 16KiB C2 Low",           UICART_PLUS4_16KB_C2LO },
+    { "Raw 16KiB C2 High",          UICART_PLUS4_16KB_C2HI },
+    { "Raw 32KiB C1",               UICART_PLUS4_32KB_C1 },
+    { "Raw 32KiB C2",               UICART_PLUS4_32KB_C2 },
     { "Freezer",                    UICART_PLUS4_FREEZER },
     { "Games",                      UICART_PLUS4_GAME },
     { "Utilities",                  UICART_PLUS4_UTIL },
@@ -169,15 +193,16 @@ static const cart_type_list_t plus4_cart_types[] = {
 /** \brief  List of CBM-II cart types
  */
 static const cart_type_list_t cbm2_cart_types[] = {
-    { "Smart-attach",               UICART_CBM2_SMART },
-    { "Generic",                    UICART_CBM2_GENERIC },
-    { "Freezer",                    UICART_CBM2_FREEZER },
-    { "Games",                      UICART_CBM2_GAME },
-    { "Utilities",                  UICART_CBM2_UTIL },
+    /*{ "Smart-attach",               UICART_CBM2_SMART },*/
+    { "8KiB at $1000",              UICART_CBM2_8KB_1000 },
+    { "8KiB at $2000",              UICART_CBM2_8KB_2000 },
+    { "16KiB at $4000",             UICART_CBM2_16KB_4000 },
+    { "16KiB at $6000",             UICART_CBM2_16KB_6000 },
+    /* FIXME: add the groups */
     { NULL, -1 }
 };
 
-#if 0
+
 /** \brief  List of VIC-20 cart types of the 'generic' variety
  */
 static const cart_type_list_t vic20_cart_types_generic[] = {
@@ -190,14 +215,14 @@ static const cart_type_list_t vic20_cart_types_generic[] = {
     { "4KiB cartridge at $B000",        CARTRIDGE_VIC20_4KB_B000 },
     { NULL, -1 }
 };
-#endif
+
 
 /** \brief  File filter pattern for CRT images */
 static const char *pattern_crt[] = { "*.crt", NULL };
 
 
 /** \brief  File filter pattern for raw images */
-/*static const char *pattern_bin[] = { "*.bin", NULL };*/
+static const char *pattern_bin[] = { "*.bin", NULL };
 
 /** \brief  File filter pattern for raw images */
 static const char *pattern_bin_prg[] = { "*.bin", "*.prg", NULL };
@@ -208,8 +233,8 @@ static const char *pattern_bin_prg[] = { "*.bin", "*.prg", NULL };
  */
 static ui_file_filter_t filters[] = {
     { "CRT images", pattern_crt },
-    /*{ "Raw images", pattern_bin },*/
-    { "Raw images", pattern_bin_prg },
+    { "Raw images", pattern_bin },
+    { "Raw images", pattern_bin_prg },  /* VIC20 */
     { "All files", file_chooser_pattern_all },
     { NULL, NULL }
 };
@@ -256,7 +281,7 @@ static GtkWidget *cart_id_label = NULL;
 
 
 /** \brief  Reference to the dialog file filter showing only .bin images */
-/*static GtkFileFilter *flt_bin = NULL;*/
+static GtkFileFilter *flt_bin = NULL;
 
 /** \brief  Reference to the dialog file filter showing .bin + .prg images */
 static GtkFileFilter *flt_bin_prg = NULL;
@@ -270,6 +295,7 @@ static GtkListStore *create_cart_id_model(unsigned int flags);
 static int get_cart_type(void);
 static int get_cart_id(void);
 static int attach_cart_image(int type, int id, const char *path);
+static GtkListStore *create_cart_id_model_vic20(void);
 
 /** \brief  Optional extra callback
  *
@@ -312,22 +338,18 @@ static void on_response(GtkWidget *dialog, gint response_id, gpointer data)
 
                 result = attach_cart_image(get_cart_type(), get_cart_id(), filename_locale);
                 if (!result) {
-                    vice_gtk3_message_error(GTK_WINDOW(dialog),
-                                            "VICE Error",
-                                            "Failed to attach image '%s'",
-                                            filename);
-                    /* we don't destroy the dialog here to allow the user to
-                     * select another (hopefully valid) image. */
+                    vice_gtk3_message_error("VICE Error",
+                            "Failed to smart-attach '%s'", filename);
                 } else {
                     /* call optional extra callback */
                     if (extra_attach_callback != NULL) {
                         extra_attach_callback();
                     }
-                    gtk_widget_destroy(dialog);
                 }
                 g_free(filename);
                 g_free(filename_locale);
             }
+            gtk_widget_destroy(dialog);
             break;
     }
 
@@ -352,8 +374,8 @@ static void set_pattern(int pattern)
         case UICART_PATTERN_CRT:
             filter = flt_crt;
             break;
-        case UICART_PATTERN_BIN_PRG:
-            filter = flt_bin_prg;
+        case UICART_PATTERN_BIN:
+            filter = flt_bin;
             break;
         default:
             filter = flt_all;
@@ -372,7 +394,7 @@ static void on_cart_type_changed(GtkComboBox *combo, gpointer data)
 {
     GtkListStore *id_model;     /* cart 'ID' model */
     unsigned int mask = ~0;
-    int pattern = UICART_PATTERN_BIN_PRG;
+    int pattern = UICART_PATTERN_BIN;
     int crt_type;
 
     crt_type = get_cart_type();
@@ -385,39 +407,22 @@ static void on_cart_type_changed(GtkComboBox *combo, gpointer data)
         case VICE_MACHINE_C64SC:    /* fall through */
         case VICE_MACHINE_C128:     /* fall through */
         case VICE_MACHINE_SCPU64:   /* fall through */
-        case VICE_MACHINE_PLUS4:    /* fall through */
-        case VICE_MACHINE_CBM5x0:   /* fall through */
-        case VICE_MACHINE_CBM6x0:   /* fall through */
-        case VICE_MACHINE_VIC20:
+        case VICE_MACHINE_PLUS4:
             switch (crt_type) {
                 case UICART_C64_SMART:      /* fall through */
-                case UICART_PLUS4_SMART:    /* fall through */
-                case UICART_VIC20_SMART:    /* fall through */
-                case UICART_CBM2_SMART:     /* fall through */
+                case UICART_PLUS4_SMART:
                     pattern = UICART_PATTERN_CRT;
                     break;
-                case UICART_C64_GENERIC:    /* fall through */
-                case UICART_PLUS4_GENERIC:  /* fall through */
-                case UICART_VIC20_GENERIC:  /* fall through */
-                case UICART_CBM2_GENERIC:   /* fall through */
-                    mask = CARTRIDGE_GROUP_GENERIC;
-                    break;
                 case UICART_C64_FREEZER:    /* fall through */
-                case UICART_PLUS4_FREEZER:  /* fall through */
-                case UICART_VIC20_FREEZER:  /* fall through */
-                case UICART_CBM2_FREEZER:   /* fall through */
+                case UICART_PLUS4_FREEZER:
                     mask = CARTRIDGE_GROUP_FREEZER;
                     break;
                 case UICART_C64_GAME:       /* fall through */
-                case UICART_PLUS4_GAME:     /* fall through */
-                case UICART_VIC20_GAME:     /* fall through */
-                case UICART_CBM2_GAME:      /* fall through */
+                case UICART_PLUS4_GAME:
                     mask = CARTRIDGE_GROUP_GAME;
                     break;
                 case UICART_C64_UTIL:       /* fall through */
-                case UICART_PLUS4_UTIL:     /* fall through */
-                case UICART_VIC20_UTIL:     /* fall through */
-                case UICART_CBM2_UTIL:      /* fall through */
+                case UICART_PLUS4_UTIL:
                     mask = CARTRIDGE_GROUP_UTIL;
                     break;
                 default:
@@ -442,7 +447,6 @@ static void on_cart_type_changed(GtkComboBox *combo, gpointer data)
             set_pattern(pattern);
 
             break;
-#if 0
         case VICE_MACHINE_VIC20:
             if ((crt_type == UICART_VIC20_GENERIC) ||
                 (crt_type == UICART_VIC20_ADD_GENERIC)) {
@@ -461,7 +465,7 @@ static void on_cart_type_changed(GtkComboBox *combo, gpointer data)
             gtk_combo_box_set_active(GTK_COMBO_BOX(cart_id_widget), 0);
 
             break;
-#endif
+
         default:
             break;
     }
@@ -562,12 +566,9 @@ static int attach_cart_image(int type, int id, const char *path)
                        we need to fix "generic" vs "add to generic" */
                     /* id = CARTRIDGE_VIC20_GENERIC; */
                     /* id is correct */
-#if 0
                 case UICART_VIC20_ADD_GENERIC:
                     /* id is correct */
                     break;
-#endif
-#if 0
                 case UICART_VIC20_BEHRBONZ:
                     id = CARTRIDGE_VIC20_BEHRBONZ;
                     break;
@@ -583,12 +584,7 @@ static int attach_cart_image(int type, int id, const char *path)
                case UICART_VIC20_FLASHPLUGIN:
                     id = CARTRIDGE_VIC20_FP;
                     break;
-#endif
-                case UICART_VIC20_FREEZER:    /* fall through */
-                case UICART_VIC20_GAME:       /* fall through */
-                case UICART_VIC20_UTIL:
-                    /* id is correct */
-                    break;
+                /* FIXME: add groups */
                 default:
                     debug_gtk3("error: shouldn't get here.");
                     break;
@@ -600,7 +596,6 @@ static int attach_cart_image(int type, int id, const char *path)
                 case UICART_PLUS4_SMART:
                     id = CARTRIDGE_CRT;
                     break;
-#if 0
                 case UICART_PLUS4_16KB_C1LO:
                     id = CARTRIDGE_PLUS4_GENERIC_C1LO;
                     break;
@@ -619,7 +614,6 @@ static int attach_cart_image(int type, int id, const char *path)
                 case UICART_PLUS4_32KB_C2:
                     id = CARTRIDGE_PLUS4_GENERIC_C2;
                     break;
-#endif
                 case UICART_PLUS4_FREEZER:    /* fall through */
                 case UICART_PLUS4_GAME:       /* fall through */
                 case UICART_PLUS4_UTIL:
@@ -635,29 +629,21 @@ static int attach_cart_image(int type, int id, const char *path)
         case VICE_MACHINE_CBM5x0:   /* fall through */
         case VICE_MACHINE_CBM6x0:
             switch (type) {
-                case UICART_CBM2_SMART:
-                    /*return (crt_attach_func(CARTRIDGE_CBM2_DETECT, path) == 0);*/
-                    id = CARTRIDGE_CRT;
-                    break;
-#if 0
-                case UICART_CBM2_4KB_1000:
-                    id = CARTRIDGE_CBM2_GENERIC_C1;
+                /*case UICART_CBM2_SMART:
+                    return (crt_attach_func(CARTRIDGE_CBM2_DETECT, path) == 0);*/
+                case UICART_CBM2_8KB_1000:
+                    id = CARTRIDGE_CBM2_8KB_1000;
                     break;
                 case UICART_CBM2_8KB_2000:
-                    id = CARTRIDGE_CBM2_GENERIC_C2;
+                    id = CARTRIDGE_CBM2_8KB_2000;
                     break;
-                case UICART_CBM2_8KB_4000:
-                    id = CARTRIDGE_CBM2_GENERIC_C4;
+                case UICART_CBM2_16KB_4000:
+                    id = CARTRIDGE_CBM2_16KB_4000;
                     break;
-                case UICART_CBM2_8KB_6000:
-                    id = CARTRIDGE_CBM2_GENERIC_C6;
+                case UICART_CBM2_16KB_6000:
+                    id = CARTRIDGE_CBM2_16KB_6000;
                     break;
-#endif
-                case UICART_CBM2_FREEZER:    /* fall through */
-                case UICART_CBM2_GAME:       /* fall through */
-                case UICART_CBM2_UTIL:
-                    /* id is correct */
-                    break;
+                /* FIXME: add groups */
                 default:
                     /* oops */
                     debug_gtk3("error: shouldn't get here.");
@@ -765,7 +751,7 @@ static GtkListStore *create_cart_id_model(unsigned int flags)
     return model;
 }
 
-#if 0
+
 /** \brief  Create a list of cartridges for VIC-20
  *
  * Only valid for VIC-20
@@ -789,7 +775,7 @@ static GtkListStore *create_cart_id_model_vic20(void)
     }
     return model;
 }
-#endif
+
 
 /** \brief  Create combo box with main cartridge types
  *
@@ -815,10 +801,7 @@ static GtkWidget *create_cart_type_combo_box(void)
 
     gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 0);
 
-    g_signal_connect_unlocked(G_OBJECT(combo),
-                              "changed",
-                              G_CALLBACK(on_cart_type_changed),
-                              NULL);
+    g_signal_connect(combo, "changed", G_CALLBACK(on_cart_type_changed), NULL);
     return combo;
 }
 
@@ -853,7 +836,7 @@ static GtkWidget *create_cart_id_combo_box(unsigned int mask)
     return combo;
 }
 
-#if 0
+
 /** \brief  Create combo box with generic VIC-20 cartridges
  *
  * \return  GtkComboBox
@@ -879,7 +862,7 @@ static GtkWidget *create_cart_id_combo_box_vic20(void)
     gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 0);
     return combo;
 }
-#endif
+
 
 /** \brief  Create the 'extra' widget for the dialog
  *
@@ -906,11 +889,8 @@ static GtkWidget *create_extra_widget(gboolean set_default)
     switch (machine_class) {
         case VICE_MACHINE_C64:      /* fall through */
         case VICE_MACHINE_C64SC:    /* fall through */
-        case VICE_MACHINE_C128:     /* fall through */
         case VICE_MACHINE_SCPU64:   /* fall through */
         case VICE_MACHINE_PLUS4:    /* fall through */
-        case VICE_MACHINE_CBM5x0:   /* fall through */
-        case VICE_MACHINE_CBM6x0:   /* fall through */
         case VICE_MACHINE_VIC20:
             cart_set_default_widget = gtk_check_button_new_with_label(
                     "Set cartridge as default");
@@ -924,16 +904,13 @@ static GtkWidget *create_extra_widget(gboolean set_default)
             break;
     }
 
-    /* create "cartridge ID" combo box */
+    /* only for c64/c128/plus4 */
     switch (machine_class) {
         case VICE_MACHINE_C64:      /* fall through */
         case VICE_MACHINE_C64SC:    /* fall through */
         case VICE_MACHINE_C128:     /* fall through */
         case VICE_MACHINE_SCPU64:   /* fall through */
-        case VICE_MACHINE_PLUS4:    /* fall through */
-        case VICE_MACHINE_CBM5x0:   /* fall through */
-        case VICE_MACHINE_CBM6x0:   /* fall through */
-        case VICE_MACHINE_VIC20:
+        case VICE_MACHINE_PLUS4:
 
             cart_id_label = gtk_label_new("cartridge ID");
             gtk_widget_set_halign(cart_id_label, GTK_ALIGN_START);
@@ -941,7 +918,6 @@ static GtkWidget *create_extra_widget(gboolean set_default)
             gtk_grid_attach(GTK_GRID(grid), cart_id_label, 2, 0, 1, 1);
             gtk_grid_attach(GTK_GRID(grid), cart_id_widget, 3, 0, 1, 1);
             break;
-#if 0
         case VICE_MACHINE_VIC20:
             cart_id_label = gtk_label_new("cartridge class");
             gtk_widget_set_halign(cart_id_label, GTK_ALIGN_START);
@@ -949,7 +925,7 @@ static GtkWidget *create_extra_widget(gboolean set_default)
             gtk_grid_attach(GTK_GRID(grid), cart_id_label, 2, 0, 1, 1);
             gtk_grid_attach(GTK_GRID(grid), cart_id_widget, 3, 0, 1, 1);
             break;
-#endif
+
         default:
             break;
     }
@@ -958,7 +934,7 @@ static GtkWidget *create_extra_widget(gboolean set_default)
     return grid;
 }
 
-#if 0
+
 /** \brief  Create the 'preview' widget for the dialog
  *
  * \return  GtkGrid
@@ -969,8 +945,8 @@ static GtkWidget *create_preview_widget(void)
             && (machine_class != VICE_MACHINE_C64SC)
             && (machine_class != VICE_MACHINE_SCPU64)
             && (machine_class != VICE_MACHINE_C128)
-            && (machine_class != VICE_MACHINE_CBM5x0)
-            && (machine_class != VICE_MACHINE_CBM6x0)
+            /*&& (machine_class != VICE_MACHINE_CBM5x0)
+            && (machine_class != VICE_MACHINE_CBM6x0)*/   /* TODO: enable once implemented */
             && (machine_class != VICE_MACHINE_PLUS4)
             && (machine_class != VICE_MACHINE_VIC20)) {
         GtkWidget *grid = NULL;
@@ -994,7 +970,7 @@ static GtkWidget *create_preview_widget(void)
     }
 
 }
-#endif
+
 
 /** \brief  Update the 'preview' widget for the dialog
  *
@@ -1049,14 +1025,14 @@ static GtkWidget *cart_dialog_internal(gboolean set_as_default,
             create_extra_widget(set_as_default));
 
     /* add preview widget */
-    cart_preview_widget = crt_preview_widget_create();
+    cart_preview_widget = create_preview_widget();
     gtk_file_chooser_set_preview_widget(GTK_FILE_CHOOSER(dialog),
             cart_preview_widget);
     gtk_file_chooser_set_use_preview_label(GTK_FILE_CHOOSER(dialog), FALSE);
 
     /* add filters */
     flt_crt = create_file_chooser_filter(filters[UICART_PATTERN_CRT], FALSE);
-    /*flt_bin = create_file_chooser_filter(filters[UICART_PATTERN_BIN], FALSE);*/
+    flt_bin = create_file_chooser_filter(filters[UICART_PATTERN_BIN], FALSE);
     flt_bin_prg = create_file_chooser_filter(filters[UICART_PATTERN_BIN_PRG], FALSE);
     flt_all = create_file_chooser_filter(filters[UICART_PATTERN_ALL], TRUE);
 
@@ -1065,22 +1041,16 @@ static GtkWidget *cart_dialog_internal(gboolean set_as_default,
         case VICE_MACHINE_C64SC:    /* fall through */
         case VICE_MACHINE_C128:     /* fall through */
         case VICE_MACHINE_SCPU64:   /* fall through */
-        case VICE_MACHINE_CBM5x0:   /* fall through */
-        case VICE_MACHINE_CBM6x0:   /* fall through */
         case VICE_MACHINE_PLUS4:
-        case VICE_MACHINE_VIC20:
             gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), flt_crt);
-            /*gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), flt_bin);*/
-            gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), flt_bin_prg);
+            gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), flt_bin);
             gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), flt_all);
             break;
-#if 0
         case VICE_MACHINE_VIC20:
             gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), flt_crt);
             gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), flt_bin_prg);
             gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), flt_all);
             break;
-#endif
         default:
             break;
     }

@@ -114,7 +114,6 @@ int native_console_close(console_t *log)
     return 0;
 }
 
-/* output to console, no translation (ASCII) */
 int native_console_out(console_t *log, const char *format, ...)
 {
     va_list ap;
@@ -135,7 +134,7 @@ int native_console_out(console_t *log, const char *format, ...)
     return 0;
 }
 
-int native_console_petscii_out(int maxlen, console_t *log, const char *format, ...)
+int native_console_petscii_out(console_t *log, const char *format, ...)
 {
     va_list ap;
     char *buf;
@@ -147,85 +146,18 @@ int native_console_petscii_out(int maxlen, console_t *log, const char *format, .
     va_end(ap);
 
     if (buf) {
-        for (i = 0; i < maxlen; i++) {
-            c = buf[i];
-            if ((c == '\t') || (c == '\r') || (c == '\n')){
-                c = '.';
-            } else if (c == 0) {
-                c = '@';
-            } else if ((c < 32) || (c > 126)) {
-                c = charset_p_toascii(c, CONVERT_WITH_CTRLCODES);
-            }
-            if (log && (log->private->output)) {
-                fprintf(log->private->output, "%c", c);
-            } else {
-                fprintf(stdout, "%c", c);
+        for (i = 0; (c = buf[i]) != 0; i++) {
+            if (c == '\t') {
+                buf[i] = ' ';
+            } else if (((c < 32) || (c > 126)) && (c != '\n')) {
+                buf[i] = charset_p_toascii(c, CONVERT_WITH_CTRLCODES);
             }
         }
-        lib_free(buf);
-    }
-    return 0;
-}
 
-int native_console_petscii_upper_out(int maxlen, console_t *log, const char *format, ...)
-{
-    va_list ap;
-    char *buf;
-    unsigned char c;
-    int i;
-
-    va_start(ap, format);
-    buf = lib_mvsprintf(format, ap);
-    va_end(ap);
-
-    if (buf) {
-        for (i = 0; i < maxlen; i++) {
-            c = buf[i];
-            if ((c == '\t') || (c == '\r') || (c == '\n')){
-                c = '.';
-            } else if (c == 0) {
-                c = '@';
-            } else if ((c < 32) || (c > 126)) {
-                c = charset_p_toascii(c, CONVERT_WITH_CTRLCODES);
-            }
-            if (log && (log->private->output)) {
-                fprintf(log->private->output, "%c", c);
-            } else {
-                fprintf(stdout, "%c", c);
-            }
-        }
-        lib_free(buf);
-    }
-    return 0;
-}
-
-int native_console_scrcode_out(int maxlen, console_t *log, const char *format, ...)
-{
-    va_list ap;
-    char *buf;
-    unsigned char c;
-    int i;
-
-    va_start(ap, format);
-    buf = lib_mvsprintf(format, ap);
-    va_end(ap);
-
-    if (buf) {
-        for (i = 0; i < maxlen; i++) {
-            c = buf[i];
-            c = charset_screencode_to_petscii(c);
-            if ((c == '\t') || (c == '\r') || (c == '\n')){
-                c = '.';
-            } else if (c == 0) {
-                c = '@';
-            } else if ((c < 32) || (c > 126)) {
-                c = charset_p_toascii(c, CONVERT_WITH_CTRLCODES);
-            }
-            if (log && (log->private->output)) {
-                fprintf(log->private->output, "%c", c);
-            } else {
-                fprintf(stdout, "%c", c);
-            }
+        if (log && (log->private->output)) {
+            fprintf(log->private->output, "%s", buf);
+        } else {
+            fprintf(stdout, "%s", buf);
         }
         lib_free(buf);
     }

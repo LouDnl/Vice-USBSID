@@ -31,12 +31,8 @@
 #include "types.h"
 #include "uimenu.h"
 
-extern ui_menu_entry_t *screenshot_vic_vicii_vdc_menu;
-extern ui_menu_entry_t *screenshot_ted_menu;
-extern ui_menu_entry_t *screenshot_crtc_menu;
-
-void uiscreenshot_menu_create(void);
-void uiscreenshot_menu_shutdown(void);
-
+extern const ui_menu_entry_t screenshot_vic_vicii_vdc_menu[];
+extern const ui_menu_entry_t screenshot_ted_menu[];
+extern const ui_menu_entry_t screenshot_crtc_menu[];
 
 #endif

@@ -201,7 +201,6 @@ static int godotdrv_save(screenshot_t *screenshot, const char *filename)
 
 static gfxoutputdrv_t godot_drv =
 {
-    GFXOUTPUTDRV_TYPE_SCREENSHOT_NATIVE,
     "4BT",
     "Godot screenshot",
     "4bt",

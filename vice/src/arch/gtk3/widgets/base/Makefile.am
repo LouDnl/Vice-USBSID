@@ -60,7 +60,6 @@ libbasewidgets_a_SOURCES = \
 	resourcewidgetmediator.c \
 	savefiledialog.c \
 	selectdirectorydialog.c \
-	unicodehelpers.c \
 	uiactionbutton.c \
 	widgethelpers.c
 
@@ -91,7 +90,6 @@ EXTRA_DIST = \
 	resourcewidgetmediator.h \
 	savefiledialog.h \
 	selectdirectorydialog.h \
-	unicodehelpers.h \
 	uiactionbutton.h \
 	vice_gtk3.h \
 	vice_gtk3_settings.h \

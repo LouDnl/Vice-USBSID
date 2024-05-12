@@ -1296,8 +1296,6 @@ void machine_specific_reset(void)
     vicii_reset();
 
     cartridge_reset();
-
-    /* reset drives on powerup, and if "reset goes to IEC" is enabled */
     if (reset_poweron || iecreset) {
         drive_reset();
     }

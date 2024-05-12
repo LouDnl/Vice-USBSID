@@ -31,7 +31,6 @@
 
 #include "uiactions.h"
 #include "uimedia.h"
-#include "screenshot.h"
 
 #include "actions-media.h"
 
@@ -60,7 +59,7 @@ static void media_stop_action(ui_action_map_t *self)
  */
 static void screenshot_quicksave_action(ui_action_map_t *self)
 {
-    screenshot_ui_auto_screenshot();
+    ui_media_auto_screenshot();
 }
 
 

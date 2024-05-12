@@ -420,20 +420,23 @@
         }                                                                      \
         if (ik & (IK_MONITOR | IK_DMA)) {                                      \
             if (ik & IK_MONITOR) {                                             \
-                if (monitor_mask[CALLER] & (MI_STEP)) {                        \
+                if (monitor_force_import(CALLER)) {                            \
+                    IMPORT_REGISTERS();                                        \
+                }                                                              \
+                if (monitor_mask[CALLER]) {                                    \
                     EXPORT_REGISTERS();                                        \
+                }                                                              \
+                if (monitor_mask[CALLER] & (MI_STEP)) {                        \
                     monitor_check_icount((uint16_t)reg_pc);                    \
                     IMPORT_REGISTERS();                                        \
                 }                                                              \
                 if (monitor_mask[CALLER] & (MI_BREAK)) {                       \
-                    EXPORT_REGISTERS();                                        \
                     if (monitor_check_breakpoints(CALLER, (uint16_t)reg_pc)) { \
                         monitor_startup(CALLER);                               \
+                        IMPORT_REGISTERS();                                    \
                     }                                                          \
-                    IMPORT_REGISTERS();                                        \
                 }                                                              \
                 if (monitor_mask[CALLER] & (MI_WATCH)) {                       \
-                    EXPORT_REGISTERS();                                        \
                     monitor_check_watchpoints(LAST_OPCODE_ADDR, (uint16_t)reg_pc); \
                     IMPORT_REGISTERS();                                        \
                 }                                                              \
@@ -857,7 +860,7 @@ static int ane_log_level = 1; /* 0: none, 1: unstable only 2: all */
             ANE_LOGGING(0);                                         \
             reg_a_write = (uint8_t)((reg_a_read | ANE_MAGIC) & reg_x & p1); \
         }                                                           \
-        LOCAL_SET_NZ(reg_a_write);                                  \
+        LOCAL_SET_NZ(reg_a_read);                                   \
         INC_PC(2);                                                  \
         /* Pretend to be NOP #$nn to not trigger the special case   \
            when cycles are stolen after the second fetch */         \
@@ -1304,7 +1307,7 @@ static int lxa_log_level = 1; /* 0: none, 1: unstable only 2: all */
             LXA_LOGGING(0);                                         \
             reg_a_write = reg_x = (uint8_t)((reg_a_read | LXA_MAGIC) & p1); \
         }                                                           \
-        LOCAL_SET_NZ(reg_a_write);                                  \
+        LOCAL_SET_NZ(reg_a_read);                                   \
         INC_PC(2);                                                  \
         /* Pretend to be NOP #$nn to not trigger the special case   \
            when cycles are stolen after the second fetch */         \
@@ -1765,7 +1768,7 @@ static const uint8_t fetch_tab[] = {
         /* If reg_pc >= bank_limit  then JSR (0x20) hasn't load p2 yet.
            The earlier LOAD(reg_pc+2) hack can break stealing badly on x64sc.
            The fixing is now handled in JSR(). */
-        monitor_cpuhistory_store(debug_clk, reg_pc, p0, p1, p2 >> 8, reg_a_read, reg_x, reg_y, reg_sp, LOCAL_STATUS(), ORIGIN_MEMSPACE);
+        monitor_cpuhistory_store(debug_clk, reg_pc, p0, p1, p2 >> 8, reg_a_read, reg_x, reg_y, reg_sp, LOCAL_STATUS(), 0);
         memmap_state &= ~(MEMMAP_STATE_INSTR | MEMMAP_STATE_OPCODE);
 #endif
 

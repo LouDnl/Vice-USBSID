@@ -108,6 +108,5 @@ bool ui_pause_loop_iteration(void);
 void ui_pause_disable(void);
 void ui_pause_toggle(void);
 
-video_canvas_t *ui_get_active_canvas(void);
 
 #endif

@@ -60,42 +60,34 @@ static GtkWidget *main_menu_bar = NULL;
 /** \brief  File->Detach disk submenu
  */
 static const ui_menu_item_t disk_detach_submenu[] = {
-    {   .label  = "Drive 8:0",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_DRIVE_DETACH_8_0,
-    },
-    {   .label  = "Drive 8:1",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_DRIVE_DETACH_8_1
-    },
-    {   .label  = "Drive 9:0",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_DRIVE_DETACH_9_0
-    },
-    {   .label  = "Drive 9:1",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_DRIVE_DETACH_9_1
-    },
-    {   .label  = "Drive 10:0",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_DRIVE_DETACH_10_0
-    },
-    {   .label  = "Drive 10:1",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_DRIVE_DETACH_10_1
-    },
-    {   .label   = "Drive 11:0",
-        .type    = UI_MENU_TYPE_ITEM_ACTION,
-        .action  = ACTION_DRIVE_DETACH_11_0
-    },
-    {   .label   = "Drive 11:1",
-        .type    = UI_MENU_TYPE_ITEM_ACTION,
-        .action  = ACTION_DRIVE_DETACH_11_1
-    },
-    {   .label   = "Detach all",
-        .type    = UI_MENU_TYPE_ITEM_ACTION,
-        .action  = ACTION_DRIVE_DETACH_ALL
-    },
+    { "Drive 8:0", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_DRIVE_DETACH_8_0,
+      NULL, false },
+    { "Drive 8:1", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_DRIVE_DETACH_8_1,
+      NULL, false },
+    { "Drive 9:0", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_DRIVE_DETACH_9_0,
+      NULL, false },
+    { "Drive 9:1", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_DRIVE_DETACH_9_1,
+      NULL,false },
+    { "Drive 10:0", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_DRIVE_DETACH_10_0,
+      NULL, false },
+    { "Drive 10:1", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_DRIVE_DETACH_10_1,
+      NULL, false },
+    { "Drive 11:0", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_DRIVE_DETACH_11_0,
+      NULL, false },
+    { "Drive 11:1", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_DRIVE_DETACH_11_1,
+      NULL, false },
+    { "Detach all", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_DRIVE_DETACH_ALL,
+      NULL, false },
+
     UI_MENU_TERMINATOR
 };
 /* }}} */
@@ -104,26 +96,19 @@ static const ui_menu_item_t disk_detach_submenu[] = {
 /** \brief  File->Attach disk submenu
  */
 static const ui_menu_item_t disk_attach_submenu[] = {
-    {   .label    = "Drive #8",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_DRIVE_ATTACH_8_0,
-        .unlocked = true
-    },
-    {   .label    = "Drive #9",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_DRIVE_ATTACH_9_0,
-        .unlocked = true
-    },
-    {   .label    = "Drive #10",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_DRIVE_ATTACH_10_0,
-        .unlocked = true
-    },
-    {   .label    = "Drive #11",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_DRIVE_ATTACH_11_0,
-        .unlocked = true
-    },
+    { "Drive #8", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_DRIVE_ATTACH_8_0,
+      NULL, true },
+    { "Drive #9", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_DRIVE_ATTACH_9_0,
+      NULL, true },
+    { "Drive #10", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_DRIVE_ATTACH_10_0,
+      NULL, true },
+    { "Drive #11", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_DRIVE_ATTACH_11_0,
+      NULL, true },
+
     UI_MENU_TERMINATOR
 };
 /* }}} */
@@ -132,36 +117,28 @@ static const ui_menu_item_t disk_attach_submenu[] = {
 /** \brief  File->Flip list submenu
  */
 static const ui_menu_item_t disk_fliplist_submenu[] = {
-    {   .label    = "Add current image (unit #8, drive 0)",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_FLIPLIST_ADD_8_0
-    },
-    {   .label    = "Remove current image (unit #8, drive 0)",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_FLIPLIST_REMOVE_8_0
-    },
-    {   .label    = "Attach next image (unit #8, drive 0)",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_FLIPLIST_NEXT_8_0
-    },
-    {   .label    = "Attach previous image (unit #8, drive 0)",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_FLIPLIST_PREVIOUS_8_0
-    },
-    {   .label    = "Clear fliplist (unit #8, drive 0)",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_FLIPLIST_CLEAR_8_0
-    },
-    {   .label    = "Load flip list file for unit #8, drive 0...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_FLIPLIST_LOAD_8_0,
-        .unlocked = true
-    },
-    {   .label    = "Save flip list file of unit #8, drive 0...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_FLIPLIST_SAVE_8_0,
-        .unlocked = true
-    },
+    { "Add current image (unit #8, drive 0)", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_FLIPLIST_ADD_8_0,
+      NULL, false },
+    { "Remove current image (unit #8, drive 0)", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_FLIPLIST_REMOVE_8_0,
+      NULL, false },
+    { "Attach next image (unit #8, drive 0)", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_FLIPLIST_NEXT_8_0,
+      NULL, false },
+    { "Attach previous image (unit #8, drive 0)", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_FLIPLIST_PREVIOUS_8_0,
+      NULL, false },
+    { "Clear fliplist (unit #8, drive 0)", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_FLIPLIST_CLEAR_8_0,
+      NULL, false },
+    { "Load flip list file for unit #8, drive 0...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_FLIPLIST_LOAD_8_0,
+      NULL, true },
+    { "Save flip list file of unit #8, drive 0...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_FLIPLIST_SAVE_8_0,
+      NULL, true },
+
     UI_MENU_TERMINATOR
 };
 /* }}} */
@@ -170,34 +147,28 @@ static const ui_menu_item_t disk_fliplist_submenu[] = {
 /** \brief  File->Datasette control submenu for port #1
  */
 static const ui_menu_item_t datasette_1_control_submenu[] = {
-    {   .label  = "Stop",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_TAPE_STOP_1
-    },
-    {   .label  = "Start",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_TAPE_PLAY_1
-    },
-    {   .label  = "Forward",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_TAPE_FFWD_1
-    },
-    {   .label  = "Rewind",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_TAPE_REWIND_1
-    },
-    {   .label  = "Record",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_TAPE_RECORD_1
-    },
-    {   .label  = "Reset",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_TAPE_RESET_1
-    },
-    {   .label  = "Reset Counter",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_TAPE_RESET_COUNTER_1
-    },
+    { "Stop", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_TAPE_STOP_1,
+      NULL, false },
+    { "Start", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_TAPE_PLAY_1,
+      NULL, false },
+    { "Forward", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_TAPE_FFWD_1,
+      NULL, false },
+    { "Rewind", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_TAPE_REWIND_1,
+      NULL, false },
+    { "Record", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_TAPE_RECORD_1,
+      NULL, false },
+    { "Reset", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_TAPE_RESET_1,
+      NULL, false },
+    { "Reset Counter", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_TAPE_RESET_COUNTER_1,
+      NULL, false },
+
     UI_MENU_TERMINATOR
 };
 /* }}} */
@@ -206,34 +177,28 @@ static const ui_menu_item_t datasette_1_control_submenu[] = {
 /** \brief  File->Datasette control submenu for port #2
  */
 static const ui_menu_item_t datasette_2_control_submenu[] = {
-    {   .label  = "Stop",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_TAPE_STOP_1
-    },
-    {   .label  = "Start",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_TAPE_PLAY_1
-    },
-    {   .label  = "Forward",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_TAPE_FFWD_1
-    },
-    {   .label  = "Rewind",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_TAPE_REWIND_1
-    },
-    {   .label  = "Record",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_TAPE_RECORD_1
-    },
-    {   .label  = "Reset",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_TAPE_RESET_1
-    },
-    {   .label  = "Reset Counter",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_TAPE_RESET_COUNTER_1
-    },
+    { "Stop", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_TAPE_STOP_1,
+      NULL, false },
+    { "Start", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_TAPE_PLAY_1,
+      NULL, false },
+    { "Forward", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_TAPE_FFWD_1,
+      NULL, false },
+    { "Rewind", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_TAPE_REWIND_1,
+      NULL, false },
+    { "Record", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_TAPE_RECORD_1,
+      NULL, false },
+    { "Reset", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_TAPE_RESET_1,
+      NULL, false },
+    { "Reset Counter", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_TAPE_RESET_COUNTER_1,
+      NULL, false },
+
     UI_MENU_TERMINATOR
 };
 /* }}} */
@@ -242,32 +207,28 @@ static const ui_menu_item_t datasette_2_control_submenu[] = {
 /** \brief  File->Reset submenu
  */
 static const ui_menu_item_t reset_submenu[] = {
-    {   .label  = "Reset machine CPU",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_MACHINE_RESET_CPU
-    },
-    {   .label  = "Power cycle machine",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_MACHINE_POWER_CYCLE
-    },
+    { "Reset machine CPU", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_MACHINE_RESET_CPU,
+      NULL, false },
+    { "Power cycle machine", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_MACHINE_POWER_CYCLE,
+      NULL, false },
+
     UI_MENU_SEPARATOR,
 
-    {   .label  = "Reset drive #8",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_RESET_DRIVE_8
-    },
-    {   .label  = "Reset drive #9",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_RESET_DRIVE_9
-    },
-    {   .label  = "Reset drive #10",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_RESET_DRIVE_10
-    },
-    {   .label  = "Reset drive #11",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_RESET_DRIVE_11
-    },
+    { "Reset drive #8", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_RESET_DRIVE_8,
+      NULL, false },
+    { "Reset drive #9", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_RESET_DRIVE_9,
+      NULL, false },
+    { "Reset drive #10", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_RESET_DRIVE_10,
+      NULL, false },
+    { "Reset drive #11", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_RESET_DRIVE_11,
+      NULL, false },
+
     UI_MENU_TERMINATOR
 };
 /* }}} */
@@ -276,30 +237,25 @@ static const ui_menu_item_t reset_submenu[] = {
 /** \brief  'File' menu - head section
  */
 static const ui_menu_item_t file_menu_head[] = {
-    {   .label    = "Smart attach...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_SMART_ATTACH,
-        .unlocked = true
-    },
+    { "Smart attach ...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_SMART_ATTACH,
+      NULL, true },
+
     UI_MENU_SEPARATOR,
 
-    {   .label    = "Attach disk image",
-        .type     = UI_MENU_TYPE_SUBMENU,
-        .submenu  = disk_attach_submenu
-    },
-    {   .label    = "Create and attach an empty disk image...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_DRIVE_CREATE,
-        .unlocked = true
-    },
-    {   .label    = "Detach disk image",
-        .type     = UI_MENU_TYPE_SUBMENU,
-        .submenu  = disk_detach_submenu
-    },
-    {   .label    = "Flip list",
-        .type     = UI_MENU_TYPE_SUBMENU,
-        .submenu  = disk_fliplist_submenu
-    },
+    { "Attach disk image", UI_MENU_TYPE_SUBMENU,
+      0,
+      disk_attach_submenu, false },
+    { "Create and attach an empty disk image ...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_DRIVE_CREATE,
+      NULL, false },
+    { "Detach disk image", UI_MENU_TYPE_SUBMENU,
+      0,
+      disk_detach_submenu, false },
+    { "Flip list", UI_MENU_TYPE_SUBMENU,
+      0,
+      disk_fliplist_submenu, false },
+
     UI_MENU_SEPARATOR,
 
     UI_MENU_TERMINATOR
@@ -310,24 +266,19 @@ static const ui_menu_item_t file_menu_head[] = {
 /** \brief  'File' menu - tape section
  */
 static const ui_menu_item_t file_menu_tape[] = {
-    {   .label    = "Attach datasette image...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_TAPE_ATTACH_1,
-        .unlocked = true
-    },
-    {   .label    = "Create and attach datasette image...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_TAPE_CREATE_1,
-        .unlocked = true
-    },
-    {   .label    = "Detach datasette image",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_TAPE_DETACH_1
-    },
-    {   .label    = "Datasette controls",
-        .type     = UI_MENU_TYPE_SUBMENU,
-        .submenu  = datasette_1_control_submenu
-    },
+    { "Attach datasette image ...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_TAPE_ATTACH_1,
+      NULL, true },
+    { "Create and attach datasette image ...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_TAPE_CREATE_1,
+      NULL, true },
+    { "Detach datasette image", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_TAPE_DETACH_1,
+      NULL, false },
+    { "Datasette controls", UI_MENU_TYPE_SUBMENU,
+      0,
+      datasette_1_control_submenu, false },
+
     UI_MENU_SEPARATOR,  /* Required since this menu gets inserted between
                            disk menu items and cartridge items on emulators
                            that have a datasette port. */
@@ -339,44 +290,34 @@ static const ui_menu_item_t file_menu_tape[] = {
 /** \brief  'File' menu - tape section for xpet
  */
 static const ui_menu_item_t file_menu_tape_xpet[] = {
-    {   .label    = "Attach datasette #1 image...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_TAPE_ATTACH_1,
-        .unlocked = true
-    },
-    {   .label    = "Create and attach datasette #1 image...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_TAPE_CREATE_1,
-        .unlocked = true
-    },
-    {   .label    = "Detach datasette #1 image",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_TAPE_DETACH_1
-    },
-    {   .label    = "Datasette #1 controls",
-        .type     = UI_MENU_TYPE_SUBMENU,
-        .submenu  = datasette_1_control_submenu
-    },
+    { "Attach datasette #1 image ...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_TAPE_ATTACH_1,
+      NULL, true },
+    { "Create and attach datasette #1 image ...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_TAPE_CREATE_1,
+      NULL, true },
+    { "Detach datasette #1 image", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_TAPE_DETACH_1,
+      NULL,  false },
+    { "Datasette #1 controls", UI_MENU_TYPE_SUBMENU,
+      0,
+      datasette_1_control_submenu, false },
+
     UI_MENU_SEPARATOR,
 
-    {   .label    = "Attach datasette #2 image...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_TAPE_ATTACH_2,
-        .unlocked = true
-    },
-    {   .label    = "Create and attach datasette #2 image...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_TAPE_CREATE_2,
-        .unlocked = true
-    },
-    {   .label    = "Detach datasette #2 image",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_TAPE_DETACH_2
-    },
-    {   .label    = "Datasette #2 controls",
-        .type     = UI_MENU_TYPE_SUBMENU,
-        .submenu  = datasette_2_control_submenu
-    },
+    { "Attach datasette #2 image ...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_TAPE_ATTACH_2,
+      NULL, true },
+    { "Create and attach datasette #2 image ...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_TAPE_CREATE_2,
+      NULL, true },
+    { "Detach datasette #2 image", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_TAPE_DETACH_2,
+      NULL, false },
+    { "Datasette #2 controls", UI_MENU_TYPE_SUBMENU,
+      0,
+      datasette_2_control_submenu, false },
+
     UI_MENU_SEPARATOR,  /* Required since this menu gets inserted between
                            disk menu items and cartridge items on emulators
                            that have a datasette port. */
@@ -390,19 +331,16 @@ static const ui_menu_item_t file_menu_tape_xpet[] = {
  * C64, SCPU64 and C128, containing "Cartridge freeze".
  */
 static const ui_menu_item_t file_menu_cart_freeze[] = {
-    {   .label    = "Attach cartridge image...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_CART_ATTACH,
-        .unlocked = true
-    },
-    {   .label    = "Detach cartridge image(s)",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_CART_DETACH
-    },
-    {   .label    = "Cartridge freeze",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_CART_FREEZE
-    },
+    /* cart */
+    { "Attach cartridge image ...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_CART_ATTACH,
+      NULL, true },
+    { "Detach cartridge image(s)", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_CART_DETACH,
+      NULL, false },
+    { "Cartridge freeze", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_CART_FREEZE,
+      NULL, false },
     UI_MENU_SEPARATOR,
     UI_MENU_TERMINATOR
 };
@@ -414,15 +352,13 @@ static const ui_menu_item_t file_menu_cart_freeze[] = {
  * Plus/4, VIC-20, CBM-II, not containing "Cartridge freeze".
  */
 static const ui_menu_item_t file_menu_cart_no_freeze[] = {
-    {   .label    = "Attach cartridge image...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_CART_ATTACH,
-        .unlocked = true
-    },
-    {   .label    = "Detach cartridge image(s)",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_CART_DETACH
-    },
+    /* cart */
+    { "Attach cartridge image ...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_CART_ATTACH,
+      NULL, true },
+    { "Detach cartridge image(s)", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_CART_DETACH,
+      NULL, false },
     UI_MENU_SEPARATOR,
     UI_MENU_TERMINATOR
 };
@@ -434,22 +370,18 @@ static const ui_menu_item_t file_menu_cart_no_freeze[] = {
  * C64, C64SC, SCPU64, C128, VIC20, PET, CBM6x0.
  */
 static const ui_menu_item_t printer_submenu[] = {
-    {   .label  = "Send formfeed to printer #4",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_PRINTER_FORMFEED_4
-    },
-    {   .label  = "Send formfeed to printer #5",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_PRINTER_FORMFEED_5
-    },
-    {   .label  = "Send formfeed to plotter #6",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_PRINTER_FORMFEED_6
-    },
-    {   .label  = "Send formfeed to userport printer",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_PRINTER_FORMFEED_USERPORT
-    },
+    { "Send formfeed to printer #4", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_PRINTER_FORMFEED_4,
+      NULL, false },
+    { "Send formfeed to printer #5", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_PRINTER_FORMFEED_5,
+      NULL, false },
+    { "Send formfeed to plotter #6", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_PRINTER_FORMFEED_6,
+      NULL, false },
+    { "Send formfeed to userport printer", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_PRINTER_FORMFEED_USERPORT,
+      NULL, false },
     UI_MENU_SEPARATOR,
     UI_MENU_TERMINATOR
 };
@@ -461,18 +393,15 @@ static const ui_menu_item_t printer_submenu[] = {
  * C64DTV, PLUS4, CBM5x0.
  */
 static const ui_menu_item_t printer_submenu_no_userport[] = {
-    {   .label  = "Send formfeed to printer #4",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_PRINTER_FORMFEED_4
-    },
-    {   .label  = "Send formfeed to printer #5",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_PRINTER_FORMFEED_5
-    },
-    {   .label  = "Send formfeed to plotter #6",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_PRINTER_FORMFEED_6
-    },
+    { "Send formfeed to printer #4", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_PRINTER_FORMFEED_4,
+      NULL, false },
+    { "Send formfeed to printer #5", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_PRINTER_FORMFEED_5,
+      NULL, false },
+    { "Send formfeed to plotter #6", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_PRINTER_FORMFEED_6,
+      NULL, false },
     UI_MENU_TERMINATOR
 };
 /* }}} */
@@ -483,10 +412,9 @@ static const ui_menu_item_t printer_submenu_no_userport[] = {
  * C64, C64SC, SCPU64, C128, VIC20, PET, CBM6x0.
  */
 static const ui_menu_item_t file_menu_printer[] = {
-    {   .label   = "Printer/plotter",
-        .type    = UI_MENU_TYPE_SUBMENU,
-        .submenu = printer_submenu
-    },
+    { "Printer/plotter",    UI_MENU_TYPE_SUBMENU,
+      0,
+      printer_submenu, false },
     UI_MENU_SEPARATOR,
     UI_MENU_TERMINATOR,
 };
@@ -498,10 +426,9 @@ static const ui_menu_item_t file_menu_printer[] = {
  * C64DTV, PLUS4, CBM5x0.
  */
 static const ui_menu_item_t file_menu_printer_no_userport[] = {
-    {   .label   = "Printer/plotter",
-        .type    = UI_MENU_TYPE_SUBMENU,
-        .submenu = printer_submenu_no_userport
-    },
+    { "Printer/plotter",    UI_MENU_TYPE_SUBMENU,
+      0,
+      printer_submenu_no_userport, false },
     UI_MENU_SEPARATOR,
     UI_MENU_TERMINATOR,
 };
@@ -512,23 +439,22 @@ static const ui_menu_item_t file_menu_printer_no_userport[] = {
  */
 static const ui_menu_item_t file_menu_tail[] = {
     /* monitor */
-    {   .label   = "Activate monitor",
-        .type    = UI_MENU_TYPE_ITEM_ACTION,
-        .action  = ACTION_MONITOR_OPEN,
-    },
+    { "Activate monitor", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_MONITOR_OPEN,
+      NULL, false },
+
     UI_MENU_SEPARATOR,
 
-    {   .label   = "Reset",
-        .type    = UI_MENU_TYPE_SUBMENU,
-        .submenu = reset_submenu
-    },
+    { "Reset", UI_MENU_TYPE_SUBMENU,
+      0,
+      reset_submenu, false },
+
     UI_MENU_SEPARATOR,
 
-    {   .label    = "Exit emulator",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_QUIT,
-        .unlocked = true
-    },
+    { "Exit emulator", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_QUIT,
+      NULL, true },
+
     UI_MENU_TERMINATOR
 };
 /* }}} */
@@ -537,14 +463,13 @@ static const ui_menu_item_t file_menu_tail[] = {
 /** \brief  'Edit' menu
  */
 static const ui_menu_item_t edit_menu[] = {
-    {   .label  = "Copy",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_EDIT_COPY
-    },
-    {   .label  = "Paste",
-        .type   = UI_MENU_TYPE_ITEM_ACTION,
-        .action = ACTION_EDIT_PASTE
-    },
+    { "Copy", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_EDIT_COPY,
+      NULL, false },
+    { "Paste", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_EDIT_PASTE,
+      NULL, false },
+
     UI_MENU_TERMINATOR
 };
 /* }}} */
@@ -553,67 +478,58 @@ static const ui_menu_item_t edit_menu[] = {
 /** \brief  'Snapshot' menu
  */
 static ui_menu_item_t snapshot_menu[] = {
-    {   .label    = "Load snapshot image...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_SNAPSHOT_LOAD
-    },
-    {   .label    = "Save snapshot image...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_SNAPSHOT_SAVE
-    },
+    { "Load snapshot image ...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_SNAPSHOT_LOAD,
+      NULL, false },
+    { "Save snapshot image ...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_SNAPSHOT_SAVE,
+      NULL, false },
+
     UI_MENU_SEPARATOR,
 
-    {   .label    = "Quickload snapshot",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_SNAPSHOT_QUICKLOAD
-    },
-    {   .label    = "Quicksave snapshot",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_SNAPSHOT_QUICKSAVE
-    },
+    { "Quickload snapshot", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_SNAPSHOT_QUICKLOAD,
+      NULL, false },
+    { "Quicksave snapshot", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_SNAPSHOT_QUICKSAVE,
+      NULL, false },
+
     UI_MENU_SEPARATOR,
 
-    {   .label    = "Start recording events",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_HISTORY_RECORD_START
-    },
-    {   .label    = "Stop recording events",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_HISTORY_RECORD_STOP
-    },
-    {   .label    = "Start playing back events",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_HISTORY_PLAYBACK_START
-    },
-    {   .label    = "Stop playing back events",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_HISTORY_PLAYBACK_STOP
-    },
-    {   .label    = "Set recording milestone",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_HISTORY_MILESTONE_SET
-    },
-    {   .label    = "Return to milestone",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_HISTORY_MILESTONE_RESET
-    },
+    { "Start recording events", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_HISTORY_RECORD_START,
+      NULL, false },
+    { "Stop recording events", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_HISTORY_RECORD_STOP,
+      NULL, false },
+    { "Start playing back events", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_HISTORY_PLAYBACK_START,
+      NULL, false },
+    { "Stop playing back events", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_HISTORY_PLAYBACK_STOP,
+      NULL, false },
+    { "Set recording milestone", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_HISTORY_MILESTONE_SET,
+      NULL, false },
+    { "Return to milestone", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_HISTORY_MILESTONE_RESET,
+      NULL, false },
+
     UI_MENU_SEPARATOR,
 
-    {   .label    = "Save/Record media...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_MEDIA_RECORD,
-        .unlocked = true
-    },
-    {   .label    = "Stop media recording",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_MEDIA_STOP
-    },
+    { "Save/Record media ...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_MEDIA_RECORD,
+      NULL, false },
+    { "Stop media recording", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_MEDIA_STOP,
+      NULL, false },
+
     UI_MENU_SEPARATOR,
 
-    {   .label    = "Quicksave screenshot",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_SCREENSHOT_QUICKSAVE
-    },
+    { "Quicksave screenshot", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_SCREENSHOT_QUICKSAVE,
+      NULL, false },
+
     UI_MENU_TERMINATOR
 };
 /* }}} */
@@ -628,50 +544,40 @@ static ui_menu_item_t snapshot_menu[] = {
 
 /** \brief  Settings -> Speed submenu */
 static const ui_menu_item_t speed_submenu[] = {
-    {   .label    = "200% CPU",
-        .type     = UI_MENU_TYPE_ITEM_RADIO_INT,
-        .action   = ACTION_SPEED_CPU_200
-    },
-    {   .label    = "100% CPU",
-        .type     = UI_MENU_TYPE_ITEM_RADIO_INT,
-        .action   = ACTION_SPEED_CPU_100
-    },
-    {   .label    = "50% CPU",
-        .type     = UI_MENU_TYPE_ITEM_RADIO_INT,
-        .action   = ACTION_SPEED_CPU_50
-    },
-    {   .label    = "25% CPU",
-        .type     = UI_MENU_TYPE_ITEM_RADIO_INT,
-        .action   = ACTION_SPEED_CPU_25
-    },
-    {   .label    = "10% CPU",
-        .type     = UI_MENU_TYPE_ITEM_RADIO_INT,
-        .action   = ACTION_SPEED_CPU_10
-    },
-    {   .label    = "Custom CPU speed...",
-        .type     = UI_MENU_TYPE_ITEM_RADIO_INT,
-        .action   = ACTION_SPEED_CPU_CUSTOM,
-        .activate = true
-    },
+    { "200% CPU", UI_MENU_TYPE_ITEM_RADIO_INT,
+      ACTION_SPEED_CPU_200,
+      NULL, false },
+    { "100% CPU", UI_MENU_TYPE_ITEM_RADIO_INT,
+      ACTION_SPEED_CPU_100,
+      NULL, false },
+    { "50% CPU", UI_MENU_TYPE_ITEM_RADIO_INT,
+      ACTION_SPEED_CPU_50,
+      NULL, false },
+    { "25% CPU", UI_MENU_TYPE_ITEM_RADIO_INT,
+      ACTION_SPEED_CPU_25,
+      NULL, false },
+    { "10% CPU", UI_MENU_TYPE_ITEM_RADIO_INT,
+      ACTION_SPEED_CPU_10,
+      NULL, false },
+    { "Custom CPU speed ...", UI_MENU_TYPE_ITEM_RADIO_INT,
+      ACTION_SPEED_CPU_CUSTOM,
+      NULL, false },
+
     UI_MENU_SEPARATOR,
 
-    {   .label    = "MACHINE_NAME FPS",   /* gets replaced during runtime */
-        .type     = UI_MENU_TYPE_ITEM_RADIO_INT,
-        .action   = ACTION_SPEED_FPS_REAL
-    },
-    {   .label    = "50 FPS",
-        .type     = UI_MENU_TYPE_ITEM_RADIO_INT,
-        .action   = ACTION_SPEED_FPS_50
-    },
-    {   .label    = "60 FPS",
-        .type     = UI_MENU_TYPE_ITEM_RADIO_INT,
-        .action   = ACTION_SPEED_FPS_60
-    },
-    {   .label    = "Custom FPS",
-        .type     = UI_MENU_TYPE_ITEM_RADIO_INT,
-        .action   = ACTION_SPEED_FPS_CUSTOM,
-        .activate = true
-    },
+    { "MACHINE_NAME FPS", UI_MENU_TYPE_ITEM_RADIO_INT,
+      ACTION_SPEED_FPS_REAL,
+      NULL, false },
+    { "50 FPS", UI_MENU_TYPE_ITEM_RADIO_INT,
+      ACTION_SPEED_FPS_50,
+      NULL, false },
+    { "60 FPS", UI_MENU_TYPE_ITEM_RADIO_INT,
+      ACTION_SPEED_FPS_60,
+      NULL, false },
+    { "Custom FPS", UI_MENU_TYPE_ITEM_RADIO_INT,
+      ACTION_SPEED_FPS_CUSTOM,
+      NULL, false },
+
     UI_MENU_TERMINATOR
 };
 /* }}} */
@@ -679,21 +585,15 @@ static const ui_menu_item_t speed_submenu[] = {
 /* {{{ settings_menu_head[] */
 /** \brief  Settings menu - head section */
 static const ui_menu_item_t settings_menu_head[] = {
-    {   .label    = "Fullscreen",
-        .type     = UI_MENU_TYPE_ITEM_CHECK,
-        .action   =  ACTION_FULLSCREEN_TOGGLE,
-        .unlocked = true
-    },
-    {   .label    = "Restore display state",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_RESTORE_DISPLAY,
-        .unlocked = true
-    },
-    {   .label    = "Show menu/status in fullscreen",
-        .type     = UI_MENU_TYPE_ITEM_CHECK,
-        .action   = ACTION_FULLSCREEN_DECORATIONS_TOGGLE,
-        .unlocked = true
-    },
+    { "Fullscreen", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_FULLSCREEN_TOGGLE,
+      NULL, true },
+    { "Restore display state", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_RESTORE_DISPLAY,
+      NULL, true },
+    { "Show menu/status in fullscreen", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_FULLSCREEN_DECORATIONS_TOGGLE,
+      NULL, true },
     UI_MENU_TERMINATOR
 };
 /* }}} */
@@ -701,25 +601,20 @@ static const ui_menu_item_t settings_menu_head[] = {
 /* {{{ settings_menu_speed[] */
 /** \brief  Settings menu - speed section */
 static const ui_menu_item_t settings_menu_speed[] = {
-    {   .label    = "Warp mode",
-        .type     = UI_MENU_TYPE_ITEM_CHECK,
-        .action   = ACTION_WARP_MODE_TOGGLE
-    },
-    {   .label    = "Pause emulation",
-        .type     = UI_MENU_TYPE_ITEM_CHECK,
-        .action   = ACTION_PAUSE_TOGGLE
-    },
-    {   .label    = "Advance frame",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_ADVANCE_FRAME,
-        .unlocked = false
-    },
+    { "Warp mode", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_WARP_MODE_TOGGLE,
+      NULL, false },
+    { "Pause emulation", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_PAUSE_TOGGLE,
+      NULL, false },
+    { "Advance frame", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_ADVANCE_FRAME,
+      NULL, false },
     UI_MENU_SEPARATOR,
 
-    {   .label    = "Emulation speed",
-        .type     = UI_MENU_TYPE_SUBMENU,
-        .submenu  = speed_submenu
-    },
+    { "Emulation speed", UI_MENU_TYPE_SUBMENU,
+      0,
+      speed_submenu, false },
     UI_MENU_SEPARATOR,
     UI_MENU_TERMINATOR
 };
@@ -728,10 +623,10 @@ static const ui_menu_item_t settings_menu_speed[] = {
 /* {{{ settings_menu_statusbar_primary[] */
 /** \brief  Settings menu - show statusbar (primary) item */
 static const ui_menu_item_t settings_menu_statusbar_primary[] = {
-    {   .action    = ACTION_SHOW_STATUSBAR_TOGGLE,
+    {   .action_id = ACTION_SHOW_STATUSBAR_TOGGLE,
         .label     = "Show status bar",
         .type      = UI_MENU_TYPE_ITEM_CHECK,
-        .unlocked  = false
+        .unlocked  = false,
     },
     UI_MENU_SEPARATOR,
     UI_MENU_TERMINATOR
@@ -741,9 +636,10 @@ static const ui_menu_item_t settings_menu_statusbar_primary[] = {
 /* {{{ settings_menu_statusbar_secondary[] */
 /** \brief  Settings menu - show statusbar (secondary) item */
 static const ui_menu_item_t settings_menu_statusbar_secondary[] = {
-    {   .action    = ACTION_SHOW_STATUSBAR_SECONDARY_TOGGLE,
+    {   .action_id = ACTION_SHOW_STATUSBAR_SECONDARY_TOGGLE,
         .label     = "Show status bar",
-        .type      = UI_MENU_TYPE_ITEM_CHECK
+        .type      = UI_MENU_TYPE_ITEM_CHECK,
+        .unlocked  = false
     },
     UI_MENU_SEPARATOR,
     UI_MENU_TERMINATOR
@@ -753,9 +649,10 @@ static const ui_menu_item_t settings_menu_statusbar_secondary[] = {
 /* {{{ settings_menu_mouse[] */
 /** \brief  Settings menu - mouse items */
 static const ui_menu_item_t settings_menu_mouse[] = {
-    {   .action   = ACTION_MOUSE_GRAB_TOGGLE,
-        .label    = "Mouse grab",
-        .type     = UI_MENU_TYPE_ITEM_CHECK
+    {   .action_id = ACTION_MOUSE_GRAB_TOGGLE,
+        .label     = "Mouse grab",
+        .type      = UI_MENU_TYPE_ITEM_CHECK,
+        .unlocked  = false
     },
     UI_MENU_TERMINATOR
 };
@@ -768,10 +665,10 @@ static const ui_menu_item_t settings_menu_mouse[] = {
  * Valid for x64/x64sc/x64dtv/xscpu64/x128/xplus4/xcbm5x0
  */
 static const ui_menu_item_t settings_menu_joy_swap[] = {
-    {   .label  = "Swap joysticks",
-        .type   = UI_MENU_TYPE_ITEM_CHECK,
-        .action = ACTION_SWAP_CONTROLPORT_TOGGLE
-    },
+    { "Swap joysticks", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_SWAP_CONTROLPORT_TOGGLE,
+      NULL, false },
+
     UI_MENU_TERMINATOR
 };
 /* }}} */
@@ -783,11 +680,12 @@ static const ui_menu_item_t settings_menu_joy_swap[] = {
  */
 static const ui_menu_item_t settings_menu_non_vsid[] = {
     /* Needs to go here to avoid duplicate action names */
-    {   .label  = "Allow keyset joysticks",
-        .type   = UI_MENU_TYPE_ITEM_CHECK,
-        .action = ACTION_KEYSET_JOYSTICK_TOGGLE
-    },
+    { "Allow keyset joysticks", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_KEYSET_JOYSTICK_TOGGLE,
+      NULL, false },
+
     UI_MENU_SEPARATOR,
+
     UI_MENU_TERMINATOR
 };
 /* }}} */
@@ -797,39 +695,28 @@ static const ui_menu_item_t settings_menu_non_vsid[] = {
  */
 static const ui_menu_item_t settings_menu_tail[] = {
    /* the settings dialog */
-    {   .label    = "Settings...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_SETTINGS_DIALOG,
-        .unlocked = true
-    },
-    {   .label    = "Load settings",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_SETTINGS_LOAD
-    },
-    {   .label    = "Load settings from...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_SETTINGS_LOAD_FROM,
-        .unlocked = true
-    },
-    {   .label    = "Load extra settings from...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_SETTINGS_LOAD_EXTRA,
-        .unlocked = true
-    },
-    {   .label    = "Save settings",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_SETTINGS_SAVE
-    },
-    {   .label    = "Save settings to...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_SETTINGS_SAVE_TO,
-        .unlocked = true
-    },
-    {   .label    = "Restore default settings",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_SETTINGS_DEFAULT,
-        .unlocked = true
-    },
+    { "Settings ...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_SETTINGS_DIALOG,
+      NULL, true },
+    { "Load settings", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_SETTINGS_LOAD,
+      NULL, false },
+    { "Load settings from ...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_SETTINGS_LOAD_FROM,
+      NULL, true },
+    { "Load extra settings from ...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_SETTINGS_LOAD_EXTRA,
+      NULL, true },
+    { "Save settings", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_SETTINGS_SAVE,
+      NULL, false },
+    { "Save settings to ...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_SETTINGS_SAVE_TO,
+      NULL, true },
+    { "Restore default settings", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_SETTINGS_DEFAULT,
+      NULL, true },
+
     UI_MENU_TERMINATOR
 };
 /* }}} */
@@ -839,57 +726,49 @@ static const ui_menu_item_t settings_menu_tail[] = {
 /** \brief  'Debug' menu items for emu's except x64dtv
  */
 static const ui_menu_item_t debug_menu[] = {
-    {   .label    = "Trace mode...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_DEBUG_TRACE_MODE,
-        .unlocked = true
-    },
+    { "Trace mode ...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_DEBUG_TRACE_MODE,
+      NULL, true },
+
     UI_MENU_SEPARATOR,
 
-    {   .label    = "Main CPU trace",
-        .type     = UI_MENU_TYPE_ITEM_CHECK,
-        .action   = ACTION_DEBUG_TRACE_CPU_TOGGLE,
-        .unlocked = false
-    },
+    { "Main CPU trace", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_DEBUG_TRACE_CPU_TOGGLE,
+      NULL, false },
+
     UI_MENU_SEPARATOR,
 
-    {   .label    = "IEC bus trace",
-        .type     = UI_MENU_TYPE_ITEM_CHECK,
-        .action   = ACTION_DEBUG_TRACE_IEC_TOGGLE
-    },
-    {   .label    = "IEEE-488 bus trace",
-        .type     = UI_MENU_TYPE_ITEM_CHECK,
-        .action   = ACTION_DEBUG_TRACE_IEEE488_TOGGLE
-    },
+    { "IEC bus trace", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_DEBUG_TRACE_IEC_TOGGLE,
+      NULL, false },
+    { "IEEE-488 bus trace", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_DEBUG_TRACE_IEEE488_TOGGLE,
+      NULL, false },
+
     UI_MENU_SEPARATOR,
 
-    {   .label    = "Drive #8 CPU trace",
-        .type     = UI_MENU_TYPE_ITEM_CHECK,
-        .action   = ACTION_DEBUG_TRACE_DRIVE_8_TOGGLE
-    },
-    {   .label    = "Drive #9 CPU trace",
-        .type     = UI_MENU_TYPE_ITEM_CHECK,
-        .action   = ACTION_DEBUG_TRACE_DRIVE_9_TOGGLE
-    },
-    {   .label    = "Drive #10 CPU trace",
-        .type     = UI_MENU_TYPE_ITEM_CHECK,
-        .action   = ACTION_DEBUG_TRACE_DRIVE_10_TOGGLE
-    },
-    {   .label    = "Drive #11 CPU trace",
-        .type     = UI_MENU_TYPE_ITEM_CHECK,
-        .action   = ACTION_DEBUG_TRACE_DRIVE_11_TOGGLE
-    },
+    { "Drive #8 CPU trace", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_DEBUG_TRACE_DRIVE_8_TOGGLE,
+      NULL, false },
+    { "Drive #9 CPU trace", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_DEBUG_TRACE_DRIVE_9_TOGGLE,
+      NULL, false },
+    { "Drive #10 CPU trace", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_DEBUG_TRACE_DRIVE_10_TOGGLE,
+      NULL, false },
+    { "Drive #11 CPU trace", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_DEBUG_TRACE_DRIVE_11_TOGGLE,
+      NULL, false },
+
     UI_MENU_SEPARATOR,
 
-    {   .label    = "Autoplay playback frames...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_DEBUG_AUTOPLAYBACK_FRAMES,
-        .unlocked = true
-    },
-    {   .label    = "Save core dump",
-        .type     = UI_MENU_TYPE_ITEM_CHECK,
-        .action   = ACTION_DEBUG_CORE_DUMP_TOGGLE
-    },
+    { "Autoplay playback frames...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_DEBUG_AUTOPLAYBACK_FRAMES,
+      NULL, true },
+    { "Save core dump", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_DEBUG_CORE_DUMP_TOGGLE,
+      NULL, false },
+
     UI_MENU_TERMINATOR
 };
 /* }}} */
@@ -898,64 +777,55 @@ static const ui_menu_item_t debug_menu[] = {
 /** \brief  'Debug' menu items for x64dtv
  */
 static const ui_menu_item_t debug_menu_c64dtv[] = {
-    {   .label    = "Trace mode...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_DEBUG_TRACE_MODE,
-        .unlocked = true
-    },
+    { "Trace mode ...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_DEBUG_TRACE_MODE,
+      NULL, true },
+
     UI_MENU_SEPARATOR,
 
-    {   .label    = "Main CPU trace",
-        .type     = UI_MENU_TYPE_ITEM_CHECK,
-        .action   = ACTION_DEBUG_TRACE_CPU_TOGGLE
-    },
+    { "Main CPU trace", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_DEBUG_TRACE_CPU_TOGGLE,
+      NULL, false },
+
     UI_MENU_SEPARATOR,
 
-    {   .label    = "IEC bus trace",
-        .type     = UI_MENU_TYPE_ITEM_CHECK,
-        .action   = ACTION_DEBUG_TRACE_IEC_TOGGLE
-    },
-    {   .label    = "Drive #8 CPU trace",
-        .type     = UI_MENU_TYPE_ITEM_CHECK,
-        .action   = ACTION_DEBUG_TRACE_DRIVE_8_TOGGLE
-    },
-    {   .label    = "Drive #9 CPU trace",
-        .type     = UI_MENU_TYPE_ITEM_CHECK,
-        .action   = ACTION_DEBUG_TRACE_DRIVE_9_TOGGLE
-    },
-    {   .label    = "Drive #10 CPU trace",
-        .type     = UI_MENU_TYPE_ITEM_CHECK,
-        .action   = ACTION_DEBUG_TRACE_DRIVE_10_TOGGLE
-    },
-    {   .label    = "Drive #11 CPU trace",
-        .type     = UI_MENU_TYPE_ITEM_CHECK,
-        .action   = ACTION_DEBUG_TRACE_DRIVE_11_TOGGLE
-    },
+    { "IEC bus trace", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_DEBUG_TRACE_IEC_TOGGLE,
+      NULL, false },
+    { "Drive #8 CPU trace", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_DEBUG_TRACE_DRIVE_8_TOGGLE,
+      NULL, false },
+    { "Drive #9 CPU trace", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_DEBUG_TRACE_DRIVE_9_TOGGLE,
+      NULL, false },
+    { "Drive #10 CPU trace", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_DEBUG_TRACE_DRIVE_10_TOGGLE,
+      NULL, false },
+    { "Drive #11 CPU trace", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_DEBUG_TRACE_DRIVE_11_TOGGLE,
+      NULL, false },
+
     UI_MENU_SEPARATOR,
 
-    {   .label    = "Blitter log",
-        .type     = UI_MENU_TYPE_ITEM_CHECK,
-        .action   = ACTION_DEBUG_BLITTER_LOG_TOGGLE
-    },
-    {   .label    = "DMA log",
-        .type     = UI_MENU_TYPE_ITEM_CHECK,
-        .action   = ACTION_DEBUG_DMA_LOG_TOGGLE
-    },
-    {   .label    = "Flash log",
-        .type     = UI_MENU_TYPE_ITEM_CHECK,
-        .action   = ACTION_DEBUG_FLASH_LOG_TOGGLE
-    },
+    { "Blitter log", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_DEBUG_BLITTER_LOG_TOGGLE,
+      NULL, false },
+    { "DMA log", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_DEBUG_DMA_LOG_TOGGLE,
+      NULL, false },
+    { "Flash log", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_DEBUG_FLASH_LOG_TOGGLE,
+      NULL, false },
+
     UI_MENU_SEPARATOR,
 
-    {   .label    = "Autoplay playback frames...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_DEBUG_AUTOPLAYBACK_FRAMES,
-        .unlocked = true
-    },
-    {   .label    = "Save core dump",
-        .type     = UI_MENU_TYPE_ITEM_CHECK,
-        .action   = ACTION_DEBUG_CORE_DUMP_TOGGLE
-    },
+    { "Autoplay playback frames ...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_DEBUG_AUTOPLAYBACK_FRAMES,
+      NULL, true },
+    { "Save core dump", UI_MENU_TYPE_ITEM_CHECK,
+      ACTION_DEBUG_CORE_DUMP_TOGGLE,
+      NULL, false },
+
     UI_MENU_TERMINATOR
 };
 /* }}} */
@@ -965,31 +835,22 @@ static const ui_menu_item_t debug_menu_c64dtv[] = {
 /** \brief  'Help' menu items
  */
 static const ui_menu_item_t help_menu[] = {
-    {   .label    = "Browse manual...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_HELP_MANUAL,
-        .unlocked = true
-    },
-    {   .label    = "Command line options...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_HELP_COMMAND_LINE,
-        .unlocked = true
-    },
-    {   .label    = "Compile time features...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_HELP_COMPILE_TIME,
-        .unlocked = true
-    },
-    {   .label    = "Hotkeys...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_HELP_HOTKEYS,
-        .unlocked = true
-    },
-    {   .label    = "About VICE...",
-        .type     = UI_MENU_TYPE_ITEM_ACTION,
-        .action   = ACTION_HELP_ABOUT,
-        .unlocked = true
-    },
+    { "Browse manual", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_HELP_MANUAL,
+      NULL, true },
+    { "Command line options...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_HELP_COMMAND_LINE,
+      NULL, true },
+    { "Compile time features...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_HELP_COMPILE_TIME,
+      NULL, true },
+    { "Hotkeys ...", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_HELP_HOTKEYS,
+      NULL, true },
+    { "About VICE", UI_MENU_TYPE_ITEM_ACTION,
+      ACTION_HELP_ABOUT,
+      NULL, true },
+
     UI_MENU_TERMINATOR
 };
 /* }}} */
@@ -1106,7 +967,6 @@ GtkWidget *ui_machine_menu_bar_create(gint window_id)
 
         case VICE_MACHINE_CBM5x0:
             file_menu_tape_section    = file_menu_tape;
-            file_menu_cart_section    = file_menu_cart_no_freeze;
             file_menu_printer_section = file_menu_printer_no_userport;
             settings_menu_joy_section = settings_menu_joy_swap;
             break;

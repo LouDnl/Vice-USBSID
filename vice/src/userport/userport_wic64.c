@@ -77,7 +77,7 @@
 
 #define VICEWIC64VERSION PACKAGE"-"VERSION
 #define WIC64_VERSION_MAJOR 2
-#define WIC64_VERSION_MINOR 1
+#define WIC64_VERSION_MINOR 0
 #define WIC64_VERSION_PATCH 0
 #define WIC64_VERSION_DEVEL 0
 #define WIC64_SHORT_VERSION "2.0.0"
@@ -109,7 +109,6 @@ static int wic64_set_loglevel(int val, void *param);
 static int wic64_set_resetuser(int val, void *param);
 static int wic64_set_hexdumplines(int val, void *param);
 static int wic64_set_colorize_log(int val, void *param);
-static int wic64_set_remote_timeout(int val, void *param);
 static int wic64_cmdl_reset(const char *val, void *param);
 static void wic64_log(const char *col, const char *fmt, ...);
 static void _wic64_log(const char *col, const int lv, const char *fmt, ...);
@@ -123,7 +122,6 @@ static void prep_wic64_str(void);
 static void do_connect(uint8_t *url);
 static void cmd_tcp_write(void);
 static void cmd_timeout(int arm);
-static void cmd_remote_timeout(int arm);
 
 static userport_device_t userport_wic64_device = {
     "Userport WiC64",                     /* device name */
@@ -156,7 +154,6 @@ static struct alarm_s *http_post_endalarm = NULL;
 static struct alarm_s *tcp_get_alarm = NULL;
 static struct alarm_s *tcp_send_alarm = NULL;
 static struct alarm_s *cmd_timeout_alarm = NULL;
-static struct alarm_s *cmd_remote_timeout_alarm = NULL;
 static char sec_token[32];
 static int sec_init = 0;
 static const char *TOKEN_NAME = "sectokenname";
@@ -168,10 +165,7 @@ static unsigned char wic64_external_ip[4] = { 0, 0, 0, 0 }; /* just a dummy, rep
 static uint8_t wic64_timezone[2] = { 0, 0};
 static uint16_t wic64_udp_port = 0;
 static uint16_t wic64_tcp_port = 0;
-static uint8_t wic64_timeout = WIC64_DEFAULT_TRANSFER_TIMEOUT;
-static int wic64_remote_timeout; /* used for resource */
-static int remote_to = WIC64_DEFAULT_REMOTE_TIMEOUT;
-static uint8_t wic64_remote_timeout_triggered = 0;
+static uint8_t wic64_timeout = 2;
 static int force_timeout = 0;
 static char *wic64_sec_token = NULL;
 static int current_tz = 2;
@@ -217,8 +211,6 @@ static const resource_int_t wic64_resources_int[] = {
       &wic64_hexdumplines, wic64_set_hexdumplines, NULL },
     { "WIC64ColorizeLog", 0, RES_EVENT_NO, NULL,
       &wic64_colorize_log, wic64_set_colorize_log, NULL },
-    { "WIC64RemoteTimeout", WIC64_DEFAULT_REMOTE_TIMEOUT, RES_EVENT_NO, NULL,
-      &wic64_remote_timeout, wic64_set_remote_timeout, NULL },
     RESOURCE_INT_LIST_END
 };
 
@@ -286,9 +278,6 @@ static const cmdline_option_t cmdline_options[] =
     { "+wic64colorizetrace", SET_RESOURCE, CMDLINE_ATTRIB_NONE,
       NULL, NULL, "WIC64colorizelog", (void *)0,
       NULL, "Disable WiC64 colorized trace on terminal" },
-    { "-wic64remotetimeout", SET_RESOURCE, CMDLINE_ATTRIB_NEED_ARGS,
-      NULL, NULL, "WIC64RemoteTimeout", NULL,
-      "<value>", "Set WIC64 remote timeout (1 - 255)" },
     CMDLINE_LIST_END
 };
 
@@ -329,8 +318,7 @@ static const cmdline_option_t cmdline_options[] =
 
 #define WIC64_CMD_REBOOT 0x29
 #define WIC64_CMD_GET_STATUS_MESSAGE 0x2a
-#define WIC64_CMD_SET_TRANSFER_TIMEOUT 0x2d
-#define WIC64_CMD_SET_REMOTE_TIMEOUT 0x32
+#define WIC64_CMD_SET_TIMEOUT 0x2d
 #define WIC64_CMD_IS_HARDWARE 0x31
 
 #define WIC64_CMD_FORCE_TIMEOUT 0xfc
@@ -391,7 +379,7 @@ static uint8_t *httpbuffer = NULL;
 static char *replybuffer = NULL;
 
 #define COMMANDBUFFER_MAXLEN    0x100010
-#define URL_MAXLEN              8192
+#define URL_MAXLEN              2000
 static char *encoded_helper = NULL;
 
 #include <errno.h>
@@ -405,8 +393,8 @@ static char *encoded_helper = NULL;
 #define MAX_PARALLEL 1 /* number of simultaneous transfers */
 #define NUM_URLS 10
 static int still_alive = 0;
-static CURLM *cm = NULL;               /* used for http(s) */
-static CURL *curl = NULL;              /* used for telnet */
+static CURLM *cm;                      /* used for http(s) */
+static CURL *curl;                     /* used for telnet */
 static uint8_t curl_buf[240];          /* this slows down by smaller chunks sent to C64, improves BBSs  */
 static uint8_t *curl_send_buf = NULL;
 static uint16_t curl_send_len;
@@ -447,26 +435,22 @@ static int userport_wic64_enable(int value)
         prep_wic64_str();
 
     } else {
-        if (httpbuffer) {
-            lib_free(httpbuffer);
-            httpbuffer = NULL;
-        }
-        if (replybuffer) {
-            lib_free(replybuffer);
-            replybuffer = NULL;
-        }
-        if (encoded_helper) {
-            lib_free(encoded_helper);
-            encoded_helper = NULL;
-        }
-        if (curl_send_buf) {
-            lib_free(curl_send_buf);
-            curl_send_buf = NULL;
-        }
+        lib_free(httpbuffer);
+        httpbuffer = NULL;
+        lib_free(replybuffer);
+        replybuffer = NULL;
+        lib_free(encoded_helper);
+        encoded_helper = NULL;
+        lib_free(curl_send_buf);
+        curl_send_buf = NULL;
+        _wic64_log(CONS_COL_NO, 2, "%s: httpreplybuffer/replybuffer/encoded_helper/curl_send_buf freed",
+                   __FUNCTION__);
+
         if (post_data) {
             lib_free(post_data);
             post_data = NULL;
         }
+
         if (curl) {
             /* connection closed */
             curl_easy_cleanup(curl);
@@ -501,13 +485,6 @@ static int userport_wic64_enable(int value)
             alarm_destroy(cmd_timeout_alarm);
             cmd_timeout_alarm = NULL;
         }
-        if (cmd_remote_timeout_alarm) {
-            alarm_destroy(cmd_remote_timeout_alarm);
-            cmd_remote_timeout_alarm = NULL;
-        }
-        _wic64_log(CONS_COL_NO, 2, "%s: several WiC64 dynamic buffers freed",
-                   __FUNCTION__);
-
         wic64_set_status("disabled");
         log_message(wic64_loghandle, "WiC64 disabled");
     }
@@ -594,17 +571,6 @@ static int wic64_set_colorize_log(int val, void *param)
     return 0;
 }
 
-static int wic64_set_remote_timeout(int val, void *param)
-{
-    wic64_remote_timeout = val;
-    /* overrule in case of wrong range */
-    if (val < 1)
-        wic64_remote_timeout = 1;
-    if (val > 255)
-        wic64_remote_timeout = 255;
-    return 0;
-}
-
 static int wic64_cmdl_reset(const char *val, void *param)
 {
     if (param == (void *)2) {
@@ -684,7 +650,6 @@ void userport_wic64_factory_reset(void)
 
     resources_set_int("WIC64Timezone", tz);
     resources_set_string("WIC64DefaultServer", defserver);
-    resources_set_int("WIC64RemoteTimeout", WIC64_DEFAULT_REMOTE_TIMEOUT);
 
     resources_get_int("WIC64Resetuser", &reset_user);
     if (reset_user) {
@@ -826,8 +791,7 @@ static void prep_wic64_str(void)
     cmd2string[WIC64_CMD_REBOOT] = "WIC64_CMD_REBOOT";
 
     cmd2string[WIC64_CMD_GET_STATUS_MESSAGE] = "WIC64_CMD_GET_STATUS_MESSAGE";
-    cmd2string[WIC64_CMD_SET_TRANSFER_TIMEOUT] = "WIC64_CMD_SET_TIMEOUT";
-    cmd2string[WIC64_CMD_SET_REMOTE_TIMEOUT] = "WIC64_CMD_SET_REMOTE_TIMEOUT";
+    cmd2string[WIC64_CMD_SET_TIMEOUT] = "WIC64_CMD_SET_TIMEOUT";
     cmd2string[WIC64_CMD_IS_HARDWARE] = "WIC64_CMD_IS_HARDWARE";
     cmd2string[WIC64_CMD_ECHO] = "WIC64_CMD_ECHO";
     cmd2string[WIC64_CMD_FORCE_TIMEOUT]= "WIC64_CMD_FORCE_TIMEOUT";
@@ -974,24 +938,10 @@ static void http_get_alarm_handler(CLOCK offset, void *data)
         send_reply_revised(NETWORK_ERROR, "Failed to read HTTP response", NULL, 0, "!0"); /* maybe wrong here */
         goto out;
     }
-
-    if (wic64_remote_timeout_triggered) {
-        _wic64_log(CONS_COL_RED, 2, "Remote timout expired");
-        send_reply_revised(NETWORK_ERROR, "Remote timeout", NULL, 0, "!0");
-        wic64_remote_timeout_triggered = 0;
-        remote_to = wic64_remote_timeout;
-        goto out;
-    }
-
     if (still_alive) {
         /* http request not yet finished */
-        alarm_unset(http_get_alarm);
-        alarm_set(http_get_alarm, maincpu_clk + (312 * 65));
         return;
     }
-    alarm_unset(cmd_remote_timeout_alarm);
-    remote_to = wic64_remote_timeout;
-
     msg = curl_multi_info_read(cm, &msgs_left);
     if (msg) {
         CURLcode res;
@@ -1012,7 +962,6 @@ static void http_get_alarm_handler(CLOCK offset, void *data)
             url = "<unknown>";
         }
     }
-
     if (response == 201) {
         /* prefs update requested, handles replies */
         update_prefs(httpbuffer, httpbufferptr);
@@ -1033,7 +982,7 @@ static void http_get_alarm_handler(CLOCK offset, void *data)
         }
         send_reply_revised(SUCCESS, "Success", httpbuffer, httpbufferptr, NULL); /* raw send, supporting big_load */
         cheatlen = 0;
-    } else if (response >= 301) {
+    } else if (response >= 400) {
         char t[32];
         wic64_log(CONS_COL_RED, "URL '%s' returned %lu bytes (http code: %ld)", url, httpbufferptr, response);
         snprintf(t, 31, "http response: %ld", response);
@@ -1041,15 +990,9 @@ static void http_get_alarm_handler(CLOCK offset, void *data)
     } else {
         /* firmeare handles codes: 301, 302, 307, 308 - check if needed with libcurl */
         char m[64];
-        snprintf(m, 64, "Unhandled http response %ld, received %"PRI_SIZE_T" bytes", response, httpbufferptr);
+        snprintf(m, 64, "Unhandled http response %ld", response);
         wic64_log(CONS_COL_RED, m);
-        if (httpbufferptr > 0) {
-            send_reply_revised(SUCCESS, "Success", httpbuffer,
-                               (httpbufferptr > 0xffff) ? 0xffff : httpbufferptr,
-                               NULL);
-        } else {
-            send_reply_revised(INTERNAL_ERROR, m, NULL, 0, "!0");
-        }
+        send_reply_revised(INTERNAL_ERROR, m, NULL, 0, "!0");
     }
 
   out:
@@ -1062,7 +1005,6 @@ static void http_get_alarm_handler(CLOCK offset, void *data)
 
 static void do_http_get(char *url)
 {
-    cmd_remote_timeout(1);
     cm = curl_multi_init();
     if (!cm) {
         send_reply_revised(CONNECTION_ERROR, "Can't send HTTP request", NULL, 0, "!0");
@@ -1187,27 +1129,6 @@ static void cmd_timeout(int arm)
     alarm_unset(cmd_timeout_alarm);
     if (arm) {
         alarm_set(cmd_timeout_alarm, maincpu_clk + wic64_timeout * machine_get_cycles_per_second());
-    }
-}
-
-static void cmd_remote_timeout_alarm_handler(CLOCK offset, void *data)
-{
-    wic64_log(CONS_COL_RED, "remote time out - '%s' command", cmd2string[input_command]);
-    wic64_remote_timeout_triggered = 1;
-    alarm_unset(cmd_remote_timeout_alarm);
-}
-
-static void cmd_remote_timeout(int arm)
-{
-    if (cmd_remote_timeout_alarm == NULL) {
-        cmd_remote_timeout_alarm = alarm_new(maincpu_alarm_context, "CMDRemoteTimoutAlarm",
-                                             cmd_remote_timeout_alarm_handler, NULL);
-    }
-    alarm_unset(cmd_remote_timeout_alarm);
-    if (arm) {
-        _wic64_log(CONS_COL_NO, 2, "arming remote timeout with %ds", wic64_remote_timeout);
-        wic64_remote_timeout_triggered = 0;
-        alarm_set(cmd_remote_timeout_alarm, maincpu_clk + remote_to * machine_get_cycles_per_second());
     }
 }
 
@@ -1968,7 +1889,7 @@ static void cmd_get_statusmsg(void)
 
     for (i = 0; wic64_last_status[i]; i++) {
         t[i] = upcase ? toupper((unsigned char)wic64_last_status[i]) : wic64_last_status[i];
-        t[i] = charset_p_topetscii(t[i]);
+        t[i] = charset_p_topetcii(t[i]);
     }
     t[i] = '\0';
 
@@ -2160,23 +2081,17 @@ static void do_command(void)
         userport_wic64_reset();
         send_reply_revised(SUCCESS, "Success", NULL, 0, NULL);
         break;
-    case WIC64_CMD_SET_TRANSFER_TIMEOUT:
-    case WIC64_CMD_SET_REMOTE_TIMEOUT:
+    case WIC64_CMD_SET_TIMEOUT:
         if (commandptr < 1) {
-            send_reply_revised(CLIENT_ERROR, "Timeout value not specified", NULL, 0, NULL);
+            send_reply_revised(CLIENT_ERROR, "ESP timeout not specified", NULL, 0, NULL);
             break;
         }
         if (commandbuffer[0] == 0) {
-            send_reply_revised(CLIENT_ERROR, "Timeout must be >= 1 second", NULL, 0, NULL);
+            send_reply_revised(CLIENT_ERROR, "ESP timeout must be >= 1 second", NULL, 0, NULL);
             break;
         }
-        if (input_command == WIC64_CMD_SET_TRANSFER_TIMEOUT) {
-            wic64_timeout = commandbuffer[0]; /* timeout in secs */
-            wic64_log(CONS_COL_NO, "setting transfer timeout to %ds", wic64_timeout);
-        } else {
-            remote_to = commandbuffer[0]; /* timeout in secs */
-            wic64_log(CONS_COL_NO, "setting remote timeout to %ds", remote_to);
-        }
+        wic64_timeout = commandbuffer[0]; /* timeout in secs */
+        wic64_log(CONS_COL_NO, "setting cmd timeout to %ds", wic64_timeout);
         send_reply_revised(SUCCESS, "Success", NULL, 0, NULL);
         break;
     case WIC64_CMD_IS_HARDWARE:
@@ -2427,6 +2342,7 @@ static void userport_wic64_reset(void)
     } else {
         wic64_internal_ip = tmp;
     }
+
     if (resources_get_int("WIC64Timezone", &tmp_tz) == -1) {
         current_tz = 2;
     } else {
@@ -2451,8 +2367,6 @@ static void userport_wic64_reset(void)
     if (cmd_timeout_alarm) {
         alarm_unset(cmd_timeout_alarm);
     }
-    remote_to = wic64_remote_timeout; /* reset to given value */
-
     if (curl) {
         /* connection closed */
         curl_easy_cleanup(curl);

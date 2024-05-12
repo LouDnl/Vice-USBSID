@@ -493,20 +493,23 @@ do {                                                                   \
         }                                                                                      \
         if (ik & (IK_MONITOR | IK_DMA)) {                                                      \
             if (ik & IK_MONITOR) {                                                             \
-                if (monitor_mask[CALLER] & (MI_STEP)) {                                        \
+                if (monitor_force_import(CALLER)) {                                            \
+                    IMPORT_REGISTERS();                                                        \
+                }                                                                              \
+                if (monitor_mask[CALLER]) {                                                    \
                     EXPORT_REGISTERS();                                                        \
+                }                                                                              \
+                if (monitor_mask[CALLER] & (MI_STEP)) {                                        \
                     monitor_check_icount((uint16_t)reg_pc);                                    \
                     IMPORT_REGISTERS();                                                        \
                 }                                                                              \
                 if (monitor_mask[CALLER] & (MI_BREAK)) {                                       \
-                    EXPORT_REGISTERS();                                                        \
                     if (monitor_check_breakpoints(CALLER, (uint16_t)reg_pc)) {                 \
                         monitor_startup(CALLER);                                               \
+                        IMPORT_REGISTERS();                                                    \
                     }                                                                          \
-                    IMPORT_REGISTERS();                                                        \
                 }                                                                              \
                 if (monitor_mask[CALLER] & (MI_WATCH)) {                                       \
-                    EXPORT_REGISTERS();                                                        \
                     monitor_check_watchpoints(LAST_OPCODE_ADDR, (uint16_t)reg_pc);             \
                     IMPORT_REGISTERS();                                                        \
                 }                                                                              \
@@ -2301,7 +2304,7 @@ static const uint8_t rewind_fetch_tab[] = {
         /* If reg_pc >= bank_limit  then JSR (0x20) hasn't load p2 yet.
            The earlier LOAD(reg_pc+2) hack can break stealing badly.
            The fixing is now handled in JSR(). */
-        monitor_cpuhistory_store(history_clk, reg_pc, p0, p1, p2 >> 8, reg_a_read, reg_x_read, reg_y_read, reg_sp, LOCAL_STATUS(), ORIGIN_MEMSPACE);
+        monitor_cpuhistory_store(history_clk, reg_pc, p0, p1, p2 >> 8, reg_a_read, reg_x_read, reg_y_read, reg_sp, LOCAL_STATUS(), origin);
 #ifndef DRIVE_CPU
         memmap_state &= ~(MEMMAP_STATE_INSTR | MEMMAP_STATE_OPCODE);
 #endif

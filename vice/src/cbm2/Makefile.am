@@ -52,7 +52,6 @@ libcbm2_a_SOURCES = \
 	cbm2cpu.c \
 	cbm2datasette.c \
 	cbm2drive.c \
-	cbm2export.c \
 	cbm2iec.c \
 	cbm2iec.h \
 	cbm2io.c \
@@ -92,7 +91,6 @@ libcbm5x0_a_SOURCES = \
 	cbm2cpu.c \
 	cbm2datasette.c \
 	cbm2drive.c \
-	cbm2export.c \
 	cbm2iec.c \
 	cbm2iec.h \
 	cbm2io.c \

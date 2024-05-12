@@ -55,7 +55,6 @@
 #include "resources.h"
 #include "screenshot.h"
 #include "sound.h"
-#include "screenshot.h"
 #include "statusbarrecordingwidget.h"
 #include "ui.h"
 #include "uiactions.h"
@@ -92,7 +91,6 @@ typedef struct video_driver_info_s {
     const char *display;    /**< display string (used in the UI) */
     const char *name;       /**< driver name */
     const char *ext;        /**< default file extension */
-    int type;               /**< driver type GFXOUTPUTDRV_TYPE_* */
 } video_driver_info_t;
 
 /** \brief  Struct to hold information on available audio recording drivers
@@ -237,14 +235,14 @@ static char *screenshot_filename = NULL;
  */
 static char *screenshot_driver = NULL;
 
-/** \brief  Reference to the dialog for the vysnc callback */
-static GtkWidget *main_dialog = NULL;
+
 
 /** \brief  Reference to the GtkStack containing the media types
  *
  * Used in the dialog response callback to determine recording mode and params
  */
 static GtkWidget *stack;
+
 
 /** \brief  Pause state when activating the dialog
  */
@@ -287,7 +285,6 @@ static void on_dialog_destroy(GtkWidget *widget, gpointer data)
         ui_pause_disable();
     }
     ui_action_finish(ACTION_MEDIA_RECORD);
-    main_dialog = NULL;
 }
 
 
@@ -435,6 +432,45 @@ static const char* ffmpeg_kludges(const char *name)
     return name;
 }
 
+/** \brief  Create a string in the format 'yyyymmddHHMMssffffff' of the current time
+ *
+ * \return  string owned by GLib, free with g_free()
+ */
+static gchar *create_datetime_string(void)
+{
+    GDateTime *d;
+    gint m;
+    gchar *s;
+    gchar *t;
+
+    d = g_date_time_new_now_local();
+    m = g_date_time_get_microsecond(d);
+    s = g_date_time_format(d, "%Y%m%d%H%M%S");
+    g_date_time_unref(d);
+    t = g_strdup_printf("%s%02d", s, m / 10000);
+    g_free(s);
+    return t;
+}
+
+
+/** \brief  Create a filename based on the current datetime and \a ext
+ *
+ * \param[in]   ext file extension (without the dot)
+ *
+ * \return  heap-allocated string, owned by VICE, free with lib_free()
+ */
+static char *create_proposed_screenshot_name(const char *ext)
+{
+    char *date;
+    char *filename;
+
+    date = create_datetime_string();
+    filename = lib_msprintf("vice-screen-%s.%s", date, ext);
+    g_free(date);
+    return filename;
+}
+
+
 
 /** \brief  Create a filename based on the current datetime and \a ext
  *
@@ -444,12 +480,12 @@ static const char* ffmpeg_kludges(const char *name)
  */
 static char *create_proposed_video_recording_name(const char *ext)
 {
-    char *date;
+    gchar *date;
     char *filename;
 
-    date = screenshot_create_datetime_string();
+    date = create_datetime_string();
     filename = lib_msprintf("vice-video-%s.%s", date, ext);
-    lib_free(date);
+    g_free(date);
     return filename;
 }
 
@@ -463,12 +499,12 @@ static char *create_proposed_video_recording_name(const char *ext)
  */
 static char *create_proposed_audio_recording_name(const char *ext)
 {
-    char *date;
+    gchar *date;
     char *filename;
 
-    date = screenshot_create_datetime_string();
+    date = create_datetime_string();
     filename = lib_msprintf("vice-audio-%s.%s", date, ext);
-    lib_free(date);
+    g_free(date);
     return filename;
 }
 
@@ -483,8 +519,7 @@ static gboolean save_screenshot_error_impl(gpointer data)
 {
     char *filename = data;
 
-    vice_gtk3_message_error(GTK_WINDOW(main_dialog),
-                            "Screenshot error",
+    vice_gtk3_message_error("Screenshot error",
                             "Failed to write screenshot file '%s.'",
                             filename);
     lib_free(filename);
@@ -572,16 +607,16 @@ static void on_save_screenshot_filename(GtkDialog *dialog,
  */
 static void save_screenshot_handler(GtkWidget *parent)
 {
-    GtkWidget  *dialog;
+    GtkWidget *dialog;
     const char *display;
-    const char *format;
-    char       *title;
-    char       *proposed;
+    char *title;
+    char *proposed;
+    const char *ext;
 
-    format   = video_driver_list[screenshot_driver_index].name;
-    display  = video_driver_list[screenshot_driver_index].display;
-    title    = lib_msprintf("Save %s file", display);
-    proposed = screenshot_create_quickscreenshot_filename(format);
+    ext = video_driver_list[screenshot_driver_index].ext;
+    display = video_driver_list[screenshot_driver_index].display;
+    title = lib_msprintf("Save %s file", display);
+    proposed = create_proposed_screenshot_name(ext);
 
     dialog = vice_gtk3_save_file_dialog(
             title, proposed, TRUE, NULL,
@@ -701,10 +736,8 @@ static void on_save_video_filename(GtkDialog *dialog,
         /* printf("on_save_video_filename video_driver:'%s'\n", video_driver); */
         /* TODO: add extension if not present? */
         if (screenshot_save(video_driver, filename_locale, ui_get_active_canvas()) < 0) {
-            vice_gtk3_message_error(GTK_WINDOW(dialog),
-                                    "VICE Error",
-                                    "Failed to write video file '%s'",
-                                    filename);
+            vice_gtk3_message_error("VICE Error",
+                    "Failed to write video file '%s'", filename);
         }
         g_free(filename);
         g_free(filename_locale);
@@ -781,7 +814,6 @@ static void create_video_driver_list(void)
             video_driver_list[index].display = driver->displayname;
             video_driver_list[index].name = driver->name;
             video_driver_list[index].ext = driver->default_extension;
-            video_driver_list[index].type = driver->type;
             index++;
             driver = gfxoutput_drivers_iter_next();
         }
@@ -789,6 +821,23 @@ static void create_video_driver_list(void)
     video_driver_list[index].display = NULL;
     video_driver_list[index].name = NULL;
     video_driver_list[index].ext = NULL;
+}
+
+
+/** \brief  Determine if driver \a name is a video driver
+ *
+ * \param[in]   name    driver name
+ *
+ * \return  bool
+ *
+ * \todo    There has to be a better, more reliable way than this
+ */
+static int driver_is_video(const char *name)
+{
+    int result;
+
+    result = (strcmp(name, "FFMPEG") == 0) || (strcmp(name, "FFMPEGEXE") == 0) || (strcmp(name, "ZMBV") == 0);
+    return result;
 }
 
 
@@ -923,11 +972,10 @@ static GtkWidget *create_screenshot_widget(void)
     grid_index = 1;
     last = NULL;
     for (index = 0; video_driver_list[index].name != NULL; index++) {
-        if (video_driver_list[index].type == GFXOUTPUTDRV_TYPE_SCREENSHOT_NATIVE ||
-            video_driver_list[index].type == GFXOUTPUTDRV_TYPE_SCREENSHOT_IMAGE) {
-            const char *display = video_driver_list[index].display;
-            const char *name = video_driver_list[index].name;
+        const char *display = video_driver_list[index].display;
+        const char *name = video_driver_list[index].name;
 
+        if (!driver_is_video(name)) {
             radio = gtk_radio_button_new_with_label(group, display);
             gtk_widget_set_margin_start(radio, 8);
             gtk_radio_button_join_group(GTK_RADIO_BUTTON(radio),
@@ -1067,9 +1115,9 @@ static GtkWidget *create_video_widget(void)
 
     combo = gtk_combo_box_text_new();
     for (index = 0; video_driver_list[index].name != NULL; index++) {
-        if (video_driver_list[index].type == GFXOUTPUTDRV_TYPE_VIDEO) {
-            const char *display = video_driver_list[index].display;
-            const char *name = video_driver_list[index].name;
+        const char *display = video_driver_list[index].display;
+        const char *name = video_driver_list[index].name;
+        if (driver_is_video(name)) {
             gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo), name, display);
             if (video_driver_index < 0) {
                 video_driver_index = 0;
@@ -1187,6 +1235,7 @@ static GtkWidget *create_content_widget(void)
  */
 void ui_media_dialog_show(void)
 {
+    GtkWidget *dialog;
     GtkWidget *content;
 
     /*
@@ -1204,26 +1253,27 @@ void ui_media_dialog_show(void)
         create_video_driver_list();
     }
 
-    main_dialog = gtk_dialog_new_with_buttons("Record media file",
-                                               ui_get_active_window(),
-                                               GTK_DIALOG_MODAL,
-                                               "Save", RESPONSE_SAVE,
-                                               "Close", GTK_RESPONSE_DELETE_EVENT,
-                                                NULL);
+    dialog = gtk_dialog_new_with_buttons(
+            "Record media file",
+            ui_get_active_window(),
+            GTK_DIALOG_MODAL,
+            "Save", RESPONSE_SAVE,
+            "Close", GTK_RESPONSE_DELETE_EVENT,
+            NULL);
 
     /* add content widget */
-    content = gtk_dialog_get_content_area(GTK_DIALOG(main_dialog));
+    content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
     if (machine_class != VICE_MACHINE_VSID) {
         gtk_container_add(GTK_CONTAINER(content), create_content_widget());
     } else {
         gtk_container_add(GTK_CONTAINER(content), create_sound_widget());
     }
 
-    gtk_window_set_resizable(GTK_WINDOW(main_dialog), FALSE);
-    g_signal_connect(main_dialog, "response", G_CALLBACK(on_response), (gpointer)main_dialog);
-    g_signal_connect_unlocked(main_dialog, "destroy", G_CALLBACK(on_dialog_destroy), NULL);
+    gtk_window_set_resizable(GTK_WINDOW(dialog), FALSE);
+    g_signal_connect(dialog, "response", G_CALLBACK(on_response), (gpointer)dialog);
+    g_signal_connect_unlocked(dialog, "destroy", G_CALLBACK(on_dialog_destroy), NULL);
 
-    gtk_widget_show_all(main_dialog);
+    gtk_widget_show_all(dialog);
 }
 
 
@@ -1242,6 +1292,47 @@ void ui_media_stop_recording(void)
 
     ui_display_recording(0);
     statusbar_recording_widget_hide_all(ui_statusbar_get_recording_widget(), 10);
+}
+
+
+/** \brief  Callback for vsync_on_vsync_do()
+ *
+ * Create a screenshot on vsync to avoid tearing.
+ *
+ * This function is called on the VICE thread, so the canvas is retrieved in
+ * ui_media_auto_screenshot() on the UI thread and passed via \a param.
+ *
+ * \param[in]   param   video canvas
+ */
+static void auto_screenshot_vsync_callback(void *param)
+{
+    char *filename;
+    video_canvas_t *canvas = param;
+
+    /* no need for locale bullshit */
+    filename = create_proposed_screenshot_name("png");
+    if (screenshot_save("PNG", filename, canvas) < 0) {
+        log_error(LOG_ERR, "Failed to autosave screenshot.");
+    }
+    lib_free(filename);
+}
+
+
+/** \brief  Create screenshot with autogenerated filename
+ *
+ * Creates a PNG screenshot with an autogenerated filename with an ISO-8601-ish
+ * timestamp:
+ * "vice-screenshot-<year><month><day><hour><month><seconds><sec-frac>.png"
+ */
+void ui_media_auto_screenshot(void)
+{
+    if (monitor_is_inside_monitor()) {
+        /* screenshot immediately if monitor is open */
+        auto_screenshot_vsync_callback((void *)ui_get_active_canvas());
+    } else {
+        /* queue screenshot grab on vsync to avoid tearing */
+        vsync_on_vsync_do(auto_screenshot_vsync_callback, (void *)ui_get_active_canvas());
+    }
 }
 
 

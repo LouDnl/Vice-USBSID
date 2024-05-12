@@ -30,7 +30,6 @@
 #include "vice.h"
 
 #include <stdio.h>
-#include <stdbool.h>
 
 #include "drive.h"
 #include "kbd.h"
@@ -144,10 +143,10 @@ static void display_speed(void)
 /* uiapi.h */
 
 /* Display a mesage without interrupting emulation */
-void ui_display_statustext(const char *text, bool fadeout)
+void ui_display_statustext(const char *text, int fade_out)
 {
 #ifdef SDL_DEBUG
-    fprintf(stderr, "%s: \"%s\", fadout=%s\n", __func__, text, fadeout ? "true" : "false");
+    fprintf(stderr, "%s: \"%s\", %i\n", __func__, text, fade_out);
 #endif
 }
 

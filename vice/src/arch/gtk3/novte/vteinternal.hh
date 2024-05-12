@@ -915,7 +915,6 @@ public:
     VteCellAttr const* char_to_cell_attr(VteCharAttributes const* attr) const;
 
     GString* attributes_to_html(GString* text_string, GArray* attrs);
-    GString* attributes_to_ascii(GString* text_string, GArray* attrs);
 
     void start_selection(long x, long y, enum vte_selection_type selection_type);
     bool maybe_end_selection();
