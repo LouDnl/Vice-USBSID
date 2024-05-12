@@ -44,7 +44,8 @@ enum {
     SID_ENGINE_RESID,
     SID_ENGINE_CATWEASELMKIII,
     SID_ENGINE_HARDSID,
-    SID_ENGINE_PARSID
+    SID_ENGINE_PARSID,
+    SID_ENGINE_USBSID  // TODO: CHECK AND FINISH
 };
 
 #define SID_ENGINE_DEFAULT       99
@@ -66,6 +67,9 @@ enum {
 
 /** \brief  Maximum number of supported SIDs for the ParSID engine */
 #define SID_ENGINE_PARSID_NUM_SIDS          1
+
+/** \brief  Maximum number of supported SIDs for the USBSID engine */
+#define SID_ENGINE_USBSID_NUM_SIDS          1  // TODO: CHECK AND FINISH
 
 enum {
     SID_RESID_SAMPLING_FAST = 0,
@@ -93,8 +97,10 @@ enum {
 #define SID_RESID_8580D           ((SID_ENGINE_RESID << 8) | SID_MODEL_8580D)
 #define SID_RESID_DTVSID          ((SID_ENGINE_RESID << 8) | SID_MODEL_DTVSID)
 #define SID_CATWEASELMKIII        (SID_ENGINE_CATWEASELMKIII << 8)
-#define SID_HARDSID               (SID_ENGINE_HARDSID << 8)
-#define SID_PARSID                (SID_ENGINE_PARSID << 8)
+#define SID_HARDSID               (SID_ENGINE_HARDSID << 8)  // 768
+#define SID_PARSID                (SID_ENGINE_PARSID << 8)  // 1024
+#define SID_USBSID                (SID_ENGINE_USBSID << 8)  // TODO: CHECK AND FINISH ~ 1280
+// #define SID_USBSID                ((SID_ENGINE_USBSID << 8) | 512)  // TODO: CHECK AND FINISH
 
 #define SIDTYPE_SID       0
 #define SIDTYPE_SIDDTV    1

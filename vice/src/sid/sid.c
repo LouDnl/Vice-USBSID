@@ -38,6 +38,7 @@
 #include "catweaselmkiii.h"
 #include "fastsid.h"
 #include "hardsid.h"
+#include "usbsid.h"
 #include "joyport.h"
 #include "lib.h"
 #include "machine.h"
@@ -962,9 +963,14 @@ int sid_sound_machine_cycle_based(void)
             return 0;
 #endif
 #endif
+#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+        case SID_ENGINE_USBSID:
+            return 0;
+#endif
     }
 
     return 0;
+
 }
 
 int sid_sound_machine_channels(void)
@@ -1013,6 +1019,13 @@ static void set_sound_func(void)
             sid_dump_func = NULL; /* TODO: parsid dump */
         }
 #endif
+#endif
+#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+        if (sid_engine_type == SID_ENGINE_USBSID) {
+            sid_read_func = usbsid_read;
+            sid_store_func = usbsid_store;
+            sid_dump_func = NULL; /* TODO: usbsid dump */
+        }
 #endif
     } else {
         sid_read_func = sid_read_off;
@@ -1067,6 +1080,18 @@ int sid_engine_set(int engine)
         parsid_close();
     }
 #endif
+#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+    if (engine == SID_ENGINE_USBSID
+        && sid_engine_type != SID_ENGINE_USBSID) {
+        if (usbsid_open() < 0) {
+            return -1;
+        }
+    }
+    if (engine != SID_ENGINE_USBSID
+        && sid_engine_type == SID_ENGINE_USBSID) {
+        usbsid_close();
+    }
+#endif
 #endif
 
     sid_engine_type = engine;
@@ -1105,6 +1130,9 @@ void sid_set_machine_parameter(long clock_rate)
 #ifdef HAVE_HARDSID
     hardsid_set_machine_parameter(clock_rate);
 #endif
+// #ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+//     usbsid_set_machine_parameter(clock_rate);
+// #endif
 }
 
 
@@ -1128,6 +1156,8 @@ int sid_engine_get_max_sids(int engine)
             return SID_ENGINE_CATWEASELMKIII_NUM_SIDS;
         case SID_ENGINE_HARDSID:
             return SID_ENGINE_HARDSID_NUM_SIDS;
+        case SID_ENGINE_USBSID:  // TODO: CHECK AND FINISH
+            return SID_ENGINE_USBSID_NUM_SIDS;
 #if !defined(WINDOWS_COMPILE) || (defined(WINDOWS_COMPILE) && defined(HAVE_LIBIEEE1284))
         case SID_ENGINE_PARSID:
             return SID_ENGINE_PARSID_NUM_SIDS;

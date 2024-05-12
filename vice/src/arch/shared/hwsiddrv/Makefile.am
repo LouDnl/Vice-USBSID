@@ -16,6 +16,14 @@ AM_CXXFLAGS = @VICE_CXXFLAGS@
 
 AM_LDFLAGS = @VICE_LDFLAGS@
 
+# TODO: CHECK AND FINISH
+if UNIX_COMPILE
+if HAVE_USBSID
+AM_CFLAGS += -I/usr/include/libftdi1 -I/usr/include/libusb-1.0
+AM_CXXFLAGS += -I/usr/include/libftdi1 -I/usr/include/libusb-1.0
+AM_LDFLAGS += -lftdi1 -lusb-1.0
+endif HAVE_USBSID
+endif UNIX_COMPILE
 
 noinst_LIBRARIES = libhwsiddrv.a
 
@@ -64,6 +72,11 @@ HWSIDDRIVERS += \
 	ps-ieee1284.o \
 	ps-unix-file.o
 endif HAVE_PARSID
+if HAVE_USBSID
+HWSIDDRIVERS += \
+	usbsid-unix-drv.o \
+	us-unix-device.o
+endif HAVE_USBSID
 endif UNIX_COMPILE
 
 
@@ -80,7 +93,9 @@ EXTRA_libhwsiddrv_a_SOURCES = \
 	parsid-unix-drv.c \
 	parsid-win32-drv.c \
 	ps-ieee1284.c \
-	ps-unix-file.c
+	ps-unix-file.c \
+	usbsid-unix-drv.c \
+	us-unix-device.c
 
 EXTRA_DIST = \
 	cw-unix.h \
@@ -88,7 +103,8 @@ EXTRA_DIST = \
 	hs-unix.h \
 	hs-win32.h \
 	ps-unix.h \
-	ps-win32.h
+	ps-win32.h \
+	us-unix.h
 
 # Always built:
 # (needs to be declared empty to avoid `make` to try to build libhwsiddrv.o

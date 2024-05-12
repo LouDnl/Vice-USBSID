@@ -119,6 +119,18 @@ typedef struct sid_hs_snapshot_state_s {
     uint32_t device_map[4];
 } sid_hs_snapshot_state_t;
 
+typedef struct sid_us_snapshot_state_s {  // TODO: CHECK AND FINISH
+    uint8_t regs[32];
+    // uint32_t cycles_per_second;
+    // uint32_t usid_main_clk;
+    // uint32_t usid_alarm_clk;
+    // uint32_t lastaccess_clk;
+    // uint32_t lastaccess_ms;
+    // uint32_t lastaccess_chipno;
+    // uint32_t chipused;
+    // uint32_t device_map[4];
+} sid_us_snapshot_state_t;
+
 typedef struct sid_parsid_snapshot_state_s {
     uint8_t regs[32];
     uint8_t parsid_ctrport;

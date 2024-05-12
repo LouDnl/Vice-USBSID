@@ -55,6 +55,10 @@
 #include "parsid.h"
 #endif
 
+#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+#include "usbsid.h"
+#endif
+
 static char *sid2_address_range = NULL;
 static char *sid3_address_range = NULL;
 static char *sid4_address_range = NULL;
@@ -113,11 +117,18 @@ static const struct engine_s engine_match[] = {
 #endif
 #ifdef HAVE_PARSID
 #if !defined(WINDOWS_COMPILE) || (defined(WINDOWS_COMPILE) && defined(HAVE_LIBIEEE1284))
-    { "1024", SID_PARSID },
+    { "1024", SID_PARSID },  // 1280, 1536
     { "parsid", SID_PARSID },
     { "par", SID_PARSID },
     { "lpt", SID_PARSID },
 #endif
+#endif
+#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+    { "1280", SID_USBSID },
+    // { "1792", SID_USBSID },
+    { "usbsid", SID_USBSID },
+    { "usbs", SID_USBSID },
+    { "us", SID_USBSID },
 #endif
     { NULL, -1 }
 };
@@ -214,6 +225,17 @@ static const cmdline_option_t hardsid_cmdline_options[] =
     CMDLINE_LIST_END
 };
 #endif
+
+// #ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+// static const cmdline_option_t usbsid_cmdline_options[] =
+// {
+//     { "-usbsid", SET_RESOURCE, CMDLINE_ATTRIB_NEED_ARGS,
+//       NULL, NULL, "SidUSBSID", NULL,
+//       "<device>", "Set the USBSID device for the main SID output" },
+
+//     CMDLINE_LIST_END
+// };
+// #endif
 
 static cmdline_option_t stereo_cmdline_options[] =
 {
@@ -377,6 +399,15 @@ static char *build_sid_cmdline_option(int sid_type)
 #endif
 #endif
 
+#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+    /* add usbsid options if available */
+    if (usbsid_available()) {
+        new = util_concat(old, ", 1280: USBSID", NULL);
+        // new = util_concat(old, ", 1792: USBSID", NULL);
+        lib_free(old);
+        old = new;
+    }
+#endif
     /* add ending bracket */
     new = util_concat(old, ")", NULL);
     lib_free(old);
@@ -385,6 +416,7 @@ static char *build_sid_cmdline_option(int sid_type)
 
     return sid_return;
 }
+
 
 int sid_cmdline_options_init(int sid_type)
 {
@@ -420,6 +452,14 @@ int sid_cmdline_options_init(int sid_type)
         }
     }
 #endif
+
+// #ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+//     if (usbsid_available()) {
+//         if (cmdline_register_options(usbsid_cmdline_options) < 0) {
+//             return -1;
+//         }
+//     }
+// #endif
 
     if ((machine_class != VICE_MACHINE_C64DTV) &&
         (machine_class != VICE_MACHINE_VIC20) &&

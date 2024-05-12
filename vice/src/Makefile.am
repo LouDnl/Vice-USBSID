@@ -1,12 +1,23 @@
 # We have to override the automake default, because we need to use
 # $(CXX) instead of $(CC) when compiling with reSID.
-LINK = @LINKCC@ @VICE_CFLAGS@ @VICE_LDFLAGS@ $(LDFLAGS) -o $@
+LINK = @LINKCC@ @VICE_CFLAGS@ @VICE_LDFLAGS@ $(LDFLAGS) -o $@ @PISSFLAGS@
 # We shouldnt have to add the flags here, but without it doesn't add them
 CCLD = @LINKCC@ @VICE_LDFLAGS@ $(LDFLAGS)
 
 AM_CFLAGS = @VICE_CFLAGS@
 AM_CXXFLAGS = @VICE_CXXFLAGS@
 AM_LDFLAGS = @VICE_LDFLAGS@
+
+# TODO: CHECK AND FINISH
+if UNIX_COMPILE
+if HAVE_USBSID
+AM_CFLAGS += -I/usr/include/libftdi1 -I/usr/include/libusb-1.0 -lftdi1 -lusb-1.0
+AM_CXXFLAGS += -I/usr/include/libftdi1 -I/usr/include/libusb-1.0 -lftdi1 -lusb-1.0
+AM_LDFLAGS += -lftdi1 -lusb-1.0
+SHITFLAGS = @PISSFLAGS@
+SHITFLAGS += -lftdi1 -lusb-1.0
+endif HAVE_USBSID
+endif UNIX_COMPILE
 
 ARCH_LIBS = @ARCH_LIBS@
 

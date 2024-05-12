@@ -23,8 +23,18 @@ AM_CXXFLAGS = @VICE_CXXFLAGS@
 
 AM_LDFLAGS = @VICE_LDFLAGS@
 
+# TODO: CHECK AND FINISH
+if UNIX_COMPILE
+if HAVE_USBSID
+AM_CFLAGS += -I/usr/include/libftdi1 -I/usr/include/libusb-1.0 -lftdi1 -lusb-1.0
+AM_CXXFLAGS += -I/usr/include/libftdi1 -I/usr/include/libusb-1.0 -lftdi1 -lusb-1.0
+AM_LDFLAGS += -lftdi1 -lusb-1.0
+endif HAVE_USBSID
+endif UNIX_COMPILE
 
 noinst_LIBRARIES = libsid.a libsid_dtv.a
+
+# TODO: CHECK AND FINISH
 
 libsid_a_SOURCES = \
 	catweaselmkiii.c \
@@ -32,6 +42,8 @@ libsid_a_SOURCES = \
 	fastsid.h \
 	hardsid.c \
 	parsid.c \
+	usbsid.c \
+	usbsid.h \
 	sid-cmdline-options.c \
 	sid-cmdline-options.h \
 	sid-resources.c \

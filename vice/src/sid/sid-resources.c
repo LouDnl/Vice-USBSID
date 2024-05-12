@@ -33,6 +33,7 @@
 
 #include "catweaselmkiii.h"
 #include "hardsid.h"
+#include "usbsid.h"
 #include "log.h"
 #include "machine.h"
 #ifdef HAVE_PARSID
@@ -114,6 +115,9 @@ static int set_sid_engine(int set_engine, void *param)
 #if !defined(WINDOWS_COMPILE) || (defined(WINDOWS_COMPILE) && defined(HAVE_LIBIEEE1284))
         case SID_ENGINE_PARSID:
 #endif
+#endif
+#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+        case SID_ENGINE_USBSID:
 #endif
             break;
         default:
@@ -370,6 +374,11 @@ void sid_set_enable(int value)
         sid_engine_set(SID_ENGINE_FASTSID);
     } else
 #endif
+#ifdef HAVE_USBSID
+    if (val) {
+        sid_engine_set(SID_ENGINE_USBSID);
+    } else
+#endif
     {
         sid_engine_set(sid_engine);
     }
@@ -467,6 +476,15 @@ int sid_common_resources_init(void)
         }
     }
 #endif
+
+// #ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+//     if (usbsid_available()) {
+//         if (resources_register_int(usbsid_resources_int) < 0) {
+//             return -1;
+//         }
+//     }
+// #endif
+
     return resources_register_int(common_resources_int);
 }
 
@@ -555,6 +573,13 @@ static sid_engine_model_t sid_engine_models_parsid[] = {
 #endif
 #endif
 
+#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+static sid_engine_model_t sid_engine_models_usbsid[] = {
+    { "USBSID", SID_USBSID },
+    { NULL, -1 }
+};
+#endif
+
 static void add_sid_engine_models(sid_engine_model_t *sid_engine_models)
 {
     int i = 0;
@@ -603,6 +628,11 @@ sid_engine_model_t **sid_get_engine_model_list(void)
 #endif
 #endif
 
+#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+    if (usbsid_available()) {
+        add_sid_engine_models(sid_engine_models_usbsid);
+    }
+#endif
     sid_engine_model_list[num_sid_engine_models] = NULL;
 
     return sid_engine_model_list;
@@ -615,6 +645,7 @@ static int sid_check_engine_model(int engine, int model)
         case SID_ENGINE_CATWEASELMKIII:
         case SID_ENGINE_HARDSID:
         case SID_ENGINE_PARSID:
+        case SID_ENGINE_USBSID:  // TODO: CHECK AND FINISH
             return 0;
         default:
             break;
