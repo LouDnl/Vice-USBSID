@@ -2,6 +2,9 @@
  * usbsid.c - Generic usbsid abstraction layer.
  *
  * Written by
+ *  Andreas Boose <viceteam@t-online.de>
+ *  usbsid Support <support@usbsid.com>
+ *  Marco van den Heuvel <blackystardust68@yahoo.com>
  *  LouDnl
  *
  * This file is part of VICE, the Versatile Commodore Emulator.
