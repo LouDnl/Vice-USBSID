@@ -2,6 +2,7 @@
  * usbsid-unix-drv.c - Linux specific usbsid driver.
  *
  * Written by
+ *  Marco van den Heuvel <blackystardust68@yahoo.com>
  *  LouDnl
  *
  * This file is part of VICE, the Versatile Commodore Emulator.
