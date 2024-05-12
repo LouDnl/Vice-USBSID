@@ -26,15 +26,10 @@
 #pragma once
 #ifndef VICE_USBSID_MACROS_H
 #define VICE_USBSID_MACROS_H
-//============================================================================
-// Description : FTDI ft2232h supporting GPIO header file for SidBerry
-// Source      : https://stackoverflow.com/a/25108449
-// Author      : LouD
-// Last update : 2024
-//============================================================================
 
 #include <stdio.h>
 
+/* Credits: https://stackoverflow.com/a/25108449 */
 /* --- PRINTF_BYTE_TO_BINARY macro's --- */
 #define PRINTF_BINARY_PATTERN_INT8 "%c%c%c%c%c%c%c%c"
 #define PRINTF_BYTE_TO_BINARY_INT8(i) \
