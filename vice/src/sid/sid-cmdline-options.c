@@ -226,17 +226,6 @@ static const cmdline_option_t hardsid_cmdline_options[] =
 };
 #endif
 
-// #ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
-// static const cmdline_option_t usbsid_cmdline_options[] =
-// {
-//     { "-usbsid", SET_RESOURCE, CMDLINE_ATTRIB_NEED_ARGS,
-//       NULL, NULL, "SidUSBSID", NULL,
-//       "<device>", "Set the USBSID device for the main SID output" },
-
-//     CMDLINE_LIST_END
-// };
-// #endif
-
 static cmdline_option_t stereo_cmdline_options[] =
 {
     { "-sidextra", SET_RESOURCE, CMDLINE_ATTRIB_NEED_ARGS,
@@ -403,7 +392,6 @@ static char *build_sid_cmdline_option(int sid_type)
     /* add usbsid options if available */
     if (usbsid_available()) {
         new = util_concat(old, ", 1280: USBSID", NULL);
-        // new = util_concat(old, ", 1792: USBSID", NULL);
         lib_free(old);
         old = new;
     }

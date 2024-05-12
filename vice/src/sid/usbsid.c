@@ -2,9 +2,7 @@
  * usbsid.c - Generic usbsid abstraction layer.
  *
  * Written by
- *  Andreas Boose <viceteam@t-online.de>
- *  usbsid Support <support@usbsid.com>
- *  Marco van den Heuvel <blackystardust68@yahoo.com>
+ *  LouDnl
  *
  * This file is part of VICE, the Versatile Commodore Emulator.
  * See README for copyright notice.
@@ -27,10 +25,8 @@
  */
   // TODO: CHECK AND FINISH
 /* #define DEBUG_usbsid */
-#define DEBUG_USBSID
 /* define to trace usbsid stuff without having a usbsid */
 /* #define DEBUG_usbsid_DUMMY */
-// #define DEBUG_USBSID_DUMMY
 
 #include <string.h>
 #include "vice.h"

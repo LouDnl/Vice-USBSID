@@ -1,8 +1,8 @@
 /*
- * usbsid-unix-drv.c - Unix specific usbsid driver.
+ * usbsid-unix-drv.c - Linux specific usbsid driver.
  *
  * Written by
- *  Marco van den Heuvel <blackystardust68@yahoo.com>
+ *  LouDnl
  *
  * This file is part of VICE, the Versatile Commodore Emulator.
  * See README for copyright notice.
@@ -96,24 +96,5 @@ int usbsid_drv_available(void)
     return 0;
 }
 
-/* ---------------------------------------------------------------------*/
-
-// void usbsid_drv_state_read(int chipno, struct sid_us_snapshot_state_s *sid_state)
-// {
-
-//     if (use_us_device) {
-//         us_device_state_read(chipno, sid_state);
-//     }
-
-// }
-
-// void usbsid_drv_state_write(int chipno, struct sid_us_snapshot_state_s *sid_state)
-// {
-
-//     if (use_us_device) {
-//         us_device_state_write(chipno, sid_state);
-//     }
-
-// }
 #endif
 #endif

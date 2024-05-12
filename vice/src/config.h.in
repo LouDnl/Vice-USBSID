@@ -257,6 +257,9 @@
 /* Define to 1 if you have the `FLAC' library (-lFLAC). */
 #undef HAVE_LIBFLAC
 
+/* Define to 1 if you have the <libftdi1/ftdi.h> header file. */
+#undef HAVE_LIBFTDI1_FTDI_H
+
 /* Define to 1 if you have the <libgen.h> header file. */
 #undef HAVE_LIBGEN_H
 
@@ -609,6 +612,9 @@
 
 /* Define to 1 if you have the <usbhid.h> header file. */
 #undef HAVE_USBHID_H
+
+/* Support for USBSID. */
+#undef HAVE_USBSID
 
 /* Define to 1 if you have the <usb.h> header file. */
 #undef HAVE_USB_H

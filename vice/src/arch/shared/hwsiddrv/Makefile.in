@@ -91,34 +91,43 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 
+# TODO: CHECK AND FINISH
+@HAVE_USBSID_TRUE@@UNIX_COMPILE_TRUE@am__append_1 = -I/usr/include/libftdi1 -I/usr/include/libusb-1.0
+@HAVE_USBSID_TRUE@@UNIX_COMPILE_TRUE@am__append_2 = -I/usr/include/libftdi1 -I/usr/include/libusb-1.0
+@HAVE_USBSID_TRUE@@UNIX_COMPILE_TRUE@am__append_3 = -lftdi1 -lusb-1.0
+
 # Windows drivers
-@WINDOWS_COMPILE_TRUE@am__append_1 = \
+@WINDOWS_COMPILE_TRUE@am__append_4 = \
 @WINDOWS_COMPILE_TRUE@	hardsid-win32-drv.o \
 @WINDOWS_COMPILE_TRUE@	hs-win32-dll.o
 
-@HAVE_CATWEASELMKIII_TRUE@@WINDOWS_COMPILE_TRUE@am__append_2 = \
+@HAVE_CATWEASELMKIII_TRUE@@WINDOWS_COMPILE_TRUE@am__append_5 = \
 @HAVE_CATWEASELMKIII_TRUE@@WINDOWS_COMPILE_TRUE@	catweaselmkiii-win32-drv.o \
 @HAVE_CATWEASELMKIII_TRUE@@WINDOWS_COMPILE_TRUE@	cw-win32-dll.o
 
-@HAVE_PARSID_TRUE@@WINDOWS_COMPILE_TRUE@am__append_3 = \
+@HAVE_PARSID_TRUE@@WINDOWS_COMPILE_TRUE@am__append_6 = \
 @HAVE_PARSID_TRUE@@WINDOWS_COMPILE_TRUE@	parsid-win32-drv.o \
 @HAVE_PARSID_TRUE@@WINDOWS_COMPILE_TRUE@	ps-ieee1284.o
 
-@BEOS_COMPILE_TRUE@@HAVE_PARSID_TRUE@am__append_4 = \
+@BEOS_COMPILE_TRUE@@HAVE_PARSID_TRUE@am__append_7 = \
 @BEOS_COMPILE_TRUE@@HAVE_PARSID_TRUE@	ps-ieee1284.o
 
-@UNIX_COMPILE_TRUE@am__append_5 = \
+@UNIX_COMPILE_TRUE@am__append_8 = \
 @UNIX_COMPILE_TRUE@	hardsid-unix-drv.o
 
-@LINUX_COMPILE_TRUE@@UNIX_COMPILE_TRUE@am__append_6 = hs-unix-linux.o
-@HAVE_CATWEASELMKIII_TRUE@@UNIX_COMPILE_TRUE@am__append_7 = \
+@LINUX_COMPILE_TRUE@@UNIX_COMPILE_TRUE@am__append_9 = hs-unix-linux.o
+@HAVE_CATWEASELMKIII_TRUE@@UNIX_COMPILE_TRUE@am__append_10 = \
 @HAVE_CATWEASELMKIII_TRUE@@UNIX_COMPILE_TRUE@	catweaselmkiii-unix-drv.o \
 @HAVE_CATWEASELMKIII_TRUE@@UNIX_COMPILE_TRUE@	cw-unix-device.o
 
-@HAVE_PARSID_TRUE@@UNIX_COMPILE_TRUE@am__append_8 = \
+@HAVE_PARSID_TRUE@@UNIX_COMPILE_TRUE@am__append_11 = \
 @HAVE_PARSID_TRUE@@UNIX_COMPILE_TRUE@	parsid-unix-drv.o \
 @HAVE_PARSID_TRUE@@UNIX_COMPILE_TRUE@	ps-ieee1284.o \
 @HAVE_PARSID_TRUE@@UNIX_COMPILE_TRUE@	ps-unix-file.o
+
+@HAVE_USBSID_TRUE@@UNIX_COMPILE_TRUE@am__append_12 = \
+@HAVE_USBSID_TRUE@@UNIX_COMPILE_TRUE@	usbsid-unix-drv.o \
+@HAVE_USBSID_TRUE@@UNIX_COMPILE_TRUE@	us-unix-device.o
 
 subdir = src/arch/shared/hwsiddrv
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -166,7 +175,8 @@ am__depfiles_remade = ./$(DEPDIR)/catweaselmkiii-unix-drv.Po \
 	./$(DEPDIR)/hardsid-win32-drv.Po ./$(DEPDIR)/hs-unix-linux.Po \
 	./$(DEPDIR)/hs-win32-dll.Po ./$(DEPDIR)/parsid-unix-drv.Po \
 	./$(DEPDIR)/parsid-win32-drv.Po ./$(DEPDIR)/ps-ieee1284.Po \
-	./$(DEPDIR)/ps-unix-file.Po
+	./$(DEPDIR)/ps-unix-file.Po ./$(DEPDIR)/us-unix-device.Po \
+	./$(DEPDIR)/usbsid-unix-drv.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -451,16 +461,16 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/src/arch/shared \
 	-I$(top_srcdir)/src/arch/shared/iodrv
 
-AM_CFLAGS = @VICE_CFLAGS@
-AM_CXXFLAGS = @VICE_CXXFLAGS@
-AM_LDFLAGS = @VICE_LDFLAGS@
+AM_CFLAGS = @VICE_CFLAGS@ $(am__append_1)
+AM_CXXFLAGS = @VICE_CXXFLAGS@ $(am__append_2)
+AM_LDFLAGS = @VICE_LDFLAGS@ $(am__append_3)
 noinst_LIBRARIES = libhwsiddrv.a
 
 # Determine which drivers need to be built, start with an empty list
 # (HardSID is currently enabled by default on system that have drivers for it)
-HWSIDDRIVERS = $(am__append_1) $(am__append_2) $(am__append_3) \
-	$(am__append_4) $(am__append_5) $(am__append_6) \
-	$(am__append_7) $(am__append_8)
+HWSIDDRIVERS = $(am__append_4) $(am__append_5) $(am__append_6) \
+	$(am__append_7) $(am__append_8) $(am__append_9) \
+	$(am__append_10) $(am__append_11) $(am__append_12)
 
 # Built depending on configure options:
 EXTRA_libhwsiddrv_a_SOURCES = \
@@ -475,7 +485,9 @@ EXTRA_libhwsiddrv_a_SOURCES = \
 	parsid-unix-drv.c \
 	parsid-win32-drv.c \
 	ps-ieee1284.c \
-	ps-unix-file.c
+	ps-unix-file.c \
+	usbsid-unix-drv.c \
+	us-unix-device.c
 
 EXTRA_DIST = \
 	cw-unix.h \
@@ -483,7 +495,8 @@ EXTRA_DIST = \
 	hs-unix.h \
 	hs-win32.h \
 	ps-unix.h \
-	ps-win32.h
+	ps-win32.h \
+	us-unix.h
 
 
 # Always built:
@@ -553,6 +566,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parsid-win32-drv.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ps-ieee1284.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ps-unix-file.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/us-unix-device.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/usbsid-unix-drv.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -709,6 +724,8 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/parsid-win32-drv.Po
 	-rm -f ./$(DEPDIR)/ps-ieee1284.Po
 	-rm -f ./$(DEPDIR)/ps-unix-file.Po
+	-rm -f ./$(DEPDIR)/us-unix-device.Po
+	-rm -f ./$(DEPDIR)/usbsid-unix-drv.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -766,6 +783,8 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/parsid-win32-drv.Po
 	-rm -f ./$(DEPDIR)/ps-ieee1284.Po
 	-rm -f ./$(DEPDIR)/ps-unix-file.Po
+	-rm -f ./$(DEPDIR)/us-unix-device.Po
+	-rm -f ./$(DEPDIR)/usbsid-unix-drv.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

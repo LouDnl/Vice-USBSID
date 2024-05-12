@@ -781,6 +781,8 @@ HAVE_DEBUG_THREADS_FALSE
 HAVE_DEBUG_THREADS_TRUE
 DEBUGBUILD
 OBJCPP
+HAVE_USBSID_FALSE
+HAVE_USBSID_TRUE
 HAVE_PARSID_FALSE
 HAVE_PARSID_TRUE
 HAVE_CATWEASELMKIII_FALSE
@@ -982,6 +984,7 @@ with_lame
 with_static_lame
 with_portaudio
 enable_catweasel
+enable_usbsid
 enable_hardsid
 enable_midi
 enable_new8580filter
@@ -1703,6 +1706,7 @@ Optional Features:
   --enable-silent-rules   less verbose build output (undo: "make V=1")
   --disable-silent-rules  verbose build output (undo: "make V=0")
   --enable-catweasel      enables CatWeasel (PCI/Zorro/Clockport SID card) support
+  --disable-usbsid        disables usbsid support
   --disable-hardsid       disables HardSID support
   --enable-midi           enable MIDI support
   --disable-new8580filter disable new 8580 filters
@@ -4423,6 +4427,15 @@ then :
 fi
 
 vice_arg_enable_list="$vice_arg_enable_list catweasel"
+
+
+# Check whether --enable-usbsid was given.
+if test ${enable_usbsid+y}
+then :
+  enableval=$enable_usbsid;
+fi
+
+vice_arg_enable_list="$vice_arg_enable_list usbsid"
 
 
 # Check whether --enable-hardsid was given.
@@ -11681,6 +11694,7 @@ HAVE_FFMPEG_SWRESAMPLE_SUPPORT="no "
 HAVE_FFMPEG_SWSCALE_SUPPORT="no "
 HAVE_FONTCONFIG_SUPPORT="no "
 HAVE_GIF_SUPPORT="no "
+HAVE_USBSID_SUPPORT="no "
 HAVE_HARDSID_SUPPORT="no "
 HAVE_HWSCALE_SUPPORT="no "
 HAVE_IOSID_SUPPORT="no "
@@ -12555,6 +12569,20 @@ fi
 
     HAVE_CATWEASELMKIII_SUPPORT="yes"
   fi
+  if test x"$enable_usbsid" != "xno"; then
+
+printf "%s\n" "#define HAVE_USBSID /**/" >>confdefs.h
+
+     if true; then
+  HAVE_USBSID_TRUE=
+  HAVE_USBSID_FALSE='#'
+else
+  HAVE_USBSID_TRUE='#'
+  HAVE_USBSID_FALSE=
+fi
+
+    HAVE_USBSID_SUPPORT="yes"
+  fi
   if test x"$enable_hardsid" != "xno"; then
 
 printf "%s\n" "#define HAVE_HARDSID /**/" >>confdefs.h
@@ -12738,6 +12766,13 @@ else
 fi
 
     HAVE_CATWEASELMKIII_SUPPORT="yes"
+  fi
+
+  if test x"$enable_usbsid" != "xno"; then
+
+printf "%s\n" "#define HAVE_USBSID /**/" >>confdefs.h
+
+    HAVE_USBSID_SUPPORT="yes"
   fi
 
   if test x"$enable_hardsid" != "xno"; then
@@ -20965,18 +21000,20 @@ if test x"$is_unix" = "xyes"; then
       ;;
   *)
       enable_parsid=no
+      enable_usbsid=no
       enable_hardsid=no
       enable_catweasel=no
       ;;
   esac
 
-  if test x"$enable_parsid" = "xyes" -o x"$enable_hardsid" != "xno" -o x"$enable_catweasel" = "xyes"; then
+  if test x"$enable_parsid" = "xyes" -o x"$enable_hardsid" != "xno" -o x"$enable_usbsid" = "xyes" -o x"$enable_catweasel" = "xyes"; then
 
     if test x"$with_libieee1284" = "xyes"; then
       LIBIEEE1284_HEADERS_PRESENT=yes
     else
       LIBIEEE1284_HEADERS_PRESENT=no
     fi
+    LINUX_USBSID_HEADER_PRESENT=yes
     LINUX_HARDSID_HEADER_PRESENT=yes
     LINUX_PARPORT_HEADERS_PRESENT=yes
     CATWEASEL_HEADER_PRESENT=yes
@@ -21001,6 +21038,18 @@ fi
 
 done
     fi
+           for ac_header in libftdi1/ftdi.h
+do :
+  ac_fn_c_check_header_compile "$LINENO" "libftdi1/ftdi.h" "ac_cv_header_libftdi1_ftdi_h" "$ac_includes_default"
+if test "x$ac_cv_header_libftdi1_ftdi_h" = xyes
+then :
+  printf "%s\n" "#define HAVE_LIBFTDI1_FTDI_H 1" >>confdefs.h
+
+else $as_nop
+  LINUX_USBSID_HEADER_PRESENT=no
+fi
+
+done
            for ac_header in linux/hardsid.h
 do :
   ac_fn_c_check_header_compile "$LINENO" "linux/hardsid.h" "ac_cv_header_linux_hardsid_h" "$ac_includes_default"
@@ -21104,6 +21153,90 @@ else $as_nop
 fi
 
 done
+    # TODO: FIX AND FINISH
+    if test x"$LINUX_USBSID_HEADER_PRESENT" = "xyes"; then
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for ftdi_init in -lftdi1" >&5
+printf %s "checking for ftdi_init in -lftdi1... " >&6; }
+if test ${ac_cv_lib_ftdi1_ftdi_init+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lftdi1  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+char ftdi_init ();
+int
+main (void)
+{
+return ftdi_init ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_lib_ftdi1_ftdi_init=yes
+else $as_nop
+  ac_cv_lib_ftdi1_ftdi_init=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ftdi1_ftdi_init" >&5
+printf "%s\n" "$ac_cv_lib_ftdi1_ftdi_init" >&6; }
+if test "x$ac_cv_lib_ftdi1_ftdi_init" = xyes
+then :
+  LIBS="-lftdi1 $LIBS"; USBSID_LIB_PRESENT=yes
+fi
+
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for libusb_open in -lusb-1.0" >&5
+printf %s "checking for libusb_open in -lusb-1.0... " >&6; }
+if test ${ac_cv_lib_usb_1_0_libusb_open+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lusb-1.0  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+char libusb_open ();
+int
+main (void)
+{
+return libusb_open ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_lib_usb_1_0_libusb_open=yes
+else $as_nop
+  ac_cv_lib_usb_1_0_libusb_open=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_usb_1_0_libusb_open" >&5
+printf "%s\n" "$ac_cv_lib_usb_1_0_libusb_open" >&6; }
+if test "x$ac_cv_lib_usb_1_0_libusb_open" = xyes
+then :
+  LIBS="-lusb-1.0 $LIBS"; USBSID_LIB_PRESENT=yes
+fi
+
+      # LIBS="-lftdi1 -lusb-1.0 $LIBS"; USBSID_LIB_PRESENT=yes
+    fi
 
     if test x"$PCIUTILS_HEADER_PRESENT" = "xyes"; then
       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for pci_fill_info in -lpciutils" >&5
@@ -21457,13 +21590,27 @@ fi
 
         HAVE_CATWEASELMKIII_SUPPORT="yes"
       fi
+      if test x"$enable_usbsid" != "xno"; then
+
+printf "%s\n" "#define HAVE_USBSID /**/" >>confdefs.h
+
+         if true; then
+  HAVE_USBSID_TRUE=
+  HAVE_USBSID_FALSE='#'
+else
+  HAVE_USBSID_TRUE='#'
+  HAVE_USBSID_FALSE=
+fi
+
+        HAVE_USBSID_SUPPORT="yes"
+      fi
       if test x"$enable_hardsid" != "xno"; then
 
 printf "%s\n" "#define HAVE_HARDSID /**/" >>confdefs.h
 
         HAVE_HARDSID_SUPPORT="yes"
       fi
-    else
+      else
       if test x"$enable_hardsid" != "xno" -a x"$LINUX_HARDSID_HEADER_PRESENT" = "xyes"; then
 
 printf "%s\n" "#define HAVE_HARDSID /**/" >>confdefs.h
@@ -21508,6 +21655,10 @@ printf "%s\n" "#define HAVE_PORTSID /**/" >>confdefs.h
 
     if test x"$enable_catweasel" = "xyes" -a x"$HAVE_CATWEASELMKIII_SUPPORT" != "xyes"; then
       as_fn_error $? "CatWeaselMKIII support is missing" "$LINENO" 5
+    fi
+
+    if test x"$enable_usbsid" = "xyes" -a x"$HAVE_USBSID_SUPPORT" != "xyes"; then
+      as_fn_error $? "USBSID support is missing" "$LINENO" 5
     fi
 
     if test x"$enable_hardsid" = "xyes" -a x"$HAVE_HARDSID_SUPPORT" != "xyes"; then
@@ -23617,6 +23768,10 @@ if test -z "${HAVE_CATWEASELMKIII_TRUE}" && test -z "${HAVE_CATWEASELMKIII_FALSE
   as_fn_error $? "conditional \"HAVE_CATWEASELMKIII\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
+if test -z "${HAVE_USBSID_TRUE}" && test -z "${HAVE_USBSID_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_USBSID\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 if test -z "${HAVE_PARSID_TRUE}" && test -z "${HAVE_PARSID_FALSE}"; then
   as_fn_error $? "conditional \"HAVE_PARSID\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
@@ -23890,6 +24045,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_CATWEASELMKIII_TRUE}" && test -z "${HAVE_CATWEASELMKIII_FALSE}"; then
   as_fn_error $? "conditional \"HAVE_CATWEASELMKIII\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_USBSID_TRUE}" && test -z "${HAVE_USBSID_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_USBSID\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_CATWEASELMKIII_TRUE}" && test -z "${HAVE_CATWEASELMKIII_FALSE}"; then
@@ -25606,6 +25765,7 @@ fi
 
 if test x"$real_arch" != "xOSX" -a x"$real_arch" != "xBeOS"; then
     echo "Catweasel MK3 support        : $HAVE_CATWEASELMKIII_SUPPORT (--enable/disable-catweasel)"
+    echo "USBSID support               : $HAVE_USBSID_SUPPORT (--enable/disable-usbsid)"
     echo "HardSID support              : $HAVE_HARDSID_SUPPORT (--enable/disable-hardsid)"
 fi
 

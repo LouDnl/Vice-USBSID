@@ -1,14 +1,10 @@
 /*
- * hs-unix-linux.c - Linux specific usbsid driver.
+ * us-unix-linux.c - Linux specific usbsid driver.
  *
  * Written by
- *  Simon White <sidplay2@yahoo.com>
- *  Marco van den Heuvel <blackystardust68@yahoo.com>
+ *  LouDnl
  *
- * This file is part of VICE, modified from the sidplay2 sources.  It is
- * a one for all driver with real timing support via real time kernel
- * extensions or through the hardware buffering.  It supports the usbsid
- * isa/pci single/quattro and also the catweasel MK3/4.
+ * This file is part of VICE, modified from the other hardware sid sources.
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

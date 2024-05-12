@@ -89,6 +89,11 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+
+# TODO: CHECK AND FINISH
+@HAVE_USBSID_TRUE@@UNIX_COMPILE_TRUE@am__append_1 = -I/usr/include/libftdi1 -I/usr/include/libusb-1.0 -lftdi1 -lusb-1.0
+@HAVE_USBSID_TRUE@@UNIX_COMPILE_TRUE@am__append_2 = -I/usr/include/libftdi1 -I/usr/include/libusb-1.0 -lftdi1 -lusb-1.0
+@HAVE_USBSID_TRUE@@UNIX_COMPILE_TRUE@am__append_3 = -lftdi1 -lusb-1.0
 bin_PROGRAMS = vsid$(EXEEXT) $(am__EXEEXT_1) x64sc$(EXEEXT) \
 	x64dtv$(EXEEXT) xscpu64$(EXEEXT) x128$(EXEEXT) xvic$(EXEEXT) \
 	xpet$(EXEEXT) xplus4$(EXEEXT) xcbm2$(EXEEXT) xcbm5x0$(EXEEXT) \
@@ -662,12 +667,14 @@ xvic_LDFLAGS = @xvic_LDFLAGS@
 
 # We have to override the automake default, because we need to use
 # $(CXX) instead of $(CC) when compiling with reSID.
-LINK = @LINKCC@ @VICE_CFLAGS@ @VICE_LDFLAGS@ $(LDFLAGS) -o $@
+LINK = @LINKCC@ @VICE_CFLAGS@ @VICE_LDFLAGS@ $(LDFLAGS) -o $@ @PISSFLAGS@
 # We shouldnt have to add the flags here, but without it doesn't add them
 CCLD = @LINKCC@ @VICE_LDFLAGS@ $(LDFLAGS)
-AM_CFLAGS = @VICE_CFLAGS@
-AM_CXXFLAGS = @VICE_CXXFLAGS@
-AM_LDFLAGS = @VICE_LDFLAGS@
+AM_CFLAGS = @VICE_CFLAGS@ $(am__append_1)
+AM_CXXFLAGS = @VICE_CXXFLAGS@ $(am__append_2)
+AM_LDFLAGS = @VICE_LDFLAGS@ $(am__append_3)
+@HAVE_USBSID_TRUE@@UNIX_COMPILE_TRUE@SHITFLAGS = @PISSFLAGS@ -lftdi1 \
+@HAVE_USBSID_TRUE@@UNIX_COMPILE_TRUE@	-lusb-1.0
 
 # Windows .res files to be linked to each binary
 # .. but NOT in headless mode
