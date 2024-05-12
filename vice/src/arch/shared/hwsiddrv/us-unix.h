@@ -2,6 +2,7 @@
  * us-unix.h - Linux USBSID specific prototypes.
  *
  * Written by
+ *  Marco van den Heuvel <blackystardust68@yahoo.com>
  *  LouDnl
  *
  * This file is part of VICE, the Versatile Commodore Emulator.
