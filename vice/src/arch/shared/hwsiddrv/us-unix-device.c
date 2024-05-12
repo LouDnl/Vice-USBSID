@@ -2,9 +2,11 @@
  * us-unix-linux.c - Linux specific usbsid driver.
  *
  * Written by
+ *  LouDnl
+ *
+ * Based on vice code written by
  *  Simon White <sidplay2@yahoo.com>
  *  Marco van den Heuvel <blackystardust68@yahoo.com>
- *  LouDnl
  *
  * This file is part of VICE, modified from the other hardware sid sources.
  *
