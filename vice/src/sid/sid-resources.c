@@ -38,6 +38,9 @@
 #ifdef HAVE_PARSID
 #include "parsid.h"
 #endif
+#ifdef HAVE_USBSID
+#include "usbsid.h"
+#endif
 #include "resources.h"
 #include "sid-resources.h"
 #include "sid.h"
@@ -114,6 +117,9 @@ static int set_sid_engine(int set_engine, void *param)
 #if !defined(WINDOWS_COMPILE) || (defined(WINDOWS_COMPILE) && defined(HAVE_LIBIEEE1284))
         case SID_ENGINE_PARSID:
 #endif
+#endif
+#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+        case SID_ENGINE_USBSID:
 #endif
             break;
         default:
@@ -369,6 +375,13 @@ void sid_set_enable(int value)
     if (val) {
         sid_engine_set(SID_ENGINE_FASTSID);
     } else
+
+#ifdef HAVE_USBSID
+    if (val) {
+        sid_engine_set(SID_ENGINE_USBSID);
+    } else
+#endif
+
 #endif
     {
         sid_engine_set(sid_engine);
@@ -555,6 +568,15 @@ static sid_engine_model_t sid_engine_models_parsid[] = {
 #endif
 #endif
 
+#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+// #if !defined(WINDOWS_COMPILE)
+static sid_engine_model_t sid_engine_models_usbsid[] = {
+    { "USBSID", SID_USBSID },
+    { NULL, -1 }
+};
+// #endif
+#endif
+
 static void add_sid_engine_models(sid_engine_model_t *sid_engine_models)
 {
     int i = 0;
@@ -603,6 +625,13 @@ sid_engine_model_t **sid_get_engine_model_list(void)
 #endif
 #endif
 
+#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+// #if !defined(WINDOWS_COMPILE)
+    if (usbsid_available()) {
+        add_sid_engine_models(sid_engine_models_usbsid);
+    }
+#endif
+
     sid_engine_model_list[num_sid_engine_models] = NULL;
 
     return sid_engine_model_list;
@@ -615,6 +644,7 @@ static int sid_check_engine_model(int engine, int model)
         case SID_ENGINE_CATWEASELMKIII:
         case SID_ENGINE_HARDSID:
         case SID_ENGINE_PARSID:
+        case SID_ENGINE_USBSID:  // TODO: CHECK AND FINISH
             return 0;
         default:
             break;

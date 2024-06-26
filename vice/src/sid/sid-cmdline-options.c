@@ -55,6 +55,10 @@
 #include "parsid.h"
 #endif
 
+#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+#include "usbsid.h"
+#endif
+
 static char *sid2_address_range = NULL;
 static char *sid3_address_range = NULL;
 static char *sid4_address_range = NULL;
@@ -117,6 +121,12 @@ static const struct engine_s engine_match[] = {
     { "parsid", SID_PARSID },
     { "par", SID_PARSID },
     { "lpt", SID_PARSID },
+#endif
+#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+    { "1280", SID_USBSID },
+    { "usbsid", SID_USBSID },
+    { "usbs", SID_USBSID },
+    { "us", SID_USBSID },
 #endif
 #endif
     { NULL, -1 }
@@ -371,6 +381,15 @@ static char *build_sid_cmdline_option(int sid_type)
     /* add parsid options if available */
     if (parsid_available()) {
         new = util_concat(old, ", 1024: ParSID in par port 1, 1280: ParSID in par port 2, 1536: ParSID in par port 3", NULL);
+        lib_free(old);
+        old = new;
+    }
+#endif
+
+#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+    /* add usbsid options if available */
+    if (usbsid_available()) {
+        new = util_concat(old, ", 1280: USBSID", NULL);
         lib_free(old);
         old = new;
     }

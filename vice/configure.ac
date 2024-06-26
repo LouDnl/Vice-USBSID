@@ -96,6 +96,7 @@ VICE_ARG_WITH_LIST(lame,                    [  --with-lame             use LAME 
 VICE_ARG_WITH_LIST(static-lame,             [  --with-static-lame      statically link LAME MP3])
 VICE_ARG_WITH_LIST(portaudio,               [  --with-portaudio        use PortAudio for sound input])
 VICE_ARG_ENABLE_LIST(catweasel,             [  --enable-catweasel      enables CatWeasel (PCI/Zorro/Clockport SID card) support])
+VICE_ARG_ENABLE_LIST(usbsid,                [  --disable-usbsid        disables usbsid support])
 VICE_ARG_ENABLE_LIST(hardsid,               [  --disable-hardsid       disables HardSID support])
 VICE_ARG_ENABLE_LIST(midi,                  [  --enable-midi           enable MIDI support])
 VICE_ARG_ENABLE_LIST(new8580filter,         [  --disable-new8580filter disable new 8580 filters])
@@ -452,6 +453,7 @@ HAVE_FFMPEG_SWRESAMPLE_SUPPORT="no "
 HAVE_FFMPEG_SWSCALE_SUPPORT="no "
 HAVE_FONTCONFIG_SUPPORT="no "
 HAVE_GIF_SUPPORT="no "
+HAVE_USBSID_SUPPORT="no "
 HAVE_HARDSID_SUPPORT="no "
 HAVE_HWSCALE_SUPPORT="no "
 HAVE_IOSID_SUPPORT="no "
@@ -797,6 +799,11 @@ if test x"$is_win32" = "xyes" -o x"$is_win32_gtk3" = "xyes"; then
     AM_CONDITIONAL(HAVE_CATWEASELMKIII, true)
     HAVE_CATWEASELMKIII_SUPPORT="yes"
   fi
+  if test x"$enable_usbsid" != "xno"; then
+    AC_DEFINE(HAVE_USBSID,,[Support for USBSID.])
+    AM_CONDITIONAL(HAVE_USBSID, true)
+    HAVE_USBSID_SUPPORT="yes"
+  fi
   if test x"$enable_hardsid" != "xno"; then
     AC_DEFINE(HAVE_HARDSID,,[Support for HardSID.])
     HAVE_HARDSID_SUPPORT="yes"
@@ -862,6 +869,11 @@ elif test x"$host_os" = "xbeos" -o x"$host_os" = "xhaiku"; then
     AC_DEFINE(HAVE_CATWEASELMKIII,,[Support for Catweasel MKIII.])
     AM_CONDITIONAL(HAVE_CATWEASELMKIII, true)
     HAVE_CATWEASELMKIII_SUPPORT="yes"
+  fi
+
+  if test x"$enable_usbsid" != "xno"; then
+    AC_DEFINE(HAVE_USBSID,,[Support for USBSID.])
+    HAVE_USBSID_SUPPORT="yes"
   fi
 
   if test x"$enable_hardsid" != "xno"; then
@@ -1035,7 +1047,7 @@ darwin*)
     AC_CHECK_FILE(/usr/local/lib,             [ MAC_LDFLAGS="$MAC_LDFLAGS -L/usr/local/lib -Wl,-rpath,/usr/local/lib" ])
     AC_CHECK_FILE(/usr/local/lib/libomp,      [ MAC_LDFLAGS="$MAC_LDFLAGS -L/usr/local/lib/libomp -Wl,-rpath,/usr/local/lib/libomp" ])
   fi
-  
+
   CPPFLAGS="$CPPFLAGS $MAC_CCPFLAGS"
   VICE_CPPFLAGS="$VICE_CPPFLAGS $MAC_CCPFLAGS"
   LDFLAGS="$LDFLAGS $MAC_LDFLAGS"
@@ -1879,7 +1891,7 @@ if test x"$with_resid" = "xno"; then
   dnl macro is used.
   dnl Another workaround must be found if other self-contained packages go
   dnl into VICE.
-  
+
   dnl A workaround for an autoconf bug when not using/checking the C++
   dnl compiler, we'll define am__fastdepCXX_TRUE as #
   am__fastdepCXX_TRUE=#
@@ -2897,7 +2909,7 @@ fi
 AC_SUBST(SOUND_DRIVERS)
 AC_SUBST(SOUND_LIBS)
 
-dnl Check for ParSID/HardSID/CW support
+dnl Check for ParSID/USBSID/HardSID/CW support
 if test x"$is_unix" = "xyes"; then
 
   dnl Check cpu first
@@ -2906,18 +2918,20 @@ if test x"$is_unix" = "xyes"; then
       ;;
   *)
       enable_parsid=no
+      enable_usbsid=no
       enable_hardsid=no
       enable_catweasel=no
       ;;
   esac
 
-  if test x"$enable_parsid" = "xyes" -o x"$enable_hardsid" != "xno" -o x"$enable_catweasel" = "xyes"; then
+  if test x"$enable_parsid" = "xyes" -o x"$enable_hardsid" != "xno" -o x"$enable_usbsid" = "xyes" -o x"$enable_catweasel" = "xyes"; then
 
     if test x"$with_libieee1284" = "xyes"; then
       LIBIEEE1284_HEADERS_PRESENT=yes
     else
       LIBIEEE1284_HEADERS_PRESENT=no
     fi
+    LINUX_USBSID_HEADER_PRESENT=yes
     LINUX_HARDSID_HEADER_PRESENT=yes
     LINUX_PARPORT_HEADERS_PRESENT=yes
     CATWEASEL_HEADER_PRESENT=yes
@@ -2932,6 +2946,7 @@ if test x"$is_unix" = "xyes"; then
     if test x"$with_libieee1284" = "xyes"; then
       AC_CHECK_HEADERS(ieee1284.h,,[LIBIEEE1284_HEADERS_PRESENT=no],)
     fi
+    AC_CHECK_HEADERS(libusb-1.0/libusb.h,,[LINUX_USBSID_HEADER_PRESENT=no],)
     AC_CHECK_HEADERS(linux/hardsid.h,,[LINUX_HARDSID_HEADER_PRESENT=no],)
     AC_CHECK_HEADERS(linux/ppdev.h linux/parport.h,,[LINUX_PARPORT_HEADERS_PRESENT=no],)
     AC_CHECK_HEADERS(dev/ppbus/ppi.h dev/ppbus/ppbconf.h,,[FREEBSD_PARPORT_HEADERS_PRESENT=no],)
@@ -2963,6 +2978,26 @@ if test x"$is_unix" = "xyes"; then
     else
       if test x"$with_libieee1284" = "xyes"; then
         AC_MSG_ERROR([libieee1284 header is missing])
+      fi
+    fi
+
+    if test x"$LINUX_USBSID_HEADER_PRESENT" = "xyes"; then
+      AC_CHECK_LIB(usb-1.0, libusb_init,[LIBS="-lusb-1.0 $LIBS"; USBSID_LIB_PRESENT=yes],,)
+      if test x"$PKG_CONFIG" != "x" -a x"$USBSID_LIB_PRESENT" = "xyes"; then
+        AC_MSG_CHECKING([if pkgconfig libusb-1.0 is present])
+        PKG_CHECK_MODULES(LIBUSB, [libusb-1.0], HAVE_LIBUSB_SUPPORT="yes")
+        if test x"$HAVE_LIBUSB_SUPPORT" = "xyes"; then
+          VICE_CFLAGS="$VICE_CFLAGS $LIBUSB_CFLAGS";
+          VICE_CPPFLAGS="$VICE_CPPFLAGS $LIBUSB_CFLAGS";
+          AC_DEFINE(HAVE_USB,,[Can we use the USB library?])
+          AC_MSG_RESULT([yes])
+        else
+          AC_MSG_RESULT([no])
+        fi
+      fi
+    else
+      if test x"$enable_usbsid" = "xyes"; then
+        AC_MSG_ERROR([usb-1.0 header is missing])
       fi
     fi
 
@@ -3016,6 +3051,11 @@ if test x"$is_unix" = "xyes"; then
         AM_CONDITIONAL(HAVE_CATWEASELMKIII, true)
         HAVE_CATWEASELMKIII_SUPPORT="yes"
       fi
+      if test x"$enable_usbsid" != "xno"; then
+        AC_DEFINE(HAVE_USBSID,,[Support for USBSID.])
+        AM_CONDITIONAL(HAVE_USBSID, true)
+        HAVE_USBSID_SUPPORT="yes"
+      fi
       if test x"$enable_hardsid" != "xno"; then
         AC_DEFINE(HAVE_HARDSID,,[Support for HardSID.])
         HAVE_HARDSID_SUPPORT="yes"
@@ -3024,6 +3064,10 @@ if test x"$is_unix" = "xyes"; then
       if test x"$enable_hardsid" != "xno" -a x"$LINUX_HARDSID_HEADER_PRESENT" = "xyes"; then
         AC_DEFINE(HAVE_HARDSID,,[Support for HardSID.])
         HAVE_HARDSID_SUPPORT="yes"
+      fi
+      if test x"$enable_usbsid" != "xno" -a x"$LINUX_USBSID_HEADER_PRESENT" = "xyes"; then
+        AC_DEFINE(HAVE_USBSID,,[Support for USBSID.])
+        HAVE_USBSID_SUPPORT="yes"
       fi
       if test x"$enable_catweasel" = "xyes" -a x"$CATWEASEL_HEADER_PRESENT" = "xyes"; then
         AC_DEFINE(HAVE_CATWEASELMKIII,,[Support for Catweasel MKIII.])
@@ -3043,6 +3087,10 @@ if test x"$is_unix" = "xyes"; then
 
     if test x"$enable_catweasel" = "xyes" -a x"$HAVE_CATWEASELMKIII_SUPPORT" != "xyes"; then
       AC_MSG_ERROR([CatWeaselMKIII support is missing])
+    fi
+
+    if test x"$enable_usbsid" = "xyes" -a x"$HAVE_USBSID_SUPPORT" != "xyes"; then
+      AC_MSG_ERROR([USBSID support is missing])
     fi
 
     if test x"$enable_hardsid" = "xyes" -a x"$HAVE_HARDSID_SUPPORT" != "xyes"; then
@@ -3754,6 +3802,7 @@ fi
 
 if test x"$real_arch" != "xOSX" -a x"$real_arch" != "xBeOS"; then
     echo "Catweasel MK3 support        : $HAVE_CATWEASELMKIII_SUPPORT (--enable/disable-catweasel)"
+    echo "USBSID support               : $HAVE_USBSID_SUPPORT (--enable/disable-usbsid)"
     echo "HardSID support              : $HAVE_HARDSID_SUPPORT (--enable/disable-hardsid)"
 fi
 

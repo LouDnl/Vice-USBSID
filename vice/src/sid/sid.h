@@ -44,7 +44,8 @@ enum {
     SID_ENGINE_RESID,
     SID_ENGINE_CATWEASELMKIII,
     SID_ENGINE_HARDSID,
-    SID_ENGINE_PARSID
+    SID_ENGINE_PARSID,
+    SID_ENGINE_USBSID  // TODO: CHECK AND FINISH
 };
 
 #define SID_ENGINE_DEFAULT       99
@@ -66,6 +67,9 @@ enum {
 
 /** \brief  Maximum number of supported SIDs for the ParSID engine */
 #define SID_ENGINE_PARSID_NUM_SIDS          1
+
+/** \brief  Maximum number of supported SIDs for the USBSID engine */
+#define SID_ENGINE_USBSID_NUM_SIDS          4  // TODO: CHECK AND FINISH
 
 enum {
     SID_RESID_SAMPLING_FAST = 0,
@@ -95,6 +99,7 @@ enum {
 #define SID_CATWEASELMKIII        (SID_ENGINE_CATWEASELMKIII << 8)
 #define SID_HARDSID               (SID_ENGINE_HARDSID << 8)
 #define SID_PARSID                (SID_ENGINE_PARSID << 8)
+#define SID_USBSID                (SID_ENGINE_USBSID << 8)  // TODO: CHECK AND FINISH ~ 1280
 
 #define SIDTYPE_SID       0
 #define SIDTYPE_SIDDTV    1
@@ -121,7 +126,7 @@ enum {
  * This can be the same as C64 in emulation, but PSID currently only manages 3
  * SIDs.
  */
-#define SID_MACHINE_MAX_SID_VSID    3
+#define SID_MACHINE_MAX_SID_VSID            3  /* NOTICE: More then 3 needs a change in PSID file handler  */
 
 
 #define RESID_6581_PASSBAND_MIN             0

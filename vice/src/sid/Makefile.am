@@ -32,6 +32,8 @@ libsid_a_SOURCES = \
 	fastsid.h \
 	hardsid.c \
 	parsid.c \
+	usbsid.c \
+	usbsid.h \
 	sid-cmdline-options.c \
 	sid-cmdline-options.h \
 	sid-resources.c \
