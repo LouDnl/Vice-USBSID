@@ -122,12 +122,12 @@ static const struct engine_s engine_match[] = {
     { "par", SID_PARSID },
     { "lpt", SID_PARSID },
 #endif
+#endif
 #ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
     { "1280", SID_USBSID },
     { "usbsid", SID_USBSID },
     { "usbs", SID_USBSID },
     { "us", SID_USBSID },
-#endif
 #endif
     { NULL, -1 }
 };
@@ -385,6 +385,7 @@ static char *build_sid_cmdline_option(int sid_type)
         old = new;
     }
 #endif
+#endif
 
 #ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
     /* add usbsid options if available */
@@ -393,7 +394,6 @@ static char *build_sid_cmdline_option(int sid_type)
         lib_free(old);
         old = new;
     }
-#endif
 #endif
 
     /* add ending bracket */

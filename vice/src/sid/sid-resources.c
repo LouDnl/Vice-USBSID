@@ -375,6 +375,7 @@ void sid_set_enable(int value)
     if (val) {
         sid_engine_set(SID_ENGINE_FASTSID);
     } else
+#endif
 
 #ifdef HAVE_USBSID
     if (val) {
@@ -382,7 +383,7 @@ void sid_set_enable(int value)
     } else
 #endif
 
-#endif
+
     {
         sid_engine_set(sid_engine);
     }

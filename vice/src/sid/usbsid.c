@@ -30,7 +30,7 @@
 /* #define DEBUG_USBSID */
 
 /* define to trace usbsid stuff without having a usbsid */
-/* #define DEBUG_usbsid_DUMMY */
+/* #define DEBUG_USBSID_DUMMY */
 
 #include <string.h>
 #include "vice.h"
@@ -88,7 +88,7 @@ int usbsid_close(void)
         usbsid_is_open = -1;
     }
     DBG(("usbsid_close usbsid_is_open=%d\n", usbsid_is_open));
-    return 0;
+    return usbsid_is_open;
 }
 
 void usbsid_reset(void)
@@ -107,7 +107,7 @@ int usbsid_read(uint16_t addr, int chipno)
         return val;
     }
 
-    return 0;
+    return usbsid_is_open;
 }
 
 void usbsid_store(uint16_t addr, uint8_t val, int chipno)
@@ -130,7 +130,7 @@ int usbsid_available(void)
     if (!usbsid_is_open) {
         return usbsid_drv_available();
     }
-    return 0;
+    return usbsid_is_open;
 }
 
 

@@ -60,12 +60,12 @@ static CLOCK usid_main_clk;
 static CLOCK usid_alarm_clk;
 static alarm_t *usid_alarm = 0;
 
-#define VENDOR_ID      0x5553
-#define PRODUCT_ID     0x4001
+#define VENDOR_ID      0xcafe
+#define PRODUCT_ID     0x4011
 #define ACM_CTRL_DTR   0x01
 #define ACM_CTRL_RTS   0x02
-static int ep_out_addr  = 0x02;
-static int ep_in_addr = 0x82;
+static int ep_out_addr = 0x02;
+static int ep_in_addr  = 0x82;
 static struct libusb_device_handle *devh = NULL;
 
 /* set line encoding: here 9600 8N1
@@ -76,9 +76,6 @@ static struct libusb_device_handle *devh = NULL;
 static unsigned char encoding[] = { 0x00, 0x10, 0x0E, 0x00, 0x00, 0x00, 0x08 };
 static int rc;
 static int actual_length;
-static int sz;
-static unsigned char outbuffer[4];
-static unsigned char inbuffer[32];
 
 static int sids_found = -1;
 static int usid_dev = -1;
@@ -86,6 +83,7 @@ static int usid_dev = -1;
 #define DEBUG_USBSID
 #ifdef DEBUG_USBSID
 #define UDBG(...) printf(__VA_ARGS__)
+// #define UDBG(...) log_message(LOG_DEFAULT, __VA_ARGS__)
 #else
 #define UDBG(...)
 #endif
@@ -107,24 +105,26 @@ static int usbsid_init(void)
     if (usid_dev >= 0) {
         return -1;
     }
-    rc = 0;
-    if (devh)
+    if (devh != NULL) {
         libusb_close(devh);
+    }
 
     /* Initialize libusb */
     rc = libusb_init(NULL);
-	if (rc < 0) {
-        log_error(LOG_ERR, "Error initializing libusb: %s\n", libusb_error_name(rc));
+	if (rc != 0) {
+        log_error(LOG_ERR, "Error initializing libusb: %s: %s\n",
+        libusb_error_name(rc), libusb_strerror(rc));
         goto out;
     }
 
 	/* Set debugging output to max level */
-	libusb_set_option(NULL, LIBUSB_OPTION_LOG_LEVEL, 3);
+	libusb_set_option(NULL, LIBUSB_OPTION_LOG_LEVEL, 0);
+	// libusb_set_option(NULL, LIBUSB_OPTION_LOG_LEVEL, 3);
 
 	/* Look for a specific device and open it */
 	devh = libusb_open_device_with_vid_pid(NULL, VENDOR_ID, PRODUCT_ID);
     if (!devh) {
-        log_error(LOG_ERR, "Error finding USB device\n");
+        log_error(LOG_ERR, "Error opening USB device with VID & PID: %d\n", rc);
         rc = -1;
         goto out;
     }
@@ -141,32 +141,30 @@ static int usbsid_init(void)
         }
         rc = libusb_claim_interface(devh, if_num);
         if (rc < 0) {
-            log_error(LOG_ERR, "Error claiming interface: %s\n",
-            libusb_error_name(rc));
+            log_error(LOG_ERR, "Error claiming interface: %d, %s: %s\n",
+            rc, libusb_error_name(rc), libusb_strerror(rc));
             goto out;
         }
     }
 
     /* Start configuring the device:
      * - set line state */
-    rc = libusb_control_transfer(devh, 0x21, 0x22, ACM_CTRL_DTR | ACM_CTRL_RTS,
-                                0, NULL, 0, 0);
-    if (rc < 0) {
-        log_error(LOG_ERR, "Error configuring line state during control transfer: %s\n",
-        libusb_error_name(rc));
+    rc = libusb_control_transfer(devh, 0x21, 0x22, ACM_CTRL_DTR | ACM_CTRL_RTS, 0, NULL, 0, 0);
+    if (rc != 0 && rc != 7) {
+        log_error(LOG_ERR, "?Error configuring line state during control transfer: %d, %s: %s\n",
+            rc, libusb_error_name(rc), libusb_strerror(rc));
         goto out;
     }
 
     /* - set line encoding here */
-    rc = libusb_control_transfer(devh, 0x21, 0x20, 0, 0, encoding,
-                                sizeof(encoding), 0);
-    if (rc < 0) {
-        log_error(LOG_ERR, "Error configuring line encoding during control transfer: %s\n",
-        libusb_error_name(rc));
+    rc = libusb_control_transfer(devh, 0x21, 0x20, 0, 0, encoding, sizeof(encoding), 0);
+    if (rc != 0 && rc != 7) {
+        log_error(LOG_ERR, "Error configuring line encoding during control transfer: %d, %s: %s\n",
+        rc, libusb_error_name(rc), libusb_strerror(rc));
         goto out;
     }
 
-    usid_dev = rc >= 0 ? rc : -1;
+    usid_dev = (rc == 0 || rc == 7) ? 0 : -1;
 
     if (usid_dev < 0)
     {
@@ -176,18 +174,16 @@ static int usbsid_init(void)
 
 	return usid_dev;
 out:
-    if (devh)
-        libusb_close(devh);
-    libusb_exit(NULL);
+    us_device_close();
     return rc;
 }
 
 void us_device_reset(void)
 {
     if (sids_found > 0) {
-        unsigned char data[4] = {0x0, 0x40, 0x0, 0x0};
+        unsigned char data[4] = {0x3, 0x0, 0x0, 0x0};
         int size = sizeof(data);
-        if (libusb_bulk_transfer(devh, ep_out_addr, data, size, &actual_length, 0) < 0)
+        if (libusb_bulk_transfer(devh, ep_in_addr, data, size, &actual_length, 0) < 0)
         {
             log_message(LOG_ERR, "Error while sending reset to sid\n");
         }
@@ -205,16 +201,22 @@ int us_device_open(void)
     }
 
     if (sids_found > 0) {
-        return 0;
+        return sids_found;
     }
 
     sids_found = 0;
 
     log_message(LOG_DEFAULT, "Detecting Linux usbsid boards.");
 
-    if (usbsid_init() < 0) {
-        return -1;
+    if (usid_dev != 0) {
+        rc = usbsid_init();
+        if (rc != 0) {
+            return -1;
+        }
     }
+
+    log_message(LOG_DEFAULT, "Linux usbsid boards detected [rc]%d [usid_dev]%d [sids_found]%d\n", rc, usid_dev, sids_found);
+
     usid_alarm = alarm_new(maincpu_alarm_context, "usbsid", usbsid_alarm_handler, 0);
     sids_found = 1;
     usbsid_reset(); /* eventually calls us_device_reset  */
@@ -222,7 +224,7 @@ int us_device_open(void)
     /* zero length read to clear any lingering data */
     int transferred = 0;
     unsigned char buffer[1];
-    const auto res = libusb_bulk_transfer(devh, 0x82, buffer, 0, &transferred, 1);
+    libusb_bulk_transfer(devh, ep_out_addr, buffer, 0, &transferred, 1);
 
     log_message(LOG_DEFAULT, "Linux usbsid: opened.");
 
@@ -243,27 +245,36 @@ int us_device_open(void)
 int us_device_close(void)
 {
     /* Driver cleans up after itself */
-    if (usid_dev >= 0) {
-        if (devh)
-            libusb_close(devh);
-        libusb_exit(NULL);
+    for (int if_num = 0; if_num < 2; if_num++) {
+        libusb_release_interface(devh, if_num);
+        if (libusb_kernel_driver_active(devh, if_num)) {
+            libusb_detach_kernel_driver(devh, if_num);
+        }
     }
+    libusb_close(devh);
+    libusb_exit(NULL);
     alarm_destroy(usid_alarm);
+    /* Clean up vars */
     usid_alarm = 0;
     sids_found = -1;
+    usid_dev = -1;
+    rc = -1;
+    devh = NULL;
     log_message(LOG_DEFAULT, "Linux usbsid: closed.");
     return 0;
 }
-
+#include "maincpu.h"
 int us_device_read(uint16_t addr, int chipno)
 {
     if (chipno < MAXSID && usid_dev >= 0)
     {
+        CLOCK cycles = maincpu_clk - usid_main_clk - 1;
+        usid_main_clk = maincpu_clk;
         unsigned char data[4];  /* Read buffer where each byte should be the same value */
         memset(data, 0, sizeof data);
         addr &= 0x1F;                                 /* remove address limitation */
         addr = (addr + (chipno * 0x20));
-        unsigned char wdata[4] = {0x0, 0xD4, addr, 0x0};  /* set addr write data for read */  /* NOTICE: addr is limited to $D400 range */
+        unsigned char wdata[4] = {0x1, 0xD4, addr, 0x0};  /* set addr write data for read */  /* NOTICE: addr is limited to $D400 range */
         int actual_lengthw;  /* Stores the actual length of the read data */
         if (libusb_bulk_transfer(devh, ep_out_addr, wdata, sizeof(wdata), &actual_lengthw, 0) < 0)
         {
@@ -274,13 +285,13 @@ int us_device_read(uint16_t addr, int chipno)
         rc = 0;
         rc = libusb_bulk_transfer(devh, ep_in_addr, data, sizeof(data), &actual_lengthr, 1000);
         if (rc == LIBUSB_ERROR_TIMEOUT) {
-            log_message(LOG_DEFAULT, "Timeout (%d)\n", actual_lengthr);
+            log_message(LOG_ERR, "Timeout (%d)\n", actual_lengthr);
             return -1;
         } else if (rc < 0) {
-            log_message(LOG_DEFAULT, "Error while waiting for char\n");
+            log_message(LOG_ERR, "Error while waiting for char\n");
             return -1;
         }
-        UDBG("[S#]%d RCV[0x%02x] (0b"PRINTF_BINARY_PATTERN_INT8")\r\n", chipno, data[0], PRINTF_BYTE_TO_BINARY_INT8(data[0]));
+        UDBG("RCV[0x%02x] (0b"PRINTF_BINARY_PATTERN_INT8") [C]%lu\r\n", data[0], PRINTF_BYTE_TO_BINARY_INT8(data[0]), cycles);
         return data[0];
     }
     return 0;
@@ -289,19 +300,20 @@ int us_device_read(uint16_t addr, int chipno)
 void us_device_store(uint16_t addr, uint8_t val, int chipno) /* max chipno = 1 */
 {
     if (chipno < MAXSID && usid_dev >= 0) {  /* remove 0x20 address limitation */
+        CLOCK cycles = maincpu_clk - usid_main_clk - 1;
+        usid_main_clk = maincpu_clk;
         #ifdef DEBUG_USBSIDMEM
         memory[(0xD400 | addr)] = val;
         #endif
         addr &= 0x1F;
         addr = (addr + (chipno * 0x20));
-        unsigned char data[4] = {0x10, 0xD4, addr, val}; /* NOTICE: addr is limited to $D400 range */
+        unsigned char data[4] = {0x0, 0xD4, addr, val}; /* NOTICE: addr is limited to $D400 range */
         int size = sizeof(data);
-        if (libusb_bulk_transfer(devh, ep_out_addr, data, size,
-                                &actual_length, 0) < 0)
+        if (libusb_bulk_transfer(devh, ep_out_addr, data, size, &actual_length, 0) < 0)
         {
-            log_message(LOG_DEFAULT, "Error while sending char\n");
+            log_message(LOG_ERR, "Error while sending char\n");
         }
-        UDBG("[S#]%d WR@[0x%02x] (0b"PRINTF_BINARY_PATTERN_INT8") DAT[0x%02x] (0b"PRINTF_BINARY_PATTERN_INT8")\r\n", chipno, addr, PRINTF_BYTE_TO_BINARY_INT8(addr), val, PRINTF_BYTE_TO_BINARY_INT8(val));
+        UDBG("[S#]%d WR@[0x%02x] (0b"PRINTF_BINARY_PATTERN_INT8") DAT[0x%02x] (0b"PRINTF_BINARY_PATTERN_INT8") [C]%lu\r\n", chipno, addr, PRINTF_BYTE_TO_BINARY_INT8(addr), val, PRINTF_BYTE_TO_BINARY_INT8(val), cycles);
         #ifdef DEBUG_USBSIDMEM
         MDBG("one single memwrite ~ addr: %04x byte: %04x phyaddr: %04x | Synth 1: $%02X%02X %02X%02X %02X %02X %02X | Synth 2: $%02X%02X %02X%02X %02X %02X %02X | Synth 3: $%02X%02X %02X%02X %02X %02X %02X\n",
 		addr, val, laddr,
@@ -324,7 +336,7 @@ static void usbsid_alarm_handler(CLOCK offset, void *data)
     if (cycles < USBSID_DELAY_CYCLES) {
         usid_alarm_clk = usid_main_clk + USBSID_DELAY_CYCLES;
     } else {
-        uint delay = (uint) cycles;
+        /* uint delay = (uint) cycles; */
         usid_main_clk   = maincpu_clk - offset;
         usid_alarm_clk  = usid_main_clk + USBSID_DELAY_CYCLES;
     }
