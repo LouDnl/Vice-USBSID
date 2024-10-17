@@ -87,6 +87,9 @@ static int sid_engine;
 static int sid_hardsid_main;
 static int sid_hardsid_right;
 #endif
+#ifdef HAVE_USBSID
+static int sid_usbsid_async;
+#endif
 
 static int set_sid_engine(int set_engine, void *param)
 {
@@ -360,6 +363,16 @@ static int set_sid_hardsid_right(int val, void *param)
 }
 #endif
 
+#ifdef HAVE_USBSID
+static int set_sid_usbsid_async(int val, void *param)
+{
+    sid_usbsid_async = (unsigned int)val;
+    usbsid_set_async(sid_usbsid_async);
+
+    return 0;
+}
+#endif
+
 #ifdef HAVE_RESID
 static int sid_enabled = 1;
 
@@ -382,7 +395,6 @@ void sid_set_enable(int value)
         sid_engine_set(SID_ENGINE_USBSID);
     } else
 #endif
-
 
     {
         sid_engine_set(sid_engine);
@@ -443,6 +455,14 @@ static const resource_int_t hardsid_resources_int[] = {
 };
 #endif
 
+#ifdef HAVE_USBSID
+static const resource_int_t usbsid_resources_int[] = {
+    { "SidUSBSIDAsync", 0, RES_EVENT_STRICT, NULL,
+      &sid_usbsid_async, set_sid_usbsid_async, NULL },
+    RESOURCE_INT_LIST_END
+};
+#endif
+
 static const resource_int_t stereo_resources_int[] = {
     { "SidStereo", 0, RES_EVENT_SAME, NULL,
       &sid_stereo, set_sid_stereo, NULL },
@@ -477,6 +497,14 @@ int sid_common_resources_init(void)
 #ifdef HAVE_HARDSID
     if (hardsid_available()) {
         if (resources_register_int(hardsid_resources_int) < 0) {
+            return -1;
+        }
+    }
+#endif
+
+#ifdef HAVE_USBSID
+    if (usbsid_available()) {
+        if (resources_register_int(usbsid_resources_int) < 0) {
             return -1;
         }
     }
@@ -570,12 +598,10 @@ static sid_engine_model_t sid_engine_models_parsid[] = {
 #endif
 
 #ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
-// #if !defined(WINDOWS_COMPILE)
 static sid_engine_model_t sid_engine_models_usbsid[] = {
-    { "USBSID", SID_USBSID },
+    { "USBSID-Pico", SID_USBSID },
     { NULL, -1 }
 };
-// #endif
 #endif
 
 static void add_sid_engine_models(sid_engine_model_t *sid_engine_models)
@@ -626,8 +652,7 @@ sid_engine_model_t **sid_get_engine_model_list(void)
 #endif
 #endif
 
-#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
-// #if !defined(WINDOWS_COMPILE)
+#ifdef HAVE_USBSID
     if (usbsid_available()) {
         add_sid_engine_models(sid_engine_models_usbsid);
     }
@@ -645,7 +670,7 @@ static int sid_check_engine_model(int engine, int model)
         case SID_ENGINE_CATWEASELMKIII:
         case SID_ENGINE_HARDSID:
         case SID_ENGINE_PARSID:
-        case SID_ENGINE_USBSID:  // TODO: CHECK AND FINISH
+        case SID_ENGINE_USBSID:
             return 0;
         default:
             break;

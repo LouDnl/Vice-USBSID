@@ -33,6 +33,7 @@ sudo apt install autoconf automake build-essential byacc flex xa65 gawk libgtk-3
        --enable-x64-image \
        --disable-hardsid \
        --enable-usbsid \
+       --enable-midi \
        --with-pulse \
        --with-alsa \
        --with-resid
@@ -53,6 +54,9 @@ sudo apt install autoconf automake build-essential byacc flex xa65 gawk libgtk-3
     # Now you can run vice directly
     x64sc
     vice
+    # Optional commandline options
+    -sidenginemodel usbsid  # enables USBSID (available in settings menu too)
+    -usbsidasync 1  # enable async writing ~ disables reading
 ```
 
 # VICE GitHub Mirror

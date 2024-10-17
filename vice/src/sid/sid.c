@@ -1025,7 +1025,8 @@ static void set_sound_func(void)
         if (sid_engine_type == SID_ENGINE_USBSID) {
             sid_read_func = usbsid_read;
             sid_store_func = usbsid_store;
-            sid_dump_func = NULL; /* TODO: usbsid dump */
+            // sid_dump_func = NULL; /* TODO: usbsid dump */
+            sid_dump_func = sound_dump;
         }
 #endif
     } else {
@@ -1130,9 +1131,9 @@ void sid_set_machine_parameter(long clock_rate)
 #ifdef HAVE_HARDSID
     hardsid_set_machine_parameter(clock_rate);
 #endif
-// #ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
-//     usbsid_set_machine_parameter(clock_rate);
-// #endif
+#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+    usbsid_set_machine_parameter(clock_rate);
+#endif
 }
 
 

@@ -27,11 +27,6 @@
  *
  */
 
-/* #define DEBUG_USBSID */
-
-/* define to trace usbsid stuff without having a usbsid */
-/* #define DEBUG_USBSID_DUMMY */
-
 #include <string.h>
 #include "vice.h"
 
@@ -45,16 +40,21 @@
 #include "types.h"
 #include "log.h"
 
+/* #define DEBUG_USBSID */
+
+/* define to trace usbsid stuff without having a usbsid */
+/* #define DEBUG_USBSID_DUMMY */
+
 #if defined(DEBUG_USBSID_DUMMY)
 
 #define usbsid_drv_available() 1
-#define usbsid_drv_reset() printf("usbsid_drv_reset\n")
-#define usbsid_drv_open() (printf("usbsid_drv_open\n"), 0)
-#define usbsid_drv_close() printf("usbsid_drv_close\n")
-#define usbsid_drv_read(addr, chipno)  (printf("usbsid_drv_read addr:%02x chip:%d\n", addr, chipno), 1)
-#define usbsid_drv_store(addr, val, chipno) printf("usbsid_drv_store addr:%02x val:%02x chip:%d\n", addr, val, chipno)
-#define usbsid_drv_state_read(chipno, sid_state) printf("usbsid_drv_state_read chip:%d sid_state:%p\n", chipno, sid_state)
-#define usbsid_drv_state_write(chipno, sid_state) printf("usbsid_drv_state_write chip:%d sid_state:%p\n", chipno, sid_state)
+#define usbsid_drv_reset() printf("[USBSID] usbsid_drv_reset\n")
+#define usbsid_drv_open() (printf("[USBSID] usbsid_drv_open\n"), 0)
+#define usbsid_drv_close() printf("[USBSID] usbsid_drv_close\n")
+#define usbsid_drv_read(addr, chipno)  (printf("[USBSID] usbsid_drv_read addr:%02x chip:%d\n", addr, chipno), 1)
+#define usbsid_drv_store(addr, val, chipno) printf("[USBSID] usbsid_drv_store addr:%02x val:%02x chip:%d\n", addr, val, chipno)
+#define usbsid_drv_state_read(chipno, sid_state) printf("[USBSID] usbsid_drv_state_read chip:%d sid_state:%p\n", chipno, sid_state)
+#define usbsid_drv_state_write(chipno, sid_state) printf("[USBSID] usbsid_drv_state_write chip:%d sid_state:%p\n", chipno, sid_state)
 
 #endif
 
@@ -71,6 +71,7 @@ static uint8_t sidbuf[0x20 * US_MAXSID];
 
 int usbsid_open(void)
 {
+    printf("[USBSID] %s %d\r\n", __func__, usbsid_is_open);
     if (usbsid_is_open) {
         usbsid_is_open = usbsid_drv_open();
         memset(sidbuf, 0, sizeof(sidbuf));
@@ -83,6 +84,7 @@ int usbsid_open(void)
 
 int usbsid_close(void)
 {
+    printf("[USBSID] %s %d\r\n", __func__, usbsid_is_open);
     if (!usbsid_is_open) {
         usbsid_drv_close();
         usbsid_is_open = -1;
@@ -93,6 +95,7 @@ int usbsid_close(void)
 
 void usbsid_reset(void)
 {
+    printf("[USBSID] %s %d\r\n", __func__, usbsid_is_open);
     if (!usbsid_is_open) {
         usbsid_drv_reset();
     }
@@ -115,14 +118,19 @@ void usbsid_store(uint16_t addr, uint8_t val, int chipno)
     if (!usbsid_is_open && chipno < US_MAXSID) {
         /* write to sidbuf[] for write-only registers */
         sidbuf[(chipno * 0x20) + addr] = val;
-        DBG(("[W]@0x%04x [S]%d [?]%d\r\n", addr, chipno, addr +(chipno * 0x20)));
+        DBG(("[W]@0x%04x [S]%d [?]%d\r\n", addr, chipno, addr + (chipno * 0x20)));
         usbsid_drv_store(addr, val, chipno);
     }
 }
 
+void usbsid_set_machine_parameter(long cycles_per_sec)
+{
+    usbsid_drv_set_machine_parameter(cycles_per_sec);
+}
 
 int usbsid_available(void)
 {
+    printf("[USBSID] %s %d\r\n", __func__, usbsid_is_open);
     if (usbsid_is_open) {
         usbsid_open();
     }
@@ -133,33 +141,40 @@ int usbsid_available(void)
     return usbsid_is_open;
 }
 
+void usbsid_set_async(unsigned int val)
+{
+    if (!usbsid_is_open) {
+        usbsid_drv_set_async(val);
+    }
+}
 
 /* ---------------------------------------------------------------------*/
 
-// void usbsid_state_read(int chipno, struct sid_us_snapshot_state_s *sid_state)
-// {
-//     int i;
+void usbsid_state_read(int chipno, struct sid_us_snapshot_state_s *sid_state)
+{
+    printf("[USBSID] %s\r\n", __func__);
+    int i;
 
-//     if (chipno < US_MAXSID) {
-//         for (i = 0; i < 32; ++i) {
-//             sid_state->regs[i] = sidbuf[i + (chipno * 0x20)];
-//         }
-//         us_device_state_read(chipno, sid_state);
-//     }
-// }
+    if (chipno < US_MAXSID) {
+        for (i = 0; i < 32; ++i) {
+            sid_state->regs[i] = sidbuf[i + (chipno * 0x20)];
+        }
+        usbsid_drv_state_read(chipno, sid_state);
+    }
+}
 
-// void usbsid_state_write(int chipno, struct sid_us_snapshot_state_s *sid_state)
-// {
-//     int i;
+void usbsid_state_write(int chipno, struct sid_us_snapshot_state_s *sid_state)
+{
+    printf("[USBSID] %s\r\n", __func__);
+    int i;
 
-//     if (chipno < US_MAXSID) {
-//         for (i = 0; i < 32; ++i) {
-//             sidbuf[i + (chipno * 0x20)] = sid_state->regs[i];
-//         }
-//         // usbsid_store(chipno, sid_state);
-//         us_device_state_write(chipno, sid_state);
-//     }
-// }
+    if (chipno < US_MAXSID) {
+        for (i = 0; i < 32; ++i) {
+            sidbuf[i + (chipno * 0x20)] = sid_state->regs[i];
+        }
+        usbsid_drv_state_write(chipno, sid_state);
+    }
+}
 #else
 int usbsid_available(void)
 {

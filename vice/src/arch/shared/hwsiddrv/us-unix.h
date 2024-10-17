@@ -45,10 +45,14 @@ int us_device_read(uint16_t addr, int chipno);
 
 void us_device_store(uint16_t addr, uint8_t val, int chipno);
 
+void us_set_machine_parameter(long cycles_per_sec);
+
 unsigned int us_device_available(void);
 
-// void us_device_state_read(int chipno, struct sid_us_snapshot_state_s *sid_state);
+void us_device_set_async(unsigned int val);
 
-// void us_device_state_write(int chipno, struct sid_us_snapshot_state_s *sid_state);
+void us_device_state_read(int chipno, struct sid_us_snapshot_state_s *sid_state);
+
+void us_device_state_write(int chipno, struct sid_us_snapshot_state_s *sid_state);
 
 #endif

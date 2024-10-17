@@ -63,16 +63,13 @@ int usbsid_drv_close(void)
 
 void usbsid_drv_reset(void)
 {
-
     if (use_us_device) {
         us_device_reset();
     }
-
 }
 
 int usbsid_drv_read(uint16_t addr, int chipno)
 {
-
     if (use_us_device) {
         return us_device_read(addr, chipno);
     }
@@ -82,11 +79,16 @@ int usbsid_drv_read(uint16_t addr, int chipno)
 
 void usbsid_drv_store(uint16_t addr, uint8_t val, int chipno)
 {
-
     if (use_us_device) {
         us_device_store(addr, val, chipno);
     }
+}
 
+void usbsid_drv_set_machine_parameter(long cycles_per_sec)
+{
+    if (use_us_device) {
+        us_set_machine_parameter(cycles_per_sec);
+    }
 }
 
 int usbsid_drv_available(void)
@@ -97,6 +99,27 @@ int usbsid_drv_available(void)
     }
 
     return 0;
+}
+
+void usbsid_drv_set_async(unsigned int val)
+{
+    if (use_us_device) {
+        us_device_set_async(val);
+    }
+}
+
+void usbsid_drv_state_read(int chipno, struct sid_us_snapshot_state_s *sid_state)
+{
+    if (use_us_device) {
+        us_device_state_read(chipno, sid_state);
+    }
+}
+
+void usbsid_drv_state_write(int chipno, struct sid_us_snapshot_state_s *sid_state)
+{
+    if (use_us_device) {
+        us_device_state_write(chipno, sid_state);
+    }
 }
 
 #endif
