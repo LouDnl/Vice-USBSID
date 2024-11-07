@@ -1,5 +1,5 @@
-#/bin/bash
-# in case you need to rebuild the container image use: 
+#!/bin/bash
+# in case you need to rebuild the container image use:
 #   docker build --tag vice-buildcontainer:0.3 .
 
 if test x"$1" = "x" ; then
@@ -34,7 +34,7 @@ while [ x"$1" != "x" ] ; do
     shift
 done
 
-# check sanity of checkout tree 
+# check sanity of checkout tree
 if [ ! -e ${base}/vice/configure ] ; then
     echo "${base} is not a valid vice checkout directory"
     exit 1
@@ -46,8 +46,7 @@ docker run -a STDOUT -a STDERR -it \
        --env HOME='/tmp' \
        --name vice-build \
        --mount type=bind,source="${base}",target=/vice \
-       vice-buildcontainer:0.3 \
+       vice-buildcontainer:0.33 \
        ${cmd}
-
 
 docker rm vice-build
