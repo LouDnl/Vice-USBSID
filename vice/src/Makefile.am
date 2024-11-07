@@ -268,6 +268,7 @@ noinst_HEADERS = \
 	uicmdline.h \
 	uicolor.h \
 	uimon.h \
+	usbsid.h \
 	util.h \
 	version.h.in \
 	version.h \

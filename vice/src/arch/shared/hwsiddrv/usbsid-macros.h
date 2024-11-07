@@ -24,8 +24,11 @@
  *
  */
 #pragma once
+
 #ifndef VICE_USBSID_MACROS_H
 #define VICE_USBSID_MACROS_H
+
+#ifdef HAVE_USBSID
 
 #include <stdio.h>
 
@@ -56,4 +59,5 @@
     PRINTF_BYTE_TO_BINARY_INT32((i) >> 32), PRINTF_BYTE_TO_BINARY_INT32(i)
 /* --- end macros --- */
 
+#endif /* HAVE_USBSID */
 #endif /* VICE_USBSID_MACROS_H */

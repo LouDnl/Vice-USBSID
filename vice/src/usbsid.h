@@ -27,6 +27,7 @@
  */
 #ifndef VICE_USBSID_H
 #define VICE_USBSID_H
+
 #ifdef HAVE_USBSID
 #include "sid-snapshot.h"
 #include "types.h"
@@ -57,5 +58,5 @@ void usbsid_state_write(int chipno, struct sid_us_snapshot_state_s *sid_state);
 void usbsid_drv_state_read(int chipno, struct sid_us_snapshot_state_s *sid_state);
 void usbsid_drv_state_write(int chipno, struct sid_us_snapshot_state_s *sid_state);
 
-#endif
-#endif
+#endif /* HAVE_USBSID */
+#endif /* VICE_USBSID_H */

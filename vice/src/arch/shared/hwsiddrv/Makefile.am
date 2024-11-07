@@ -38,6 +38,11 @@ HWSIDDRIVERS += \
 	parsid-win32-drv.o \
 	ps-ieee1284.o
 endif HAVE_PARSID
+if HAVE_USBSID
+HWSIDDRIVERS += \
+	usbsid-unixwin-drv.o \
+	us-unixwin-device.o
+endif HAVE_USBSID
 endif WINDOWS_COMPILE
 
 if BEOS_COMPILE
@@ -66,8 +71,8 @@ HWSIDDRIVERS += \
 endif HAVE_PARSID
 if HAVE_USBSID
 HWSIDDRIVERS += \
-	usbsid-unix-drv.o \
-	us-unix-device.o
+	usbsid-unixwin-drv.o \
+	us-unixwin-device.o
 endif HAVE_USBSID
 endif UNIX_COMPILE
 
@@ -86,8 +91,8 @@ EXTRA_libhwsiddrv_a_SOURCES = \
 	parsid-win32-drv.c \
 	ps-ieee1284.c \
 	ps-unix-file.c \
-	usbsid-unix-drv.c \
-	us-unix-device.c
+	usbsid-unixwin-drv.c \
+	us-unixwin-device.c
 
 EXTRA_DIST = \
 	cw-unix.h \
@@ -96,7 +101,7 @@ EXTRA_DIST = \
 	hs-win32.h \
 	ps-unix.h \
 	ps-win32.h \
-	us-unix.h
+	us-unixwin.h
 
 # Always built:
 # (needs to be declared empty to avoid `make` to try to build libhwsiddrv.o

@@ -29,12 +29,12 @@
 
 #include "vice.h"
 
-#ifdef UNIX_COMPILE
+#if defined(UNIX_COMPILE) || defined(WINDOWS_COMPILE)
 
 #ifdef HAVE_USBSID
 
 #include "usbsid.h"
-#include "us-unix.h"
+#include "us-unixwin.h"
 #include "types.h"
 
 static int use_us_device = 0;
@@ -122,5 +122,5 @@ void usbsid_drv_state_write(int chipno, struct sid_us_snapshot_state_s *sid_stat
     }
 }
 
-#endif
-#endif
+#endif /* HAVE_USBSID */
+#endif /* UNIX_COMPILE || WINDOWS_COMPILE */

@@ -27,11 +27,14 @@
  *
  */
 
-#ifndef VICE_US_UNIX_H
-#define VICE_US_UNIX_H
+#ifndef VICE_US_UNIXWIN_H
+#define VICE_US_UNIXWIN_H
 
 #include "sid-snapshot.h"
 #include "types.h"
+
+#pragma GCC push_options
+#pragma GCC optimize ("O3")
 
 #define US_MAXSID 4
 
@@ -55,4 +58,6 @@ void us_device_state_read(int chipno, struct sid_us_snapshot_state_s *sid_state)
 
 void us_device_state_write(int chipno, struct sid_us_snapshot_state_s *sid_state);
 
-#endif
+#pragma GCC pop_options
+
+#endif /* VICE_US_UNIXWIN_H */

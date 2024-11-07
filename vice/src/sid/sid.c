@@ -178,8 +178,6 @@ static uint8_t sid_read_chip(uint16_t addr, int chipno)
     int val = -1;
 
     addr &= 0x1f;
-    // addr &= 0xFF;
-    // addr &= 0x3f;
 
     machine_handle_pending_alarms(0);
 
@@ -229,7 +227,6 @@ static uint8_t sid_read_chip(uint16_t addr, int chipno)
             }
         }
     }
-
     lastsidread = val;
     return val;
 }
@@ -965,7 +962,7 @@ int sid_sound_machine_cycle_based(void)
             return 0;
 #endif
 #endif
-#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+#ifdef HAVE_USBSID
         case SID_ENGINE_USBSID:
             return 0;
 #endif
@@ -1021,12 +1018,11 @@ static void set_sound_func(void)
         }
 #endif
 #endif
-#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+#ifdef HAVE_USBSID
         if (sid_engine_type == SID_ENGINE_USBSID) {
             sid_read_func = usbsid_read;
             sid_store_func = usbsid_store;
-            // sid_dump_func = NULL; /* TODO: usbsid dump */
-            sid_dump_func = sound_dump;
+            sid_dump_func = NULL; /* TODO: usbsid dump */
         }
 #endif
     } else {
@@ -1083,7 +1079,7 @@ int sid_engine_set(int engine)
     }
 #endif
 #endif
-#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+#ifdef HAVE_USBSID
     if (engine == SID_ENGINE_USBSID
         && sid_engine_type != SID_ENGINE_USBSID) {
         if (usbsid_open() < 0) {
@@ -1131,7 +1127,7 @@ void sid_set_machine_parameter(long clock_rate)
 #ifdef HAVE_HARDSID
     hardsid_set_machine_parameter(clock_rate);
 #endif
-#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+#ifdef HAVE_USBSID
     usbsid_set_machine_parameter(clock_rate);
 #endif
 }
@@ -1157,7 +1153,7 @@ int sid_engine_get_max_sids(int engine)
             return SID_ENGINE_CATWEASELMKIII_NUM_SIDS;
         case SID_ENGINE_HARDSID:
             return SID_ENGINE_HARDSID_NUM_SIDS;
-        case SID_ENGINE_USBSID:  // TODO: CHECK AND FINISH
+        case SID_ENGINE_USBSID:
             return SID_ENGINE_USBSID_NUM_SIDS;
 #if !defined(WINDOWS_COMPILE) || (defined(WINDOWS_COMPILE) && defined(HAVE_LIBIEEE1284))
         case SID_ENGINE_PARSID:

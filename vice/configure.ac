@@ -800,9 +800,34 @@ if test x"$is_win32" = "xyes" -o x"$is_win32_gtk3" = "xyes"; then
     HAVE_CATWEASELMKIII_SUPPORT="yes"
   fi
   if test x"$enable_usbsid" != "xno"; then
+    WIN32_USBSID_HEADER_PRESENT=yes
+
+    dnl Check for needed libusb headers
+    AC_CHECK_HEADERS(libusb-1.0/libusb.h,,[WIN32_USBSID_HEADER_PRESENT=no],)
+
     AC_DEFINE(HAVE_USBSID,,[Support for USBSID.])
     AM_CONDITIONAL(HAVE_USBSID, true)
     HAVE_USBSID_SUPPORT="yes"
+
+    if test x"$WIN32_USBSID_HEADER_PRESENT" = "xyes"; then
+      AC_CHECK_LIB(usb-1.0, libusb_init,[LIBS="-lusb-1.0 $LIBS"; USBSID_LIB_PRESENT=yes],,)
+      if test x"$PKG_CONFIG" != "x" -a x"$USBSID_LIB_PRESENT" = "xyes"; then
+        AC_MSG_CHECKING([if pkgconfig libusb-1.0 is present])
+        PKG_CHECK_MODULES(LIBUSB, [libusb-1.0], HAVE_LIBUSB_SUPPORT="yes")
+        if test x"$HAVE_LIBUSB_SUPPORT" = "xyes"; then
+          VICE_CFLAGS="$VICE_CFLAGS $LIBUSB_CFLAGS";
+          VICE_CPPFLAGS="$VICE_CPPFLAGS $LIBUSB_CFLAGS";
+          AC_DEFINE(HAVE_USB,,[Can we use the USB library?])
+          AC_MSG_RESULT([yes])
+        else
+          AC_MSG_RESULT([no])
+        fi
+      fi
+    else
+      if test x"$enable_usbsid" = "xyes"; then
+        AC_MSG_ERROR([usb-1.0 header is missing])
+      fi
+    fi
   fi
   if test x"$enable_hardsid" != "xno"; then
     AC_DEFINE(HAVE_HARDSID,,[Support for HardSID.])
@@ -3067,6 +3092,7 @@ if test x"$is_unix" = "xyes"; then
       fi
       if test x"$enable_usbsid" != "xno" -a x"$LINUX_USBSID_HEADER_PRESENT" = "xyes"; then
         AC_DEFINE(HAVE_USBSID,,[Support for USBSID.])
+        AM_CONDITIONAL(HAVE_USBSID, true)
         HAVE_USBSID_SUPPORT="yes"
       fi
       if test x"$enable_catweasel" = "xyes" -a x"$CATWEASEL_HEADER_PRESENT" = "xyes"; then

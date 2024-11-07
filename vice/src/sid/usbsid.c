@@ -30,8 +30,8 @@
 #include <string.h>
 #include "vice.h"
 
+#if defined(UNIX_COMPILE) || defined(WINDOWS_COMPILE)
 #ifdef HAVE_USBSID
-// TODO: CHECK AND FINISH
 
 #include <stdio.h>
 
@@ -71,31 +71,31 @@ static uint8_t sidbuf[0x20 * US_MAXSID];
 
 int usbsid_open(void)
 {
-    printf("[USBSID] %s %d\r\n", __func__, usbsid_is_open);
+    DBG(("[USBSID] %s %d\r\n", __func__, usbsid_is_open));
     if (usbsid_is_open) {
         usbsid_is_open = usbsid_drv_open();
         memset(sidbuf, 0, sizeof(sidbuf));
     }
     if (usbsid_is_open == -1)
-        log_error(LOG_ERR, "Failed to open USBSID\r\n");
-    DBG(("usbsid_open usbsid_is_open=%d\n", usbsid_is_open));
+        log_error(LOG_ERR, "[USBSID] Failed to open USBSID\r\n");
+    DBG(("[USBSID] usbsid_open usbsid_is_open=%d\n", usbsid_is_open));
     return usbsid_is_open;
 }
 
 int usbsid_close(void)
 {
-    printf("[USBSID] %s %d\r\n", __func__, usbsid_is_open);
+    DBG(("[USBSID] %s %d\r\n", __func__, usbsid_is_open));
     if (!usbsid_is_open) {
         usbsid_drv_close();
         usbsid_is_open = -1;
     }
-    DBG(("usbsid_close usbsid_is_open=%d\n", usbsid_is_open));
+    DBG(("[USBSID] usbsid_close usbsid_is_open=%d\n", usbsid_is_open));
     return usbsid_is_open;
 }
 
 void usbsid_reset(void)
 {
-    printf("[USBSID] %s %d\r\n", __func__, usbsid_is_open);
+    DBG(("[USBSID] %s %d\r\n", __func__, usbsid_is_open));
     if (!usbsid_is_open) {
         usbsid_drv_reset();
     }
@@ -130,7 +130,7 @@ void usbsid_set_machine_parameter(long cycles_per_sec)
 
 int usbsid_available(void)
 {
-    printf("[USBSID] %s %d\r\n", __func__, usbsid_is_open);
+    DBG(("[USBSID] %s %d\r\n", __func__, usbsid_is_open));
     if (usbsid_is_open) {
         usbsid_open();
     }
@@ -152,7 +152,7 @@ void usbsid_set_async(unsigned int val)
 
 void usbsid_state_read(int chipno, struct sid_us_snapshot_state_s *sid_state)
 {
-    printf("[USBSID] %s\r\n", __func__);
+    DBG(("[USBSID] %s\r\n", __func__));
     int i;
 
     if (chipno < US_MAXSID) {
@@ -165,7 +165,7 @@ void usbsid_state_read(int chipno, struct sid_us_snapshot_state_s *sid_state)
 
 void usbsid_state_write(int chipno, struct sid_us_snapshot_state_s *sid_state)
 {
-    printf("[USBSID] %s\r\n", __func__);
+    DBG(("[USBSID] %s\r\n", __func__));
     int i;
 
     if (chipno < US_MAXSID) {
@@ -180,4 +180,6 @@ int usbsid_available(void)
 {
     return 0;
 }
-#endif
+
+#endif /* HAVE_USBSID */
+#endif /* UNIX_COMPILE || WINDOWS_COMPILE */
