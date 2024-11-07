@@ -144,7 +144,7 @@ static void on_save_response(GtkDialog *self, gint response, gpointer data)
                 result = cartridge_save_secondary_image(state->cart_id, filename);
                 break;
             default:
-                log_error(LOG_ERR,
+                log_error(LOG_DEFAULT,
                           "%s(): saving of %s cartridge image is not implemented.",
                           __func__, tag_defaults[state->image_num - CART_IMAGE_PRIMARY]);
                 result = -1;
@@ -200,7 +200,7 @@ static void on_flush_clicked(GtkButton *self, gpointer data)
             result = cartridge_flush_secondary_image(state->cart_id);
             break;
         default:
-            log_error(LOG_ERR,
+            log_error(LOG_DEFAULT,
                       "%s(): flushing of %s cartridge image is not implemented.",
                       __func__, tag_defaults[state->image_num - CART_IMAGE_PRIMARY]);
             result = -1;
@@ -391,7 +391,10 @@ static void update_buttons_sensitivity(const ci_state_t *state)
             can_save  = FALSE;
             can_flush = FALSE;
     }
-
+#if 0
+    debug_gtk3("can-save : %s", can_save  ? "TRUE" : "FALSE");
+    debug_gtk3("can-flush: %s", can_flush ? "TRUE" : "FALSE");
+#endif
     if (state->flush != NULL) {
         gtk_widget_set_sensitive(state->flush, can_flush);
     }
@@ -535,7 +538,8 @@ static GtkWidget *create_filename_entry(ci_state_t *state)
         gtk_entry_set_text(GTK_ENTRY(entry), path);
     }
 
-    /* set up signal handlers */
+    /* set up signal handlers (all of these can set resources and thus cannot
+     * be connected unlocked) */
     g_signal_connect(G_OBJECT(entry),
                      "focus-out-event",
                      G_CALLBACK(on_filename_focus_out_event),
@@ -614,7 +618,7 @@ GtkWidget *cart_image_widget_new(int         cart_id,
     int         row = 0;
 
     if (!valid_image_num(image_num)) {
-        log_error(LOG_ERR,
+        log_error(LOG_DEFAULT,
                   "%s: invalid image number %d, valid range is %d-%d.",
                   __func__, image_num, CART_IMAGE_PRIMARY, CART_IMAGE_COUNT);
         return NULL;
@@ -701,10 +705,12 @@ GtkWidget *cart_image_widget_new(int         cart_id,
  * \param[in]   widget      cartridge image widget
  * \param[in]   resource    resource name
  * \param[in]   text        text for the check button
+ *
+ * \return  check button
  */
-void cart_image_widget_append_check(GtkWidget  *widget,
-                                    const char *resource,
-                                    const char *text)
+GtkWidget *cart_image_widget_append_check(GtkWidget  *widget,
+                                          const char *resource,
+                                          const char *text)
 {
     mediator_t *mediator = mediator_for_widget(widget);
     if (mediator != NULL) {
@@ -717,6 +723,31 @@ void cart_image_widget_append_check(GtkWidget  *widget,
                         check,
                         0, state->checks_count, 1, 1);
         state->checks_count++;
+        return check;
+    }
+    return NULL;
+}
+
+
+/** \brief  Update sensitivity of widget's save and flush buttons
+ *
+ * \param[in]   widget  cartridge image widget
+ *
+ * \note    If we require this multiple times in various settings pages to
+ *          react to an "Enable" check button like the REU settings, we might
+ *          consider adding a helper function to set up a event handler on
+ *          such a check button that then calls this function.
+ */
+void cart_image_widget_update_sensitivity(GtkWidget *widget)
+{
+    mediator_t *mediator = mediator_for_widget(widget);
+
+    if (mediator != NULL) {
+        ci_state_t *state = mediator_get_data(mediator);
+
+        if (state != NULL) {
+            update_buttons_sensitivity(state);
+        }
     }
 }
 

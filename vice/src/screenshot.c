@@ -51,7 +51,7 @@
 #include "vsync.h"
 
 
-static log_t screenshot_log = LOG_ERR;
+static log_t screenshot_log = LOG_DEFAULT;
 static gfxoutputdrv_t *recording_driver;
 static struct video_canvas_s *recording_canvas;
 
@@ -174,10 +174,14 @@ static int screenshot_save_core(screenshot_t *screenshot, gfxoutputdrv_t *drv,
         }
     } else {
         /* We're recording a movie */
-        if ((recording_driver->record)(screenshot) < 0) {
-            log_error(screenshot_log, "Recording failed...");
-            lib_free(screenshot->color_map);
-            return -1;
+        if (vsync_get_warp_mode() == 0) {
+            /* skip recording when warpmode is active, this doesn't really work -
+               and unless we significantly change what warpmode does can not work */
+            if ((recording_driver->record)(screenshot) < 0) {
+                log_error(screenshot_log, "Recording failed...");
+                lib_free(screenshot->color_map);
+                return -1;
+            }
         }
     }
 
@@ -309,7 +313,7 @@ const char *screenshot_get_quickscreenshot_format(void)
 
     if (resources_get_string("QuicksaveScreenshotFormat", &format) ||
         format == NULL) {
-        log_error(LOG_ERR, "Quicksave screenshot format resource not set in configuration?");
+        log_error(LOG_DEFAULT, "Quicksave screenshot format resource not set in configuration?");
         return NULL;
     }
     return format;
@@ -327,13 +331,13 @@ char *screenshot_create_datetime_string(void)
 
     if (stamp_tm == NULL ||
         strftime(buf, sizeof(buf), "%Y%m%d%H%M%S", stamp_tm) == 0) {
-        log_error(LOG_ERR, "Could not generate autosave screenshot timestamp!");
+        log_error(LOG_DEFAULT, "Could not generate autosave screenshot timestamp!");
         return NULL;
     }
 
     if (gettimeofday(&tv, NULL) < 0 ||
         (result = lib_msprintf("%s%02ld", buf, (tv.tv_usec / 10000))) == NULL) {
-        log_error(LOG_ERR, "Could not generate autosave screenshot microsecond timestamp!");
+        log_error(LOG_DEFAULT, "Could not generate autosave screenshot microsecond timestamp!");
         return NULL;
     }
 
@@ -346,7 +350,7 @@ char *screenshot_create_quickscreenshot_filename(const char *format)
     const char *fext;
 
     if ((fext = screenshot_get_fext_for_format(format)) == NULL) {
-        log_error(LOG_ERR, "Invalid or unsupported autosave screenshot format '%s'!", format);
+        log_error(LOG_DEFAULT, "Invalid or unsupported autosave screenshot format '%s'!", format);
         return NULL;
     }
     if ((date = screenshot_create_datetime_string()) == NULL) {
@@ -363,7 +367,7 @@ static int set_autosave_screenshot_format(const char *val, void *param)
 {
     if (!val || val[0] == '\0' ||
         screenshot_get_fext_for_format(val) == NULL) {
-        log_error(LOG_ERR, "Invalid or unset autosave screenshot format, defaulting to %s",
+        log_error(LOG_DEFAULT, "Invalid or unset autosave screenshot format, defaulting to %s",
             SCREENSHOT_DEFAULT_QUICKSCREENSHOT_FORMAT);
         util_string_set(&autosave_screenshot_format, SCREENSHOT_DEFAULT_QUICKSCREENSHOT_FORMAT);
     } else {
@@ -403,13 +407,13 @@ static void screenshot_auto_screenshot_vsync_callback(void *param)
 
     format = screenshot_get_quickscreenshot_format();
     if (format == NULL) {
-        log_error(LOG_ERR, "Failed to autosave screenshot.");
+        log_error(LOG_DEFAULT, "Failed to autosave screenshot.");
         return;
     }
 
     filename = screenshot_create_quickscreenshot_filename(format);
     if (filename == NULL || screenshot_save(format, filename, canvas) < 0) {
-        log_error(LOG_ERR, "Failed to autosave screenshot.");
+        log_error(LOG_DEFAULT, "Failed to autosave screenshot.");
     } else {
         log_message(LOG_DEFAULT, "Autosaved %s screenshot to %s", format, filename);
     }
