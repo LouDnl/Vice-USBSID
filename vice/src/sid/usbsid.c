@@ -77,7 +77,7 @@ int usbsid_open(void)
         memset(sidbuf, 0, sizeof(sidbuf));
     }
     if (usbsid_is_open == -1)
-        log_error(LOG_ERR, "[USBSID] Failed to open USBSID\r\n");
+        log_error(LOG_DEFAULT, "[USBSID] Failed to open USBSID\r\n");
     DBG(("[USBSID] usbsid_open usbsid_is_open=%d\n", usbsid_is_open));
     return usbsid_is_open;
 }

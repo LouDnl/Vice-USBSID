@@ -117,7 +117,7 @@ static int usbsid_init(void)
     /* Initialize libusb */
     rc = libusb_init(&ctx);
 	if (rc != 0) {
-        log_error(LOG_ERR, "[USBSID] Error initializing libusb: %d %s: %s\r", rc, libusb_error_name(rc), libusb_strerror(rc));
+        log_error(LOG_DEFAULT, "[USBSID] Error initializing libusb: %d %s: %s\r", rc, libusb_error_name(rc), libusb_strerror(rc));
         goto out;
     }
 
@@ -127,7 +127,7 @@ static int usbsid_init(void)
 	/* Look for a specific device and open it */
 	devh = libusb_open_device_with_vid_pid(ctx, VENDOR_ID, PRODUCT_ID);
     if (!devh) {
-        log_error(LOG_ERR, "[USBSID] Error opening USB device with VID & PID: %d %s: %s\r", rc, libusb_error_name(rc), libusb_strerror(rc));
+        log_error(LOG_DEFAULT, "[USBSID] Error opening USB device with VID & PID: %d %s: %s\r", rc, libusb_error_name(rc), libusb_strerror(rc));
         rc = -1;
         goto out;
     }
@@ -145,7 +145,7 @@ static int usbsid_init(void)
         // #ifdef UNIX_COMPILE
         rc = libusb_claim_interface(devh, if_num);
         if (rc < 0) {
-            log_error(LOG_ERR, "[USBSID] Error claiming interface: %d, %s: %s\r", rc, libusb_error_name(rc), libusb_strerror(rc));
+            log_error(LOG_DEFAULT, "[USBSID] Error claiming interface: %d, %s: %s\r", rc, libusb_error_name(rc), libusb_strerror(rc));
             goto out;
         }
         // #endif
@@ -155,7 +155,7 @@ static int usbsid_init(void)
      * - set line state */
     rc = libusb_control_transfer(devh, 0x21, 0x22, ACM_CTRL_DTR | ACM_CTRL_RTS, 0, NULL, 0, 0);
     if (rc != 0 && rc != 7) {
-        log_error(LOG_ERR, "[USBSID] Error configuring line state during control transfer: %d, %s: %s\r", rc, libusb_error_name(rc), libusb_strerror(rc));
+        log_error(LOG_DEFAULT, "[USBSID] Error configuring line state during control transfer: %d, %s: %s\r", rc, libusb_error_name(rc), libusb_strerror(rc));
         rc = -1;
         goto out;
     }
@@ -163,7 +163,7 @@ static int usbsid_init(void)
     /* - set line encoding here */
     rc = libusb_control_transfer(devh, 0x21, 0x20, 0, 0, encoding, sizeof(encoding), 0);
     if (rc != 0 && rc != 7) {
-        log_error(LOG_ERR, "[USBSID] Error configuring line encoding during control transfer: %d, %s: %s\r", rc, libusb_error_name(rc), libusb_strerror(rc));
+        log_error(LOG_DEFAULT, "[USBSID] Error configuring line encoding during control transfer: %d, %s: %s\r", rc, libusb_error_name(rc), libusb_strerror(rc));
         rc = -1;
         goto out;
     }
@@ -196,7 +196,7 @@ static int usbsid_init(void)
 
     if (usid_dev < 0)
     {
-        log_error(LOG_ERR, "[USBSID] Could not open SID device\r");
+        log_error(LOG_DEFAULT, "[USBSID] Could not open SID device\r");
         goto out;
     }
 
@@ -213,14 +213,14 @@ static void LIBUSB_CALL sid_out(struct libusb_transfer *transfer)
     if (transfer->status != LIBUSB_TRANSFER_COMPLETED) {
         rc = transfer->status;
         if (rc != LIBUSB_TRANSFER_CANCELLED) {
-		    log_error(LOG_ERR, "[USBSID] Warning: transfer out interrupted with status %d, %s: %s\r", rc, libusb_error_name(rc), libusb_strerror(rc));
+		    log_error(LOG_DEFAULT, "[USBSID] Warning: transfer out interrupted with status %d, %s: %s\r", rc, libusb_error_name(rc), libusb_strerror(rc));
         }
 		libusb_free_transfer(transfer);
         return;
     }
 
     if (transfer->actual_length != LEN_OUT_BUFFER) {
-        log_error(LOG_ERR, "[USBSID] Sent data length %d is different from the defined buffer length: %d or actual length %d\r", transfer->length, LEN_OUT_BUFFER, transfer->actual_length);
+        log_error(LOG_DEFAULT, "[USBSID] Sent data length %d is different from the defined buffer length: %d or actual length %d\r", transfer->length, LEN_OUT_BUFFER, transfer->actual_length);
     }
 
     write_completed = 1;
@@ -234,7 +234,7 @@ static void LIBUSB_CALL sid_in(struct libusb_transfer *transfer)
     if (transfer->status != LIBUSB_TRANSFER_COMPLETED) {
         rc = transfer_in->status;
 		if (rc != LIBUSB_TRANSFER_CANCELLED) {
-            log_error(LOG_ERR, "[USBSID] Warning: transfer in interrupted with status '%s'\r", libusb_error_name(rc));
+            log_error(LOG_DEFAULT, "[USBSID] Warning: transfer in interrupted with status '%s'\r", libusb_error_name(rc));
         }
         libusb_free_transfer(transfer);
         return;
@@ -314,28 +314,28 @@ int us_device_close(void)
     if (transfer_out != NULL) {
         rc = libusb_cancel_transfer(transfer_out);
         if (rc < 0 && rc != -5)
-            log_error(LOG_ERR, "[USBSID] Failed to cancel transfer %d - %s: %s\r", rc, libusb_error_name(rc), libusb_strerror(rc));
+            log_error(LOG_DEFAULT, "[USBSID] Failed to cancel transfer %d - %s: %s\r", rc, libusb_error_name(rc), libusb_strerror(rc));
     }
 
     if (transfer_in != NULL) {
         rc = libusb_cancel_transfer(transfer_in);
         if (rc < 0 && rc != -5)
-            log_error(LOG_ERR, "[USBSID] Failed to cancel transfer %d - %s: %s\r", rc, libusb_error_name(rc), libusb_strerror(rc));
+            log_error(LOG_DEFAULT, "[USBSID] Failed to cancel transfer %d - %s: %s\r", rc, libusb_error_name(rc), libusb_strerror(rc));
     }
 
     rc = libusb_dev_mem_free(devh, in_buffer, LEN_OUT_BUFFER);
     if (rc < 0)
-        log_error(LOG_ERR, "[USBSID] Failed to free in_buffer DMA memory: %d, %s: %s\r", rc, libusb_error_name(rc), libusb_strerror(rc));
+        log_error(LOG_DEFAULT, "[USBSID] Failed to free in_buffer DMA memory: %d, %s: %s\r", rc, libusb_error_name(rc), libusb_strerror(rc));
 
     rc = libusb_dev_mem_free(devh, out_buffer, LEN_OUT_BUFFER);
     if (rc < 0)
-        log_error(LOG_ERR, "[USBSID] Failed to free out_buffer DMA memory: %d, %s: %s\r", rc, libusb_error_name(rc), libusb_strerror(rc));
+        log_error(LOG_DEFAULT, "[USBSID] Failed to free out_buffer DMA memory: %d, %s: %s\r", rc, libusb_error_name(rc), libusb_strerror(rc));
 
     if (devh) {
         for (int if_num = 0; if_num < 2; if_num++) {
             if (libusb_kernel_driver_active(devh, if_num)) {
                 rc = libusb_detach_kernel_driver(devh, if_num);
-                log_error(LOG_ERR, "[USBSID] libusb_detach_kernel_driver: %d, %s: %s\r", rc, libusb_error_name(rc), libusb_strerror(rc));
+                log_error(LOG_DEFAULT, "[USBSID] libusb_detach_kernel_driver: %d, %s: %s\r", rc, libusb_error_name(rc), libusb_strerror(rc));
             }
             libusb_release_interface(devh, if_num);
         }
@@ -410,7 +410,7 @@ void us_set_machine_parameter(long cycles_per_sec)
             uint8_t configbuff[5] = {0x50, i, 0, 0, 0};
             if (libusb_bulk_transfer(devh, ep_out_addr, configbuff, 5, &actual_length, 0) < 0)
             {
-                log_message(LOG_ERR, "[USBSID] Error while sending config\r");
+                log_message(LOG_DEFAULT, "[USBSID] Error while sending config\r");
             }
             return;
         }
