@@ -2,44 +2,71 @@
 This fork has built-in support for USBSID-Pico. \
 USBSID-Pico is a RPi Pico based board for interfacing one or two MOS SID chips and/or hardware SID emulators with your PC over USB.
 
-# Building
+# Linux Building and installing
 For building you can mostly follow the instructions in the [Linux-GTK3-Howto](vice/doc/building/Linux-GTK3-Howto.txt) \
 add `--enable-usbsid` to `./configure` for [USBSID-Pico](https://github.com/LouDnl/USBSID-Pico) support
 
 ## Onliner for installing the dependencies
 ```bash
-sudo apt install autoconf automake build-essential byacc flex xa65 gawk libgtk-3-dev texinfo texlive-fonts-recommended texlive-latex-extra dos2unix libpulse-dev libasound2-dev libglew-dev libcurl4-openssl-dev libevdev-dev libpng-dev libgif-dev libpcap-dev libusb-1.0-0 libusb-1.0-0-dev libusb-dev
+sudo apt install autoconf automake build-essential byacc flex xa65 gawk libgtk-3-dev texinfo texlive-fonts-recommended texlive-latex-extra dos2unix libpulse-dev libasound2-dev libglew-dev libcurl4-openssl-dev libevdev-dev libpng-dev libgif-dev libpcap-dev libusb-1.0-0 libusb-1.0-0-dev libusb-dev libmpg123-dev libmp3lame-dev
 ```
 
-## My go-to build sequence for Linux
+## My build sequence for Linux
 ```bash
     # clone the repository
     git clone https://github.com/LouDnl/Vice-USBSID.git
-    cd Vice-USBSID/vice
+    cd Vice-USBSID
+
+    # create a build directory
+    mkdir -p usbsid/{build,release/usr}
+    export OUTDIR=$(pwd)/usbsid/release
 
     # generate configure and make files
+    cd vice
+    ./src/buildtools/genvicedate_h.sh
     ./autogen.sh
 
+    # change to the build folder
+    cd ../usbsid/build
+
     # configure make with what you need
-    ./configure \
-       --enable-arch=native \
+    ../../vice/configure \
+       --enable-option-checking=fatal \
+       --prefix=/usr \
        --enable-gtk3ui \
-       --enable-ethernet \
+       --disable-arch \
+       --disable-html-docs \
+       --enable-catweasel \
+       --enable-usbsid \
        --enable-cpuhistory \
-       --enable-debug \
-       --enable-debug-threads \
        --enable-io-simulation \
        --enable-experimental-devices \
        --enable-x64-image \
-       --disable-hardsid \
-       --enable-usbsid \
+       --enable-ethernet \
        --enable-midi \
-       --with-pulse \
+       --enable-pdf-docs \
+       --disable-hardsid \
        --with-alsa \
-       --with-resid
+       --with-pulse \
+       --with-fastsid \
+       --with-flac \
+       --with-gif \
+       --with-lame \
+       --with-libcurl \
+       --with-libieee1284 \
+       --with-mpg123 \
+       --with-png \
+       --with-resid \
+       --with-vorbis
+
+    # optional config options
+    --enable-debug
+    --enable-debug-threads
 
     # run make
-    make -j$(nproc)
+    make -j$(nproc) -s --no-print-directory
+    # (OPTIONAL) Create installation files
+    make DESTDIR=$OUTDIR install
 
     # start after compile
     ## if already installed first
@@ -49,15 +76,35 @@ sudo apt install autoconf automake build-essential byacc flex xa65 gawk libgtk-3
     ./src/x64sc -directory ./data
     ./src/vsid -directory ./data
 
-    # Installation
+    # Installation to current system
     sudo make install
     # Now you can run vice directly
     x64sc
     vice
     # Optional commandline options
     -sidenginemodel usbsid  # enables USBSID (available in settings menu too)
-    -usbsidasync 1  # enable async writing ~ disables reading
+    -usbsidasync 1  # enable async writing ~ disables reading (experimental)
 ```
+
+# Windows building (on linux) and creating a zip file with binaries
+For building you can use the instructions in the [Docker-Mingw32-build](vice/build/mingw/docker/README-docker-mingw32-build.md) as guideline.  
+After installing docker follow the following steps to create win32 or win64 binaries.
+``` shell
+    # clone the repository
+    git clone https://github.com/LouDnl/Vice-USBSID.git
+
+    # creating the base docker container
+    docker build --tag vice-buildcontainer:base .
+
+    # creating a win32 container
+    docker build --tag vice-buildcontainer:0.3 -f Dockerfile.usbsid-win32 .
+    # creating a win64 container
+    docker build --tag vice-buildcontainer:0.3 -f Dockerfile.usbsid-win64 .
+
+    # depending on the container type you created this will create a zip file in the current folder
+    ./dock-run.sh $(pwd)/Vice-USBSID
+```
+
 
 # VICE GitHub Mirror
 This is the official git mirror of the [VICE subversion repo](https://sourceforge.net/p/vice-emu/code/HEAD/tree/).
