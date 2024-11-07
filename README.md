@@ -26,7 +26,7 @@ sudo apt install autoconf automake build-essential byacc flex xa65 gawk libgtk-3
     ./src/buildtools/genvicedate_h.sh
     ./autogen.sh
 
-    # change to the build folder
+    # change to the build directory
     cd ../usbsid/build
 
     # configure make with what you need
@@ -92,17 +92,30 @@ After installing docker follow the following steps to create win32 or win64 bina
 ``` shell
     # clone the repository
     git clone https://github.com/LouDnl/Vice-USBSID.git
+    cd Vice-USBSID
+
+    # generate configure and make files
+    cd vice
+    ./src/buildtools/genvicedate_h.sh
+    ./autogen.sh
+    cd ..
+
+    # copy the docker files to current directory 
+    cp vice/build/mingw/docker/* .
 
     # creating the base docker container
     docker build --tag vice-buildcontainer:base .
 
-    # creating a win32 container
+    # choose win32 or win64
+    ## for win32 rename the correct build script and create acontainer
+    cp build-vice-usbsid-win32.sh build-vice.sh
     docker build --tag vice-buildcontainer:0.3 -f Dockerfile.usbsid-win32 .
-    # creating a win64 container
+    ## for win64 rename the correct build script and create acontainer
+    cp build-vice-usbsid-win64.sh build-vice.sh
     docker build --tag vice-buildcontainer:0.3 -f Dockerfile.usbsid-win64 .
 
-    # depending on the container type you created this will create a zip file in the current folder
-    ./dock-run.sh $(pwd)/Vice-USBSID
+    # depending on the container type you created this will create a zip file in the current directory
+    ./dock-run.sh $(pwd)
 ```
 
 

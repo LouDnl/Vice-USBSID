@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 rm -rf docker-build
 mkdir docker-build
@@ -13,12 +13,9 @@ ARGS=`echo $ARGS | sed s/--with-lame//g`
 ARGS=`echo $ARGS | sed s/--with-libieee1284//g`
 ARGS=`echo $ARGS | sed s/--with-mpg123//g`
 
-ARGS=`echo $ARGS --enable-usbsid --enable-midi --disable-hardsid`
-
 # win64 build
 #LDFLAGS=-lssp CFLAGS=-fstack-protector ../vice/configure -v --host=x86_64-w64-mingw32 ${ARGS} 2>&1 |tee conf.log
 # win32 build
 LDFLAGS=-lssp CFLAGS=-fstack-protector ../vice/configure -v --host=i686-w64-mingw32  ${ARGS} 2>&1 |tee conf.log
-
 make -j12 2>&1 | tee make.log
 make bindistzip 2>&1| tee -a make.log

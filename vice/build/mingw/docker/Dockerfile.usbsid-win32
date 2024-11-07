@@ -2,6 +2,6 @@ FROM vice-buildcontainer:base
 WORKDIR /vice
 COPY build-vice-usbsid-win32.sh /
 RUN yum install mingw32-libusb1 -y && \
-	mv /build-vice-usbsid-win32.sh /build-vice.sh
+	mv /build-vice-usbsid-win32.sh /build-vice.sh && \
 	chmod +x /build-vice.sh
 #USER nobody

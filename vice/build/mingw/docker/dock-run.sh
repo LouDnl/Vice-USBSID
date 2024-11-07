@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # in case you need to rebuild the container image use:
 #   docker build --tag vice-buildcontainer:0.3 .
 
@@ -46,7 +46,7 @@ docker run -a STDOUT -a STDERR -it \
        --env HOME='/tmp' \
        --name vice-build \
        --mount type=bind,source="${base}",target=/vice \
-       vice-buildcontainer:0.33 \
+       vice-buildcontainer:0.3 \
        ${cmd}
 
 docker rm vice-build
