@@ -68,13 +68,13 @@ sudo apt install autoconf automake build-essential byacc flex xa65 gawk libgtk-3
     # (OPTIONAL) Create installation files
     make DESTDIR=$OUTDIR install
 
-    # start after compile
-    ## if already installed first
-    ./src/x64sc
-    ./src/vsid
-    ## if not previously installed (will throw error otherwise)
+    # start Vice
+    # after first compile
     ./src/x64sc -directory ./data
     ./src/vsid -directory ./data
+    # after first installation to current system
+    ./src/x64sc
+    ./src/vsid
 
     # Installation to current system
     sudo make install
