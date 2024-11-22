@@ -14,7 +14,7 @@ sudo apt install autoconf automake build-essential byacc flex xa65 gawk libgtk-3
 ## My build sequence for Linux
 ```bash
     # clone the repository
-    git clone https://github.com/LouDnl/Vice-USBSID.git
+    git clone https://github.com/LouDnl/Vice-USBSID.git --depth 1
     cd Vice-USBSID
 
     # create a build directory
@@ -44,7 +44,6 @@ sudo apt install autoconf automake build-essential byacc flex xa65 gawk libgtk-3
        --enable-x64-image \
        --enable-ethernet \
        --enable-midi \
-       --enable-pdf-docs \
        --disable-hardsid \
        --with-alsa \
        --with-pulse \
@@ -62,6 +61,7 @@ sudo apt install autoconf automake build-essential byacc flex xa65 gawk libgtk-3
     # optional config options
     --enable-debug
     --enable-debug-threads
+    --enable-pdf-docs (Not recommended)
 
     # run make
     make -j$(nproc) -s --no-print-directory
