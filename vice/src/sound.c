@@ -87,7 +87,8 @@ static const sound_register_devices_t sound_register_devices[] = {
 #endif
 #ifdef USE_ALSA
     { "alsa", "ALSA sound output", sound_init_alsa_device, SOUND_PLAYBACK_DEVICE },
-#endif
+    { "asid", "ASID sound output", sound_init_asid_device, SOUND_PLAYBACK_DEVICE },
+#endif /* USE_ALSA */
 #ifdef USE_COREAUDIO
     { "coreaudio", "Mac OS X Audio output", sound_init_coreaudio_device, SOUND_PLAYBACK_DEVICE },
 #endif
@@ -105,6 +106,7 @@ static const sound_register_devices_t sound_register_devices[] = {
 #ifdef USE_DXSOUND
     { "dx", "DirectSound sound output", sound_init_dx_device, SOUND_PLAYBACK_DEVICE },
 #endif
+    { "asid", "ASID sound output", sound_init_asid_device, SOUND_PLAYBACK_DEVICE },
     { "wmm", "Windows Waveout sound output", sound_init_wmm_device, SOUND_PLAYBACK_DEVICE },
 #endif
 
