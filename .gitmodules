@@ -1,0 +1,3 @@
+[submodule "vice/src/arch/shared/hwsiddrv/usbsid-driver"]
+	path = vice/src/arch/shared/hwsiddrv/usbsid-driver
+	url = https://github.com/LouDnl/USBSID-Pico-driver.git

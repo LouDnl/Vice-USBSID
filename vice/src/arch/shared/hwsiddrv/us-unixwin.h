@@ -46,6 +46,8 @@ void us_device_reset(void);
 
 int us_device_read(uint16_t addr, int chipno);
 
+int_fast32_t us_delay(void);
+
 void us_device_store(uint16_t addr, uint8_t val, int chipno);
 
 void us_set_machine_parameter(long cycles_per_sec);

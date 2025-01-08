@@ -131,11 +131,11 @@ void usbsid_set_machine_parameter(long cycles_per_sec)
 int usbsid_available(void)
 {
     DBG(("[USBSID] %s %d\r\n", __func__, usbsid_is_open));
-    if (usbsid_is_open) {
+    if (usbsid_is_open < 0) {
         usbsid_open();
     }
 
-    if (!usbsid_is_open) {
+    if (usbsid_is_open >= 0) {
         return usbsid_drv_available();
     }
     return usbsid_is_open;

@@ -4,3 +4,9 @@
 !*.h
 !*/
 !builds/*
+!vice/build/mingw/docker/*
+_changes-todo
+_changes-todo/*
+!vice/src/arch/shared/hwsiddrv/usbsid-driver
+!vice/src/arch/shared/hwsiddrv/usbsid-driver/*.cpp
+!vice/src/arch/shared/hwsiddrv/usbsid-driver/*.h

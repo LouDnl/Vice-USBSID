@@ -1,5 +1,7 @@
 # Makefile.am for `libhwsiddrv.a'.
 
+SUBDIRS = usbsid-driver
+
 AM_CPPFLAGS = \
 	@VICE_CPPFLAGS@ \
 	@ARCH_INCLUDES@ \
@@ -8,7 +10,8 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/src/sid \
 	-I$(top_srcdir)/src/platform \
 	-I$(top_srcdir)/src/arch/shared \
-	-I$(top_srcdir)/src/arch/shared/iodrv
+	-I$(top_srcdir)/src/arch/shared/iodrv \
+	-I$(top_srcdir)/src/arch/shared/hwsiddrv/usbsid-driver
 
 AM_CFLAGS = @VICE_CFLAGS@
 
