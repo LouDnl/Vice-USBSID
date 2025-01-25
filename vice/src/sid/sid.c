@@ -632,6 +632,9 @@ void sid_sound_machine_store(sound_t *psid, uint16_t addr, uint8_t byte)
 void sid_sound_machine_reset(sound_t *psid, CLOCK cpu_clk)
 {
     sid_engine.reset(psid, cpu_clk);
+    #ifdef HAVE_USBSID
+    usbsid_reset();
+    #endif
 }
 
 #ifdef SOUND_SYSTEM_FLOAT
