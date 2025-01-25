@@ -60,8 +60,10 @@
 
 #include "usbsid-driver/USBSIDInterface.h"
 
+#ifdef US_NOOPT
 #pragma GCC push_options
 #pragma GCC optimize ("O3")
+#endif
 
 static int rc = -1, sids_found = -1;
 static uint8_t sidbuf[0x20 * US_MAXSID];
@@ -69,10 +71,10 @@ static uint8_t sidbuf[0x20 * US_MAXSID];
 static CLOCK usid_main_clk;
 static CLOCK usid_alarm_clk;
 static alarm_t *usid_alarm = NULL;
+static long refresh_rate;
 
 volatile int isasync = 0;
 
-#define USBSID_DELAY_CYCLES 50000 /* 60000 */
 
 /* pre declarations */
 static void usbsid_alarm_handler(CLOCK offset, void *data);
@@ -81,12 +83,12 @@ USBSIDitf usbsid;
 
 void us_device_reset(void)
 {
-    DBG("[%s]\n", __func__);
     if (sids_found > 0) {
-        /* reset_USBSID(usbsid); */
         usid_main_clk  = maincpu_clk;
-        usid_alarm_clk = USBSID_DELAY_CYCLES;
-        alarm_set(usid_alarm, USBSID_DELAY_CYCLES);
+        refresh_rate = getrefreshrate_USBSID(usbsid);
+        usid_alarm_clk = refresh_rate;
+        alarm_set(usid_alarm, refresh_rate);
+        reset_USBSID(usbsid);
         log_message(LOG_DEFAULT, "[USBSID] reset!\r");
     }
 }
@@ -120,11 +122,9 @@ int us_device_open(void)
     }
 
     usid_alarm = alarm_new(maincpu_alarm_context, "usbsid", usbsid_alarm_handler, NULL);
-    usid_alarm = 0;
     sids_found = 1;
     log_message(LOG_DEFAULT, "[USBSID] alarm set, reset sids\r");
-    /* us_device_reset(); */
-    usbsid_reset();
+    us_device_reset();
     log_message(LOG_DEFAULT, "[USBSID] opened\r");
 
     return rc;
@@ -146,16 +146,16 @@ int us_device_close(void)
     log_message(LOG_DEFAULT, "[USBSID] closed\r");
     return 0;
 }
+
 int us_device_read(uint16_t addr, int chipno)
-{  // BUG: Broken for some reason, use the new configtool for SKPico
+{   // ISSUE: Broken for some reason, use the new configtool for SKPico
     if (chipno < US_MAXSID) {
         addr = ((addr & 0x1F) + (chipno * 0x20));
         uint8_t writebuffer[3] = { 0x1, addr, 0x0 };
-        uint8_t readresult[1] = {0};
+        uint8_t readresult;
         if (isasync == 0) {
-            read_USBSID(usbsid, writebuffer, readresult);
-            sidbuf[addr] = readresult[0];
-            return readresult[0];
+            sidbuf[addr] = readresult = read_USBSID(usbsid, writebuffer);
+            return readresult;
         }
         return 0x0;
     }
@@ -166,24 +166,13 @@ int_fast32_t us_delay(void)
 {   // ISSUE: This should return an unsigned 64 bit integer but that makes vice stall indefinately on negative integers
     if (maincpu_clk < usid_main_clk) {  /* Sync reset */
         usid_main_clk = maincpu_clk;
-        DBG("return_cycles: %ld ", 0);
         return 0;
     }
     int_fast32_t cycles = maincpu_clk - usid_main_clk - 1;
-    DBG("[DELAY] maincpu_clk: %ld usid_main_clk: %ld ", maincpu_clk, usid_main_clk);
-    DBG("cycles: %ld ", cycles);
     while (cycles > 0xffff)
     {
-        // if (cycles > 0) {
-            /* waitforcycle_USBSID(usbsid, 0xffff); */  // ISSUE: This stops the main thread from working!
-        // }
-        if (isasync == 1) {
-            ringpushcycled_USBSID(usbsid, 0xFF, 0xFF, cycles);
-        }
         cycles -= 0xffff;
     }
-    // if (cycles >= 5) { cycles -= 1; };
-    DBG("return_cycles: %ld ", cycles);
     usid_main_clk = maincpu_clk;
     return cycles;
 }
@@ -191,49 +180,42 @@ int_fast32_t us_delay(void)
 void us_device_store(uint16_t addr, uint8_t val, int chipno) /* max chipno = 1 */
 {
     if (chipno < US_MAXSID) {  /* remove 0x20 address limitation */
-
-        DBG("WRITE: $%02X:%02X ", addr, val);
-        const uint_fast32_t cycles = us_delay();
-        DBG("delay_cycles: %ld\n", cycles);
         addr = ((addr & 0x1F) + (chipno * 0x20));
         if (isasync == 1) {
-            ringpushcycled_USBSID(usbsid, addr, val, cycles);
+            /* this is an unsigned integer untill we can account for min cycles */
+            uint_fast32_t cycles = us_delay();
+            writeringcycled_USBSID(usbsid, addr, val, cycles);
         } else if (isasync == 0) {
+            us_delay();
             write_USBSID(usbsid, addr, val);
         }
-
         sidbuf[addr] = val;
     }
 }
 
 void us_set_machine_parameter(long cycles_per_sec)
 {
-    log_message(LOG_DEFAULT, "[USBSID] %s set clockspeed to: %ld\r", __func__, cycles_per_sec);
     setclockrate_USBSID(usbsid, cycles_per_sec);
+    refresh_rate = getrefreshrate_USBSID(usbsid);
+    log_message(LOG_DEFAULT, "[USBSID] clockspeed set to: %ld and refreshrate set to: %ld\r", cycles_per_sec, refresh_rate);
 }
 
 unsigned int us_device_available(void)
 {
-    log_message(LOG_DEFAULT, "[USBSID] %s %d SIDs found\r", __func__, sids_found);
+    log_message(LOG_DEFAULT, "[USBSID] %d SIDs found\r", sids_found);
     return (sids_found == 1) ? 4 : 1;
 }
 
 static void usbsid_alarm_handler(CLOCK offset, void *data)
 {
-    DBG("CLOCK: ");
     CLOCK cycles = (usid_alarm_clk + offset) - usid_main_clk;
-    DBG("[DELAY] maincpu_clk: %ld usid_main_clk: %ld ", maincpu_clk, usid_main_clk);
-    DBG("cycles: %ld\n", cycles);
-    /* DBG("[%s] %ld\n", __func__, cycles); */
 
-    if (cycles < USBSID_DELAY_CYCLES) {
-        usid_alarm_clk = usid_main_clk + USBSID_DELAY_CYCLES;
+    if (cycles < refresh_rate) {
+        usid_alarm_clk = usid_main_clk + refresh_rate;
     } else {
-        /* uint delay = (uint) cycles; */
-        /* waitforcycle_USBSID(usbsid, cycles); */  // ISSUE: When enabled this breaks WARP speed etc.
-        if (isasync == 1) ringpushcycled_USBSID(usbsid, 0xFF, 0xFF, cycles);
+        if (isasync == 1) setflush_USBSID(usbsid);
         usid_main_clk   = maincpu_clk - offset;
-        usid_alarm_clk  = usid_main_clk + USBSID_DELAY_CYCLES;
+        usid_alarm_clk  = usid_main_clk + refresh_rate;
     }
     alarm_set(usid_alarm, usid_alarm_clk);
 }
@@ -270,6 +252,8 @@ void us_device_state_write(int chipno, struct sid_us_snapshot_state_s *sid_state
     usid_alarm_clk = (CLOCK)sid_state->usid_alarm_clk;
 }
 
+#ifdef US_NOOPT
 #pragma GCC pop_options
+#endif
 #endif /* HAVE_USBSID */
 #endif /* UNIX_COMPILE || WINDOWS_COMPILE */

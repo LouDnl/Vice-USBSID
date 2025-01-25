@@ -27,18 +27,18 @@
  *
  */
 
-#include <string.h>
 #include "vice.h"
 
 #if defined(UNIX_COMPILE) || defined(WINDOWS_COMPILE)
 #ifdef HAVE_USBSID
 
 #include <stdio.h>
+#include <string.h>
 
 #include "usbsid.h"
+#include "log.h"
 #include "sid-snapshot.h"
 #include "types.h"
-#include "log.h"
 
 /* #define DEBUG_USBSID */
 
