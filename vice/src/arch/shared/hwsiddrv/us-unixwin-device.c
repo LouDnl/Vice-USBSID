@@ -88,7 +88,9 @@ void us_device_reset(void)
         refresh_rate = getrefreshrate_USBSID(usbsid);
         usid_alarm_clk = refresh_rate;
         alarm_set(usid_alarm, refresh_rate);
-        reset_USBSID(usbsid);
+        mute_USBSID(usbsid);  // NOTE: Temporary replacement for reset
+        // reset_USBSID(usbsid);  // BUG: Temporary disabled
+        // resetallregisters_USBSID(usbsid);  // BUG: Temporary disabled
         log_message(LOG_DEFAULT, "[USBSID] reset!\r");
     }
 }
@@ -184,6 +186,15 @@ void us_device_store(uint16_t addr, uint8_t val, int chipno) /* max chipno = 1 *
         if (isasync == 1) {
             /* this is an unsigned integer untill we can account for min cycles */
             uint_fast32_t cycles = us_delay();
+            // This in fact the same code as us_delay now
+            // if (maincpu_clk < usid_main_clk) {
+            //     usid_main_clk = maincpu_clk;
+            //     cycles = 0;
+            // } else {
+            //     cycles = maincpu_clk - usid_main_clk - 1; /* best results with a minor crackle */
+            //     while (cycles > 0xffff) cycles -= 0xffff;
+            // }
+            // usid_main_clk = maincpu_clk;
             writeringcycled_USBSID(usbsid, addr, val, cycles);
         } else if (isasync == 0) {
             us_delay();
