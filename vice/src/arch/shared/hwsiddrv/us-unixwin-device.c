@@ -71,7 +71,7 @@ static uint8_t sidbuf[0x20 * US_MAXSID];
 static CLOCK usid_main_clk;
 static CLOCK usid_alarm_clk;
 static alarm_t *usid_alarm = NULL;
-static long refresh_rate;
+static long raster_rate;
 
 volatile int isasync = 0;
 
@@ -85,12 +85,11 @@ void us_device_reset(void)
 {
     if (sids_found > 0) {
         usid_main_clk  = maincpu_clk;
-        refresh_rate = getrefreshrate_USBSID(usbsid);
-        usid_alarm_clk = refresh_rate;
-        alarm_set(usid_alarm, refresh_rate);
-        mute_USBSID(usbsid);  // NOTE: Temporary replacement for reset
-        // reset_USBSID(usbsid);  // BUG: Temporary disabled
-        // resetallregisters_USBSID(usbsid);  // BUG: Temporary disabled
+        raster_rate = getrasterrate_USBSID(usbsid);
+        usid_alarm_clk = raster_rate;
+        alarm_set(usid_alarm, (usid_main_clk + raster_rate));
+        mute_USBSID(usbsid);
+        clearbus_USBSID(usbsid);
         log_message(LOG_DEFAULT, "[USBSID] reset!\r");
     }
 }
@@ -114,10 +113,8 @@ int us_device_open(void)
         if (isasync == 0) {
             rc = init_USBSID(usbsid, false, false);
         } else if (isasync == 1) {
-            rc = init_USBSID(usbsid, true, true);  // ISSUE: Only with threaded cycles Vice plays digitunes okay...
-        } /* else {
-            rc = init_USBSID(usbsid, false, false);
-        } */
+            rc = init_USBSID(usbsid, true, true);  /* NOTICE: Digitunes only play with threaded cycles */
+        }
         if (rc < 0) {
             return -1;
         }
@@ -165,11 +162,12 @@ int us_device_read(uint16_t addr, int chipno)
 }
 
 int_fast32_t us_delay(void)
-{   // ISSUE: This should return an unsigned 64 bit integer but that makes vice stall indefinately on negative integers
+{   /* ISSUE: This should return an unsigned 64 bit integer but that makes vice stall indefinately on negative integers */
     if (maincpu_clk < usid_main_clk) {  /* Sync reset */
         usid_main_clk = maincpu_clk;
         return 0;
     }
+    /* Without substracting 1 cycle this would cause a clicking noise in cycle exact tunes */
     int_fast32_t cycles = maincpu_clk - usid_main_clk - 1;
     while (cycles > 0xffff)
     {
@@ -207,8 +205,8 @@ void us_device_store(uint16_t addr, uint8_t val, int chipno) /* max chipno = 1 *
 void us_set_machine_parameter(long cycles_per_sec)
 {
     setclockrate_USBSID(usbsid, cycles_per_sec);
-    refresh_rate = getrefreshrate_USBSID(usbsid);
-    log_message(LOG_DEFAULT, "[USBSID] clockspeed set to: %ld and refreshrate set to: %ld\r", cycles_per_sec, refresh_rate);
+    raster_rate = getrasterrate_USBSID(usbsid);
+    log_message(LOG_DEFAULT, "[USBSID] clockspeed set to: %ld and rasterrate set to: %ld\r", cycles_per_sec, raster_rate);
 }
 
 unsigned int us_device_available(void)
@@ -221,12 +219,12 @@ static void usbsid_alarm_handler(CLOCK offset, void *data)
 {
     CLOCK cycles = (usid_alarm_clk + offset) - usid_main_clk;
 
-    if (cycles < refresh_rate) {
-        usid_alarm_clk = usid_main_clk + refresh_rate;
+    if (cycles < raster_rate) {
+        usid_alarm_clk = usid_main_clk + raster_rate;
     } else {
         if (isasync == 1) setflush_USBSID(usbsid);
         usid_main_clk   = maincpu_clk - offset;
-        usid_alarm_clk  = usid_main_clk + refresh_rate;
+        usid_alarm_clk  = usid_main_clk + raster_rate;
     }
     alarm_set(usid_alarm, usid_alarm_clk);
 }
