@@ -573,6 +573,9 @@ int sid_sound_machine_init_vbr(sound_t *psid, int speed, int cycles_per_sec, int
 
 int sid_sound_machine_init(sound_t *psid, int speed, int cycles_per_sec)
 {
+    #ifdef HAVE_USBSID
+    usbsid_open();
+    #endif
     return sid_engine.init(psid, speed, cycles_per_sec, 1000);
 }
 
@@ -616,6 +619,9 @@ void sid_sound_machine_close(sound_t *psid)
         blen7 = 0;
         buf7 = NULL;
     }
+#endif
+#ifdef HAVE_USBSID
+    usbsid_close();
 #endif
 }
 
