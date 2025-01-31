@@ -2,6 +2,7 @@
 !.gitignore
 !*.c
 !*.cc
+!*.cpp
 !*.h
 !*/
 !builds/*
