@@ -137,7 +137,7 @@ extern long machine_get_cycles_per_frame(void);
 // static int asid_dump(WORD addr, BYTE byte, CLOCK clks)
 static int asid_dump(unsigned short addr, unsigned char byte, CLOCK clks)
 {
-    static CLOCK maincpu_clk_prev;
+    // static CLOCK maincpu_clk_prev;
     int reg,data;
 
     reg=addr & 0x1f;
@@ -172,8 +172,8 @@ static int asid_dump(unsigned short addr, unsigned char byte, CLOCK clks)
                 sid_modified[reg]++;
         }
     }
-    printf("[DUMP]$%02x$%02x[CLKCYCLES]%08ld[SINCELAST]%06ld[CLKS]%04ld(%s)\n", addr, byte, maincpu_clk, (maincpu_clk - maincpu_clk_prev), clks, __func__);
-    maincpu_clk_prev = maincpu_clk;
+    // printf("[DUMP]$%02x$%02x[CLKCYCLES]%08ld[SINCELAST]%06ld[CLKS]%04ld(%s)\n", addr, byte, maincpu_clk, (maincpu_clk - maincpu_clk_prev), clks, __func__);
+    // maincpu_clk_prev = maincpu_clk;
 
     // int reg, data, mask;
     // if (ASID_MAXSID > 1) mask = 0x7F;
@@ -305,7 +305,7 @@ static int asid_dump(unsigned short addr, unsigned char byte, CLOCK clks)
 
 static int asid_flush(char *state)
 {
-    static CLOCK maincpu_clk_prev;
+    // static CLOCK maincpu_clk_prev;
     int i,j;
     // unsigned int r=0;
     unsigned int mask=0;
@@ -359,7 +359,7 @@ static int asid_flush(char *state)
 
     // NOTE: FRAME FLUSH HAPPENS EVERY 60~65 CYCLES
     // printf("[FRAME FLUSH]%02x[CLKCYCLES]%08ld[SINCELAST]%06ld(%s)\n", state, maincpu_clk, (maincpu_clk - maincpu_clk_prev), __func__);
-    maincpu_clk_prev = maincpu_clk;
+    // maincpu_clk_prev = maincpu_clk;
     return 0;
     //return fflush(dump_fd);
 
