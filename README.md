@@ -47,16 +47,18 @@ sudo apt install autoconf automake build-essential byacc flex xa65 gawk libgtk-3
        --disable-hardsid \
        --with-alsa \
        --with-pulse \
-       --with-fastsid \
-       --with-flac \
+       --with-fastsid \     
        --with-gif \
        --with-lame \
        --with-libcurl \
        --with-libieee1284 \
        --with-mpg123 \
        --with-png \
-       --with-resid \
-       --with-vorbis
+       --with-resid
+
+    # optional recording types
+    --with-flac 
+    --with-vorbis
 
     # optional config options
     --enable-debug
