@@ -182,7 +182,7 @@ void us_device_store(uint16_t addr, uint8_t val, int chipno) /* max chipno = 1 *
 
 void us_set_machine_parameter(long cycles_per_sec)
 {
-    setclockrate_USBSID(usbsid, cycles_per_sec);
+    setclockrate_USBSID(usbsid, cycles_per_sec, false);
     raster_rate = getrasterrate_USBSID(usbsid);
     log_message(LOG_DEFAULT, "[USBSID] clockspeed set to: %ld and rasterrate set to: %ld\r", cycles_per_sec, raster_rate);
     return;
