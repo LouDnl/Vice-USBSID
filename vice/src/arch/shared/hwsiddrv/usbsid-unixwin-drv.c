@@ -61,10 +61,10 @@ int usbsid_drv_close(void)
     return 0;
 }
 
-void usbsid_drv_reset(void)
+void usbsid_drv_reset(bool us_reset)
 {
     if (use_us_device) {
-        us_device_reset();
+        us_device_reset(us_reset);
     }
 }
 
@@ -101,12 +101,6 @@ int usbsid_drv_available(void)
     return 0;
 }
 
-void usbsid_drv_set_async(unsigned int val)
-{
-    if (use_us_device) {
-        us_device_set_async(val);
-    }
-}
 
 void usbsid_drv_state_read(int chipno, struct sid_us_snapshot_state_s *sid_state)
 {

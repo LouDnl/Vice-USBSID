@@ -87,9 +87,6 @@ static int sid_engine;
 static int sid_hardsid_main;
 static int sid_hardsid_right;
 #endif
-#ifdef HAVE_USBSID
-static int sid_usbsid_async;
-#endif
 
 static int set_sid_engine(int set_engine, void *param)
 {
@@ -363,15 +360,6 @@ static int set_sid_hardsid_right(int val, void *param)
 }
 #endif
 
-#ifdef HAVE_USBSID
-static int set_sid_usbsid_async(int val, void *param)
-{
-    sid_usbsid_async = (unsigned int)val;
-    usbsid_set_async(sid_usbsid_async);
-
-    return 0;
-}
-#endif
 
 #ifdef HAVE_RESID
 static int sid_enabled = 1;
@@ -455,13 +443,6 @@ static const resource_int_t hardsid_resources_int[] = {
 };
 #endif
 
-#ifdef HAVE_USBSID
-static const resource_int_t usbsid_resources_int[] = {
-    { "SidUSBSIDAsync", 0, RES_EVENT_STRICT, NULL,
-      &sid_usbsid_async, set_sid_usbsid_async, NULL },
-    RESOURCE_INT_LIST_END
-};
-#endif
 
 static const resource_int_t stereo_resources_int[] = {
     { "SidStereo", 0, RES_EVENT_SAME, NULL,
@@ -502,13 +483,6 @@ int sid_common_resources_init(void)
     }
 #endif
 
-#ifdef HAVE_USBSID
-    if (usbsid_available()) {
-        if (resources_register_int(usbsid_resources_int) < 0) {
-            return -1;
-        }
-    }
-#endif
     return resources_register_int(common_resources_int);
 }
 
@@ -597,7 +571,7 @@ static sid_engine_model_t sid_engine_models_parsid[] = {
 #endif
 #endif
 
-#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+#ifdef HAVE_USBSID
 static sid_engine_model_t sid_engine_models_usbsid[] = {
     { "USBSID-Pico", SID_USBSID },
     { NULL, -1 }

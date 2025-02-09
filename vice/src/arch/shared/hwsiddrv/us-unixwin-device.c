@@ -73,25 +73,25 @@ static CLOCK usid_alarm_clk;
 static alarm_t *usid_alarm = NULL;
 static long raster_rate;
 
-volatile int isasync = 0;
-
 
 /* pre declarations */
 static void usbsid_alarm_handler(CLOCK offset, void *data);
 
 USBSIDitf usbsid;
 
-void us_device_reset(void)
+void us_device_reset(bool us_reset)
 {
     if (sids_found > 0) {
-        usid_main_clk  = maincpu_clk;
         raster_rate = getrasterrate_USBSID(usbsid);
+        usid_main_clk = maincpu_clk;
         usid_alarm_clk = raster_rate;
         alarm_set(usid_alarm, (usid_main_clk + raster_rate));
-        mute_USBSID(usbsid);
-        clearbus_USBSID(usbsid);
-        log_message(LOG_DEFAULT, "[USBSID] reset!\r");
+        if (us_reset) {
+            reset_USBSID(usbsid);
+        }
+        log_message(LOG_DEFAULT, "[USBSID] clocks reset!\r");
     }
+    return;
 }
 
 int us_device_open(void)
@@ -110,11 +110,7 @@ int us_device_open(void)
 
     if (usbsid == NULL) {
         usbsid = create_USBSID();
-        if (isasync == 0) {
-            rc = init_USBSID(usbsid, false, false);
-        } else if (isasync == 1) {
-            rc = init_USBSID(usbsid, true, true);  /* NOTICE: Digitunes only play with threaded cycles */
-        }
+        rc = init_USBSID(usbsid, true, true);  /* NOTICE: Digitunes only play with threaded cycles */
         if (rc < 0) {
             return -1;
         }
@@ -123,7 +119,7 @@ int us_device_open(void)
     usid_alarm = alarm_new(maincpu_alarm_context, "usbsid", usbsid_alarm_handler, NULL);
     sids_found = 1;
     log_message(LOG_DEFAULT, "[USBSID] alarm set, reset sids\r");
-    us_device_reset();
+    us_device_reset(false);  /* No reset on init! */
     log_message(LOG_DEFAULT, "[USBSID] opened\r");
 
     return rc;
@@ -147,15 +143,10 @@ int us_device_close(void)
 }
 
 int us_device_read(uint16_t addr, int chipno)
-{   // ISSUE: Broken for some reason, use the new configtool for SKPico
+{   /* NOTICE: Disabled, unneeded */
     if (chipno < US_MAXSID) {
         addr = ((addr & 0x1F) + (chipno * 0x20));
-        uint8_t writebuffer[3] = { 0x1, addr, 0x0 };
-        uint8_t readresult;
-        if (isasync == 0) {
-            sidbuf[addr] = readresult = read_USBSID(usbsid, writebuffer);
-            return readresult;
-        }
+        /* return (uint8_t)sidbuf[addr]; */
         return 0x0;
     }
     return 0x0;
@@ -181,25 +172,12 @@ void us_device_store(uint16_t addr, uint8_t val, int chipno) /* max chipno = 1 *
 {
     if (chipno < US_MAXSID) {  /* remove 0x20 address limitation */
         addr = ((addr & 0x1F) + (chipno * 0x20));
-        if (isasync == 1) {
-            /* this is an unsigned integer untill we can account for min cycles */
-            uint_fast32_t cycles = us_delay();
-            // This in fact the same code as us_delay now
-            // if (maincpu_clk < usid_main_clk) {
-            //     usid_main_clk = maincpu_clk;
-            //     cycles = 0;
-            // } else {
-            //     cycles = maincpu_clk - usid_main_clk - 1; /* best results with a minor crackle */
-            //     while (cycles > 0xffff) cycles -= 0xffff;
-            // }
-            // usid_main_clk = maincpu_clk;
-            writeringcycled_USBSID(usbsid, addr, val, cycles);
-        } else if (isasync == 0) {
-            us_delay();
-            write_USBSID(usbsid, addr, val);
-        }
+        uint_fast32_t cycles = us_delay();
+        writeringcycled_USBSID(usbsid, addr, val, cycles);
         sidbuf[addr] = val;
+        return;
     }
+    return;
 }
 
 void us_set_machine_parameter(long cycles_per_sec)
@@ -207,6 +185,7 @@ void us_set_machine_parameter(long cycles_per_sec)
     setclockrate_USBSID(usbsid, cycles_per_sec);
     raster_rate = getrasterrate_USBSID(usbsid);
     log_message(LOG_DEFAULT, "[USBSID] clockspeed set to: %ld and rasterrate set to: %ld\r", cycles_per_sec, raster_rate);
+    return;
 }
 
 unsigned int us_device_available(void)
@@ -222,19 +201,12 @@ static void usbsid_alarm_handler(CLOCK offset, void *data)
     if (cycles < raster_rate) {
         usid_alarm_clk = usid_main_clk + raster_rate;
     } else {
-        if (isasync == 1) setflush_USBSID(usbsid);
+        flush_USBSID(usbsid);
         usid_main_clk   = maincpu_clk - offset;
         usid_alarm_clk  = usid_main_clk + raster_rate;
     }
     alarm_set(usid_alarm, usid_alarm_clk);
-}
-
-void us_device_set_async(unsigned int val)
-{
-    log_message(LOG_DEFAULT, "[USBSID] %s: %x\r", __func__, val);
-    isasync = (val == 0) ? 0 : 1;
-
-    if (isasync == 1) restartthread_USBSID(usbsid, true);
+    return;
 }
 
 /* ---------------------------------------------------------------------*/

@@ -237,16 +237,6 @@ static const cmdline_option_t hardsid_cmdline_options[] =
 };
 #endif
 
-#ifdef HAVE_USBSID
-static const cmdline_option_t usbsid_cmdline_options[] =
-{
-    { "-usbsidasync", SET_RESOURCE, CMDLINE_ATTRIB_NEED_ARGS,
-      NULL, NULL, "SidUSBSIDAsync", NULL,
-      "<Mode>", "Async write mode (0: Disabled, 1: Enabled)" },
-    CMDLINE_LIST_END
-};
-#endif
-
 static cmdline_option_t stereo_cmdline_options[] =
 {
     { "-sidextra", SET_RESOURCE, CMDLINE_ATTRIB_NEED_ARGS,
@@ -411,7 +401,7 @@ static char *build_sid_cmdline_option(int sid_type)
 #endif
 #endif
 
-#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+#ifdef HAVE_USBSID
     /* add usbsid options if available */
     if (usbsid_available()) {
         new = util_concat(old, ", 1280: USBSID", NULL);
@@ -582,13 +572,6 @@ int sid_cmdline_options_init(int sid_type)
     }
 #endif
 
-#ifdef HAVE_USBSID
-    if (usbsid_available()) {
-        if (cmdline_register_options(usbsid_cmdline_options) < 0) {
-            return -1;
-        }
-    }
-#endif
 
     if ((machine_class != VICE_MACHINE_C64DTV) &&
         (machine_class != VICE_MACHINE_VIC20) &&
