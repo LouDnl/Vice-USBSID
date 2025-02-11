@@ -58,7 +58,7 @@
 #include "sid-resources.h"
 #include "types.h"
 
-#include "usbsid-driver/USBSIDInterface.h"
+#include "USBSIDInterface.h"
 
 #ifdef US_NOOPT
 #pragma GCC push_options
