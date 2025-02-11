@@ -1,7 +1,5 @@
 # Makefile.am for `libhwsiddrv.a'.
 
-SUBDIRS = usbsid-driver
-
 AM_CPPFLAGS = \
 	@VICE_CPPFLAGS@ \
 	@ARCH_INCLUDES@ \
@@ -10,8 +8,7 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/src/sid \
 	-I$(top_srcdir)/src/platform \
 	-I$(top_srcdir)/src/arch/shared \
-	-I$(top_srcdir)/src/arch/shared/iodrv \
-	-I$(top_srcdir)/src/arch/shared/hwsiddrv/usbsid-driver
+	-I$(top_srcdir)/src/arch/shared/iodrv
 
 AM_CFLAGS = @VICE_CFLAGS@
 
@@ -105,6 +102,33 @@ EXTRA_DIST = \
 	ps-unix.h \
 	ps-win32.h \
 	us-unixwin.h
+
+
+if WINDOWS_COMPILE
+if HAVE_USBSID
+HWSIDDRIVERS += \
+	USBSID.o \
+	USBSIDInterface.o
+endif HAVE_USBSID
+endif WINDOWS_COMPILE
+
+if UNIX_COMPILE
+if HAVE_USBSID
+HWSIDDRIVERS += \
+	USBSID.o \
+	USBSIDInterface.o
+endif HAVE_USBSID
+endif UNIX_COMPILE
+
+if HAVE_USBSID
+EXTRA_libhwsiddrv_a_SOURCES += \
+	USBSIDInterface.cpp \
+	USBSID.cpp
+
+EXTRA_DIST +=
+	USBSID.h \
+	USBSIDInterface.h
+endif HAVE_USBSID
 
 # Always built:
 # (needs to be declared empty to avoid `make` to try to build libhwsiddrv.o
