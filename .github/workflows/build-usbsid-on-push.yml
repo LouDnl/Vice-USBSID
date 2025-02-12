@@ -37,6 +37,13 @@ jobs:
         if: env.exiting1 != 'true'
         uses: actions/checkout@v3
 
+      - name: Checkout source
+        if: env.exiting1 != 'true' && env.THE_SECRET == 'default_value' && !env.SOURCE_BRANCH
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.SOURCE_REPO }}
+          path: ${{ env.PATH_SOURCE_CHECKOUT }}
+
       - name: Copy files
         if: env.exiting1 != 'true'
         run: |
