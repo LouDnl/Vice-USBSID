@@ -14,8 +14,16 @@ sudo apt install autoconf automake build-essential byacc flex xa65 gawk libgtk-3
 ## My build sequence for Linux
 ```bash
     # clone the repository
-    git clone https://github.com/LouDnl/Vice-USBSID.git --depth 2
+    git clone https://github.com/LouDnl/Vice-USBSID.git
     cd Vice-USBSID
+
+    # clone the driver
+    git clone https://github.com/LouDnl/USBSID-Pico-driver.git
+
+    # copy the driver files into the correct directory
+    cd USBSID-Pico-driver
+    cp USBSID* ../vice/src/arch/shared/hwsiddrv/
+    cd ..
 
     # create a build directory
     mkdir -p usbsid/{build,release/usr}
@@ -31,19 +39,19 @@ sudo apt install autoconf automake build-essential byacc flex xa65 gawk libgtk-3
 
     # configure make with what you need
     ../../vice/configure \
+       --enable-usbsid \
        --enable-option-checking=fatal \
        --prefix=/usr \
        --enable-gtk3ui \
        --disable-arch \
        --disable-html-docs \
-       --enable-catweasel \
-       --enable-usbsid \
        --enable-cpuhistory \
        --enable-io-simulation \
        --enable-experimental-devices \
        --enable-x64-image \
        --enable-ethernet \
        --enable-midi \
+       --disable-catweasel \
        --disable-hardsid \
        --with-alsa \
        --with-pulse \

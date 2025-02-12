@@ -575,7 +575,6 @@ if !USE_HEADLESSUI
 hotkeys_lib = $(top_builddir)/src/arch/shared/hotkeys/libhotkeys.a
 endif
 hwsiddrv_lib = $(top_builddir)/src/arch/shared/hwsiddrv/libhwsiddrv.a
-usbsiddrv_lib = $(top_builddir)/src/arch/shared/hwsiddrv/usbsid-driver/libusbsiddrv.a
 hvsc_lib = $(top_builddir)/src/hvsc/libhvsc.a
 iecbus_lib = $(top_builddir)/src/iecbus/libiecbus.a
 imagecontents_lib = $(top_builddir)/src/imagecontents/libimagecontents.a
@@ -633,7 +632,7 @@ resid_dtv_libs = @RESID_DTV_LIBS@
 # external libraries required for all emulators
 emu_extlibs = @UI_LIBS@ @SDL_EXTRA_LIBS@ @SOUND_LIBS@ @JOY_LIBS@ @GFXOUTPUT_LIBS@ @ZLIB_LIBS@ @DYNLIB_LIBS@ @ARCH_LIBS@ $(archdep_lib) $(linenoise_ng_lib)
 
-driver_libs = $(joyport_lib) $(samplerdrv_lib) $(sounddrv_lib) $(mididrv_lib) $(socketdrv_lib) $(hwsiddrv_lib) $(usbsiddrv_lib) $(gfxoutputdrv_lib) $(printerdrv_lib) $(rs232drv_lib) $(diskimage_lib) $(fsdevice_lib) $(tape_lib) $(fileio_lib) $(serial_lib) $(core_lib)
+driver_libs = $(joyport_lib) $(samplerdrv_lib) $(sounddrv_lib) $(mididrv_lib) $(socketdrv_lib) $(hwsiddrv_lib) $(gfxoutputdrv_lib) $(printerdrv_lib) $(rs232drv_lib) $(diskimage_lib) $(fsdevice_lib) $(tape_lib) $(fileio_lib) $(serial_lib) $(core_lib)
 
 if SUPPORT_X64
 x64_bin = x64
@@ -659,7 +658,6 @@ vsid_libs =  \
 	$(mididrv_lib) \
 	$(socketdrv_lib) \
 	$(hwsiddrv_lib) \
-	$(usbsiddrv_lib) \
 	$(serial_lib) \
 	$(core_lib) \
 	$(vicii_lib) \
@@ -1503,9 +1501,6 @@ $(hvsc_lib):
 $(hwsiddrv_lib):
 	@echo "making all in arch/shared/hwsiddrv"
 	@(cd arch/shared/hwsiddrv && $(MAKE))
-$(usbsiddrv_lib):
-	@echo "making all in arch/shared/hwsiddrv/usbsid-driver"
-	@(cd arch/shared/hwsiddrv/usbsid-driver && $(MAKE))
 $(iecbus_lib):
 	@echo "making all in iecbus"
 	@(cd iecbus && $(MAKE))
