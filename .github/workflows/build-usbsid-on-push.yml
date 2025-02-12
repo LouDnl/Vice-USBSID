@@ -219,6 +219,208 @@ jobs:
               data: fs.readFileSync(ASSET_PATH)
             });
 
+  build_win:
+      name: Build
+      needs: [pull-file, create_release, build_doc]
+      runs-on: windows-latest
+      strategy:
+        fail-fast: false
+        matrix:
+          arch:
+          - { msystem: MINGW64, arch: x86_64, prefix: mingw64 }
+            #- { msystem: MINGW32, arch: i686,   prefix: mingw32 }
+          ui: [ GTK3, SDL2, SDL1 ]
+      steps:
+        - run: git config --global core.autocrlf input
+          shell: bash
+
+        - name: Checkout Source
+          uses: actions/checkout@v4
+
+        - name: Download Documentation
+          uses: actions/download-artifact@v4
+          with:
+            name: vice-pdf
+            path: vice/doc/
+
+        - name: Install GTK3 Dependencies if Applicable
+          if: ${{ matrix.ui == 'GTK3' }}
+          uses: msys2/setup-msys2@v2
+          with:
+            msystem: ${{ matrix.arch.msystem }}
+            update: true
+            install: >-
+              autotools
+              base-devel
+              git
+              mingw-w64-${{ matrix.arch.arch }}-curl
+              mingw-w64-${{ matrix.arch.arch }}-docbook-xml
+              mingw-w64-${{ matrix.arch.arch }}-docbook-xsl
+              mingw-w64-${{ matrix.arch.arch }}-flac
+              mingw-w64-${{ matrix.arch.arch }}-giflib
+              mingw-w64-${{ matrix.arch.arch }}-glew
+              mingw-w64-${{ matrix.arch.arch }}-gtk3
+              mingw-w64-${{ matrix.arch.arch }}-icoutils
+              mingw-w64-${{ matrix.arch.arch }}-lame
+              mingw-w64-${{ matrix.arch.arch }}-libpcap
+              mingw-w64-${{ matrix.arch.arch }}-libvorbis
+              mingw-w64-${{ matrix.arch.arch }}-mpg123
+              mingw-w64-${{ matrix.arch.arch }}-ntldd
+              mingw-w64-${{ matrix.arch.arch }}-pkg-config
+              mingw-w64-${{ matrix.arch.arch }}-portaudio
+              mingw-w64-${{ matrix.arch.arch }}-toolchain
+              mingw-w64-${{ matrix.arch.arch }}-xa65
+              mingw-w64-${{ matrix.arch.arch }}-libusb
+              p7zip
+              subversion
+              unzip
+              xmlto
+              zip
+
+        - name: Install SDL2 Dependencies if Applicable
+          if: ${{ matrix.ui == 'SDL2' }}
+          uses: msys2/setup-msys2@v2
+          with:
+            msystem: ${{ matrix.arch.msystem }}
+            update: true
+            install: >-
+              autotools
+              base-devel
+              git
+              mingw-w64-${{ matrix.arch.arch }}-SDL2
+              mingw-w64-${{ matrix.arch.arch }}-SDL2_image
+              mingw-w64-${{ matrix.arch.arch }}-curl
+              mingw-w64-${{ matrix.arch.arch }}-docbook-xml
+              mingw-w64-${{ matrix.arch.arch }}-docbook-xsl
+              mingw-w64-${{ matrix.arch.arch }}-flac
+              mingw-w64-${{ matrix.arch.arch }}-giflib
+              mingw-w64-${{ matrix.arch.arch }}-glew
+              mingw-w64-${{ matrix.arch.arch }}-icoutils
+              mingw-w64-${{ matrix.arch.arch }}-lame
+              mingw-w64-${{ matrix.arch.arch }}-libpcap
+              mingw-w64-${{ matrix.arch.arch }}-libvorbis
+              mingw-w64-${{ matrix.arch.arch }}-mpg123
+              mingw-w64-${{ matrix.arch.arch }}-ntldd
+              mingw-w64-${{ matrix.arch.arch }}-pkg-config
+              mingw-w64-${{ matrix.arch.arch }}-portaudio
+              mingw-w64-${{ matrix.arch.arch }}-toolchain
+              mingw-w64-${{ matrix.arch.arch }}-xa65
+              mingw-w64-${{ matrix.arch.arch }}-libusb
+              p7zip
+              subversion
+              unzip
+              xmlto
+              zip
+
+        - name: Install SDL1 Dependencies if Applicable
+          if: ${{ matrix.ui == 'SDL1' }}
+          uses: msys2/setup-msys2@v2
+          with:
+            msystem: ${{ matrix.arch.msystem }}
+            update: true
+            install: >-
+              autotools
+              base-devel
+              git
+              mingw-w64-${{ matrix.arch.arch }}-SDL
+              mingw-w64-${{ matrix.arch.arch }}-SDL_image
+              mingw-w64-${{ matrix.arch.arch }}-curl
+              mingw-w64-${{ matrix.arch.arch }}-docbook-xml
+              mingw-w64-${{ matrix.arch.arch }}-docbook-xsl
+              mingw-w64-${{ matrix.arch.arch }}-flac
+              mingw-w64-${{ matrix.arch.arch }}-giflib
+              mingw-w64-${{ matrix.arch.arch }}-glew
+              mingw-w64-${{ matrix.arch.arch }}-icoutils
+              mingw-w64-${{ matrix.arch.arch }}-lame
+              mingw-w64-${{ matrix.arch.arch }}-libpcap
+              mingw-w64-${{ matrix.arch.arch }}-libvorbis
+              mingw-w64-${{ matrix.arch.arch }}-mpg123
+              mingw-w64-${{ matrix.arch.arch }}-ntldd
+              mingw-w64-${{ matrix.arch.arch }}-pkg-config
+              mingw-w64-${{ matrix.arch.arch }}-portaudio
+              mingw-w64-${{ matrix.arch.arch }}-toolchain
+              mingw-w64-${{ matrix.arch.arch }}-xa65
+              mingw-w64-${{ matrix.arch.arch }}-libusb
+              p7zip
+              subversion
+              unzip
+              xmlto
+              zip
+
+        - name: Build and install libieee1284
+          id: build_libieee1284
+          shell: msys2 {0}
+          run: |
+            OLDDIR=$(pwd)
+            mkdir ~/work/
+            cd ~/work
+            git clone https://github.com/twaugh/libieee1284
+            cd libieee1284
+            export XML_CATALOG_FILES="/${{ matrix.arch.prefix }}/etc/xml/catalog"
+            ./bootstrap
+            ./configure --without-python
+            make CFLAGS="-Wno-incompatible-pointer-types"
+            make install
+            cd "$OLDDIR"
+
+        - name: Build
+          id: build
+          shell: msys2 {0}
+          run: |
+            MINGW_INSTALLS=${{ matrix.arch.msystem }} ./vice/build/github-actions/build-msys2-usbsid.sh ${{ matrix.ui }} "$(echo "${{ github.ref }}" | sed 's,.*/,,')"
+            echo "zip_path=$(cygpath -w -a vice/*.zip)"       >> $GITHUB_OUTPUT
+            echo "zip_name=$(basename vice/*.zip)"            >> $GITHUB_OUTPUT
+            echo "seven_zip_path=$(cygpath -w -a vice/*.7z)"  >> $GITHUB_OUTPUT
+            echo "seven_zip_name=$(basename vice/*.7z)"       >> $GITHUB_OUTPUT
+
+        - name: Upload Zip
+          id: upload-zip
+          uses: actions/github-script@v7
+          env:
+            UPLOAD_URL: ${{ needs.create_release.outputs.upload_url }}
+            ASSET_PATH: ${{ steps.build.outputs.zip_path }}
+            ASSET_NAME: ${{ steps.build.outputs.zip_name }}
+            ASSET_CONTENT_TYPE: application/zip
+          with:
+            github-token: ${{secrets.GITHUB_TOKEN}}
+            retries: 3
+            script: |
+              const fs = require('fs');
+              const { UPLOAD_URL, ASSET_PATH, ASSET_NAME, ASSET_CONTENT_TYPE } = process.env;
+              const uploadAssetResponse = await github.rest.repos.uploadReleaseAsset({
+                url: UPLOAD_URL,
+                headers: {
+                  'content-type': ASSET_CONTENT_TYPE,
+                  'content-length': fs.statSync(ASSET_PATH).size
+                },
+                name: ASSET_NAME,
+                data: fs.readFileSync(ASSET_PATH)
+              });
+
+        - name: Upload 7Zip
+          id: upload-7zip
+          uses: actions/github-script@v7
+          env:
+            UPLOAD_URL: ${{ needs.create_release.outputs.upload_url }}
+            ASSET_PATH: ${{ steps.build.outputs.seven_zip_path }}
+            ASSET_NAME: ${{ steps.build.outputs.seven_zip_name }}
+            ASSET_CONTENT_TYPE: application/x-7z-compressed
+          with:
+            github-token: ${{secrets.GITHUB_TOKEN}}
+            retries: 3
+            script: |
+              const fs = require('fs');
+              const { UPLOAD_URL, ASSET_PATH, ASSET_NAME, ASSET_CONTENT_TYPE } = process.env;
+              const uploadAssetResponse = await github.rest.repos.uploadReleaseAsset({
+                url: UPLOAD_URL,
+                headers: {
+                  'content-type': ASSET_CONTENT_TYPE,
+                  'content-length': fs.statSync(ASSET_PATH).size
+                },
+                name: ASSET_NAME,
+                data: fs.readFileSync(ASSET_PATH)
+              });
+
   build_deb:
     name: Build Debian Package
     needs: [pull-file, create_release, build_doc]
@@ -349,219 +551,20 @@ jobs:
               data: fs.readFileSync(ASSET_PATH)
             });
 
-# build_win:
-  #   name: Build
-  #   # needs: [create_release, build_doc]
-  #   runs-on: windows-latest
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       arch:
-  #       - { msystem: MINGW64, arch: x86_64, prefix: mingw64 }
-  #         #- { msystem: MINGW32, arch: i686,   prefix: mingw32 }
-  #       ui: [ GTK3, SDL2, SDL1 ]
-  #   steps:
-  #     - run: git config --global core.autocrlf input
-  #       shell: bash
-
-  #     - name: Checkout Source
-  #       uses: actions/checkout@v4
-
-  #     - name: Download Documentation
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: vice-pdf
-  #         path: vice/doc/
-
-  #     - name: Install GTK3 Dependencies if Applicable
-  #       if: ${{ matrix.ui == 'GTK3' }}
-  #       uses: msys2/setup-msys2@v2
-  #       with:
-  #         msystem: ${{ matrix.arch.msystem }}
-  #         update: true
-  #         install: >-
-  #           autotools
-  #           base-devel
-  #           git
-  #           mingw-w64-${{ matrix.arch.arch }}-curl
-  #           mingw-w64-${{ matrix.arch.arch }}-docbook-xml
-  #           mingw-w64-${{ matrix.arch.arch }}-docbook-xsl
-  #           mingw-w64-${{ matrix.arch.arch }}-flac
-  #           mingw-w64-${{ matrix.arch.arch }}-giflib
-  #           mingw-w64-${{ matrix.arch.arch }}-glew
-  #           mingw-w64-${{ matrix.arch.arch }}-gtk3
-  #           mingw-w64-${{ matrix.arch.arch }}-icoutils
-  #           mingw-w64-${{ matrix.arch.arch }}-lame
-  #           mingw-w64-${{ matrix.arch.arch }}-libpcap
-  #           mingw-w64-${{ matrix.arch.arch }}-libvorbis
-  #           mingw-w64-${{ matrix.arch.arch }}-mpg123
-  #           mingw-w64-${{ matrix.arch.arch }}-ntldd
-  #           mingw-w64-${{ matrix.arch.arch }}-pkg-config
-  #           mingw-w64-${{ matrix.arch.arch }}-portaudio
-  #           mingw-w64-${{ matrix.arch.arch }}-toolchain
-  #           mingw-w64-${{ matrix.arch.arch }}-xa65
-  #           p7zip
-  #           subversion
-  #           unzip
-  #           xmlto
-  #           zip
-
-  #     - name: Install SDL2 Dependencies if Applicable
-  #       if: ${{ matrix.ui == 'SDL2' }}
-  #       uses: msys2/setup-msys2@v2
-  #       with:
-  #         msystem: ${{ matrix.arch.msystem }}
-  #         update: true
-  #         install: >-
-  #           autotools
-  #           base-devel
-  #           git
-  #           mingw-w64-${{ matrix.arch.arch }}-SDL2
-  #           mingw-w64-${{ matrix.arch.arch }}-SDL2_image
-  #           mingw-w64-${{ matrix.arch.arch }}-curl
-  #           mingw-w64-${{ matrix.arch.arch }}-docbook-xml
-  #           mingw-w64-${{ matrix.arch.arch }}-docbook-xsl
-  #           mingw-w64-${{ matrix.arch.arch }}-flac
-  #           mingw-w64-${{ matrix.arch.arch }}-giflib
-  #           mingw-w64-${{ matrix.arch.arch }}-glew
-  #           mingw-w64-${{ matrix.arch.arch }}-icoutils
-  #           mingw-w64-${{ matrix.arch.arch }}-lame
-  #           mingw-w64-${{ matrix.arch.arch }}-libpcap
-  #           mingw-w64-${{ matrix.arch.arch }}-libvorbis
-  #           mingw-w64-${{ matrix.arch.arch }}-mpg123
-  #           mingw-w64-${{ matrix.arch.arch }}-ntldd
-  #           mingw-w64-${{ matrix.arch.arch }}-pkg-config
-  #           mingw-w64-${{ matrix.arch.arch }}-portaudio
-  #           mingw-w64-${{ matrix.arch.arch }}-toolchain
-  #           mingw-w64-${{ matrix.arch.arch }}-xa65
-  #           p7zip
-  #           subversion
-  #           unzip
-  #           xmlto
-  #           zip
-
-  #     - name: Install SDL1 Dependencies if Applicable
-  #       if: ${{ matrix.ui == 'SDL1' }}
-  #       uses: msys2/setup-msys2@v2
-  #       with:
-  #         msystem: ${{ matrix.arch.msystem }}
-  #         update: true
-  #         install: >-
-  #           autotools
-  #           base-devel
-  #           git
-  #           mingw-w64-${{ matrix.arch.arch }}-SDL
-  #           mingw-w64-${{ matrix.arch.arch }}-SDL_image
-  #           mingw-w64-${{ matrix.arch.arch }}-curl
-  #           mingw-w64-${{ matrix.arch.arch }}-docbook-xml
-  #           mingw-w64-${{ matrix.arch.arch }}-docbook-xsl
-  #           mingw-w64-${{ matrix.arch.arch }}-flac
-  #           mingw-w64-${{ matrix.arch.arch }}-giflib
-  #           mingw-w64-${{ matrix.arch.arch }}-glew
-  #           mingw-w64-${{ matrix.arch.arch }}-icoutils
-  #           mingw-w64-${{ matrix.arch.arch }}-lame
-  #           mingw-w64-${{ matrix.arch.arch }}-libpcap
-  #           mingw-w64-${{ matrix.arch.arch }}-libvorbis
-  #           mingw-w64-${{ matrix.arch.arch }}-mpg123
-  #           mingw-w64-${{ matrix.arch.arch }}-ntldd
-  #           mingw-w64-${{ matrix.arch.arch }}-pkg-config
-  #           mingw-w64-${{ matrix.arch.arch }}-portaudio
-  #           mingw-w64-${{ matrix.arch.arch }}-toolchain
-  #           mingw-w64-${{ matrix.arch.arch }}-xa65
-  #           p7zip
-  #           subversion
-  #           unzip
-  #           xmlto
-  #           zip
-
-  #     - name: Build and install libieee1284
-  #       id: build_libieee1284
-  #       shell: msys2 {0}
-  #       run: |
-  #         OLDDIR=$(pwd)
-  #         mkdir ~/work/
-  #         cd ~/work
-  #         git clone https://github.com/twaugh/libieee1284
-  #         cd libieee1284
-  #         export XML_CATALOG_FILES="/${{ matrix.arch.prefix }}/etc/xml/catalog"
-  #         ./bootstrap
-  #         ./configure --without-python
-  #         make CFLAGS="-Wno-incompatible-pointer-types"
-  #         make install
-  #         cd "$OLDDIR"
-
-  #     - name: Build
-  #       id: build
-  #       shell: msys2 {0}
-  #       run: |
-  #         MINGW_INSTALLS=${{ matrix.arch.msystem }} ./vice/build/github-actions/build-msys2.sh ${{ matrix.ui }} "$(echo "${{ github.ref }}" | sed 's,.*/,,')"
-  #         echo "zip_path=$(cygpath -w -a vice/*.zip)"       >> $GITHUB_OUTPUT
-  #         echo "zip_name=$(basename vice/*.zip)"            >> $GITHUB_OUTPUT
-  #         echo "seven_zip_path=$(cygpath -w -a vice/*.7z)"  >> $GITHUB_OUTPUT
-  #         echo "seven_zip_name=$(basename vice/*.7z)"       >> $GITHUB_OUTPUT
-
-  #     - name: Upload Zip
-  #       id: upload-zip
-  #       uses: actions/github-script@v7
-  #       env:
-  #         UPLOAD_URL: ${{ needs.create_release.outputs.upload_url }}
-  #         ASSET_PATH: ${{ steps.build.outputs.zip_path }}
-  #         ASSET_NAME: ${{ steps.build.outputs.zip_name }}
-  #         ASSET_CONTENT_TYPE: application/zip
-  #       with:
-  #         github-token: ${{secrets.GITHUB_TOKEN}}
-  #         retries: 3
-  #         script: |
-  #           const fs = require('fs');
-  #           const { UPLOAD_URL, ASSET_PATH, ASSET_NAME, ASSET_CONTENT_TYPE } = process.env;
-  #           const uploadAssetResponse = await github.rest.repos.uploadReleaseAsset({
-  #             url: UPLOAD_URL,
-  #             headers: {
-  #               'content-type': ASSET_CONTENT_TYPE,
-  #               'content-length': fs.statSync(ASSET_PATH).size
-  #             },
-  #             name: ASSET_NAME,
-  #             data: fs.readFileSync(ASSET_PATH)
-  #           });
-
-  #     - name: Upload 7Zip
-  #       id: upload-7zip
-  #       uses: actions/github-script@v7
-  #       env:
-  #         UPLOAD_URL: ${{ needs.create_release.outputs.upload_url }}
-  #         ASSET_PATH: ${{ steps.build.outputs.seven_zip_path }}
-  #         ASSET_NAME: ${{ steps.build.outputs.seven_zip_name }}
-  #         ASSET_CONTENT_TYPE: application/x-7z-compressed
-  #       with:
-  #         github-token: ${{secrets.GITHUB_TOKEN}}
-  #         retries: 3
-  #         script: |
-  #           const fs = require('fs');
-  #           const { UPLOAD_URL, ASSET_PATH, ASSET_NAME, ASSET_CONTENT_TYPE } = process.env;
-  #           const uploadAssetResponse = await github.rest.repos.uploadReleaseAsset({
-  #             url: UPLOAD_URL,
-  #             headers: {
-  #               'content-type': ASSET_CONTENT_TYPE,
-  #               'content-length': fs.statSync(ASSET_PATH).size
-  #             },
-  #             name: ASSET_NAME,
-  #             data: fs.readFileSync(ASSET_PATH)
-  #           });
-
-  # publish_release:
-  #   name: Publish Release
-  #   # needs: [create_release, build, build_deb]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/github-script@v7
-  #       with:
-  #         github-token: ${{secrets.GITHUB_TOKEN}}
-  #         retries: 3
-  #         script: |
-  #           await github.rest.repos.updateRelease(
-  #             {
-  #               owner: context.repo.owner,
-  #               repo: context.repo.repo,
-  #               release_id: ${{ needs.create_release.outputs.release_id }},
-  #               draft: false
-  #             });
+  publish_release:
+    name: Publish Release
+    # needs: [create_release, build, build_deb]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          retries: 3
+          script: |
+            await github.rest.repos.updateRelease(
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: ${{ needs.create_release.outputs.release_id }},
+                draft: false
+              });
