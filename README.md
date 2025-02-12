@@ -71,8 +71,7 @@ sudo apt install autoconf automake build-essential byacc flex xa65 gawk libgtk-3
     # optional config options
     --enable-debug
     --enable-debug-threads
-    --enable-pdf-docs (Not recommended)
-    --enable-pdf-docs (Not recommended)
+    --enable-pdf-docs
 
     # run make
     make -j$(nproc) -s --no-print-directory
@@ -94,7 +93,6 @@ sudo apt install autoconf automake build-essential byacc flex xa65 gawk libgtk-3
     vice
     # Optional commandline options
     -sidenginemodel usbsid  # enables USBSID (available in settings menu too)
-    -usbsidasync 1  # enable async writing ~ disables reading (experimental)
 ```
 
 # Windows building (on linux) and creating a zip file with binaries
