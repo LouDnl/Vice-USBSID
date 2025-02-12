@@ -802,48 +802,41 @@ if test x"$is_win32" = "xyes" -o x"$is_win32_gtk3" = "xyes"; then
     HAVE_CATWEASELMKIII_SUPPORT="yes"
   fi
 
-  AC_DEFINE(HAVE_USBSID,,[Support for USBSID])
-  AM_CONDITIONAL(HAVE_USBSID, false)
-
+  dnl usbsid required libraries and headers
   if test x"$enable_usbsid" = "xyes" ; then
     PKG_PROG_PKG_CONFIG
     WIN32_USBSID_HEADER_PRESENT=yes
     AC_CHECK_HEADERS(libusb-1.0/libusb.h,,[WIN32_USBSID_HEADER_PRESENT=no],)
-
-    # usbsid header
     if test x"$WIN32_USBSID_HEADER_PRESENT" = "xyes"; then
       AC_CHECK_LIB(usb-1.0, libusb_init,[LIBS="-lusb-1.0 $LIBS"; USBSID_LIB_PRESENT=yes],,)
-
       if test x"$PKG_CONFIG" != "x" -a x"$USBSID_LIB_PRESENT" = "xyes"; then
         PKG_CHECK_MODULES(LIBUSB, [libusb-1.0], HAVE_LIBUSB_SUPPORT="yes")
         AC_MSG_CHECKING([for pkgconfig libusb-1.0])
         if test x"$HAVE_LIBUSB_SUPPORT" = "xyes"; then
           VICE_CFLAGS="$VICE_CFLAGS $LIBUSB_CFLAGS";
           VICE_CPPFLAGS="$VICE_CPPFLAGS $LIBUSB_CFLAGS";
-          AC_DEFINE(HAVE_USB,,[Can we use the USB library?])
           AC_MSG_RESULT([yes])
         else
           AC_MSG_RESULT([no])
         fi
       fi
     fi
+  fi
 
-    HAVE_USBSID_SUPPORT="no"
-    # usbsid support
-    AC_MSG_CHECKING([for complete USBSID-Pico support])
-    if test x"$enable_usbsid" = "xyes" -o x"$HAVE_LIBUSB_SUPPORT" != "xno"; then
+  dnl usbsid support
+  AM_CONDITIONAL(HAVE_USBSID, false)
+  AC_MSG_CHECKING([for USBSID-Pico support])
+  if test x"$enable_usbsid" = "xyes" ; then
+    if test x"$HAVE_LIBUSB_SUPPORT" = "xyes"; then
+      AC_DEFINE([HAVE_USBSID],,[Support for USBSID])
       HAVE_USBSID_SUPPORT="yes"
       AM_CONDITIONAL(HAVE_USBSID, true)
       AC_MSG_RESULT([yes])
     else
-      AM_CONDITIONAL(HAVE_USBSID, false)
-      HAVE_USBSID_SUPPORT="no"
-      AC_MSG_RESULT([no])
+      AC_MSG_RESULT([no (LIBUSB not found!!)])
     fi
-
-    if test x"$enable_usbsid" = "xyes" -a x"$HAVE_USBSID_SUPPORT" != "xyes"; then
-      AC_MSG_ERROR([USBSID support is missing])
-    fi
+  else
+    AC_MSG_RESULT([no (USBSID-Pico disabled)])
   fi
 
   if test x"$enable_hardsid" != "xno"; then
@@ -3101,48 +3094,41 @@ if test x"$is_unix" = "xyes"; then
 
   fi
 
-  AC_DEFINE(HAVE_USBSID,,[Support for USBSID])
-  AM_CONDITIONAL(HAVE_USBSID, false)
-
+  dnl usbsid required libraries and headers
   if test x"$enable_usbsid" = "xyes" ; then
     PKG_PROG_PKG_CONFIG
     LINUX_USBSID_HEADER_PRESENT=yes
     AC_CHECK_HEADERS(libusb-1.0/libusb.h,,[LINUX_USBSID_HEADER_PRESENT=no],)
-
-    # usbsid header
     if test x"$LINUX_USBSID_HEADER_PRESENT" = "xyes"; then
       AC_CHECK_LIB(usb-1.0, libusb_init,[LIBS="-lusb-1.0 $LIBS"; USBSID_LIB_PRESENT=yes],,)
-
       if test x"$PKG_CONFIG" != "x" -a x"$USBSID_LIB_PRESENT" = "xyes"; then
         PKG_CHECK_MODULES(LIBUSB, [libusb-1.0], HAVE_LIBUSB_SUPPORT="yes")
         AC_MSG_CHECKING([for pkgconfig libusb-1.0])
         if test x"$HAVE_LIBUSB_SUPPORT" = "xyes"; then
           VICE_CFLAGS="$VICE_CFLAGS $LIBUSB_CFLAGS";
           VICE_CPPFLAGS="$VICE_CPPFLAGS $LIBUSB_CFLAGS";
-          AC_DEFINE(HAVE_USB,,[Can we use the USB library?])
           AC_MSG_RESULT([yes])
         else
           AC_MSG_RESULT([no])
         fi
       fi
     fi
+  fi
 
-    HAVE_USBSID_SUPPORT="no"
-    # usbsid support
-    AC_MSG_CHECKING([for complete USBSID-Pico support])
-    if test x"$enable_usbsid" = "xyes" -o x"$HAVE_LIBUSB_SUPPORT" != "xno"; then
+  dnl usbsid support
+  AM_CONDITIONAL(HAVE_USBSID, false)
+  AC_MSG_CHECKING([for USBSID-Pico support])
+  if test x"$enable_usbsid" = "xyes" ; then
+    if test x"$HAVE_LIBUSB_SUPPORT" = "xyes"; then
+      AC_DEFINE([HAVE_USBSID],,[Support for USBSID])
       HAVE_USBSID_SUPPORT="yes"
       AM_CONDITIONAL(HAVE_USBSID, true)
       AC_MSG_RESULT([yes])
     else
-      AM_CONDITIONAL(HAVE_USBSID, false)
-      HAVE_USBSID_SUPPORT="no"
-      AC_MSG_RESULT([no])
+      AC_MSG_RESULT([no (LIBUSB not found!!)])
     fi
-
-    if test x"$enable_usbsid" = "xyes" -a x"$HAVE_USBSID_SUPPORT" != "xyes"; then
-      AC_MSG_ERROR([USBSID support is missing])
-    fi
+  else
+    AC_MSG_RESULT([no (USBSID-Pico disabled)])
   fi
 
 fi
