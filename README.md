@@ -37,12 +37,23 @@ sudo apt install autoconf automake build-essential byacc flex xa65 gawk libgtk-3
     # change to the build directory
     cd ../usbsid/build
 
+    # depending on your preference add on of the
+    # following sets to the configure command below
+    # GTK3
+       --enable-gtk3ui \
+    # SDL2
+       --enable-sdl2ui \
+       --with-sdlsound \
+    # SDL1
+       --enable-sdl1ui \
+       --with-sdlsound \
+
     # configure make with what you need
     ../../vice/configure \
-       --enable-usbsid \
-       --enable-option-checking=fatal \
        --prefix=/usr \
+       --enable-option-checking=fatal \
        --enable-gtk3ui \
+       --enable-usbsid \
        --disable-arch \
        --disable-html-docs \
        --enable-cpuhistory \
@@ -53,8 +64,8 @@ sudo apt install autoconf automake build-essential byacc flex xa65 gawk libgtk-3
        --enable-midi \
        --disable-catweasel \
        --disable-hardsid \
-       --with-alsa \
        --with-pulse \
+       --with-alsa \
        --with-fastsid \
        --with-gif \
        --with-lame \

@@ -13,3 +13,5 @@ _changes-todo/*
 !vice/src/arch/shared/hwsiddrv/usbsid-driver
 !vice/src/arch/shared/hwsiddrv/usbsid-driver/*.cpp
 !vice/src/arch/shared/hwsiddrv/usbsid-driver/*.h
+!vice/src/lib/libusbsiddrv
+!vice/src/lib/libusbsiddrv/*

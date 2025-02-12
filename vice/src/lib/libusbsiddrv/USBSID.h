@@ -292,8 +292,8 @@ namespace USBSID_NS
       void USBSID_DisableSID(void);                     /* Release reset pin and unmute SID */
       void USBSID_EnableSID(void);                      /* Assert reset pin and release chipselect pins */
       void USBSID_ClearBus(void);                       /* Clear the SID bus from any data */
-      void USBSID_SetClockRate(long clockrate_cycles,
-                               bool suspend_sids);      /* Set CPU clockrate in Hertz */
+      void USBSID_SetClockRate(long clockrate_cycles,   /* Set CPU clockrate in Hertz */
+                               bool suspend_sids);      /* Assert SID RES signal while changing clockrate (Advised!)*/
       long USBSID_GetClockRate(void);                   /* Get CPU clockrate in Hertz  */
       long USBSID_GetRefreshRate(void);                 /* Get cycles per refresh rate */
       long USBSID_GetRasterRate(void);                  /* Get cycles per raster rate */

@@ -41,7 +41,7 @@ jobs:
         if: env.exiting1 != 'true'
         run: |
           cd $PATH_SOURCE_CHECKOUT
-          cp -u $FILES ../vice/src/arch/shared/hwsiddrv/
+          cp -u $FILES ../vice/src/lib/libusbsiddrv/
           cd ..
 
   cleanup_previous_builds: # Delete unfinished draft prereleases, and prereleases older than 30 days (but keep at least 10)

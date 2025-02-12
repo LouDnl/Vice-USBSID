@@ -16,6 +16,12 @@ AM_CXXFLAGS = @VICE_CXXFLAGS@
 
 AM_LDFLAGS = @VICE_LDFLAGS@
 
+# TESTING
+if HAVE_USBSID
+AM_CPPFLAGS += -I$(top_srcdir)/src/lib/libusbsiddrv
+AM_CXXFLAGS += -I$(top_srcdir)/src/lib/libusbsiddrv
+AM_LDFLAGS += -I$(top_srcdir)/src/lib/libusbsiddrv
+endif
 
 noinst_LIBRARIES = libhwsiddrv.a
 
@@ -102,33 +108,6 @@ EXTRA_DIST = \
 	ps-unix.h \
 	ps-win32.h \
 	us-unixwin.h
-
-
-if WINDOWS_COMPILE
-if HAVE_USBSID
-HWSIDDRIVERS += \
-	USBSID.o \
-	USBSIDInterface.o
-endif HAVE_USBSID
-endif WINDOWS_COMPILE
-
-if UNIX_COMPILE
-if HAVE_USBSID
-HWSIDDRIVERS += \
-	USBSID.o \
-	USBSIDInterface.o
-endif HAVE_USBSID
-endif UNIX_COMPILE
-
-if HAVE_USBSID
-EXTRA_libhwsiddrv_a_SOURCES += \
-	USBSIDInterface.cpp \
-	USBSID.cpp
-
-EXTRA_DIST +=
-	USBSID.h \
-	USBSIDInterface.h
-endif HAVE_USBSID
 
 # Always built:
 # (needs to be declared empty to avoid `make` to try to build libhwsiddrv.o
