@@ -2,8 +2,8 @@ name: USBSID-Pico Snapshot Build
 env:
   SOURCE_REPO: LouDnl/USBSID-Pico-driver
   AUTOMATIC_MONITOR: true
-  FILES: "*.cpp,*.h" # seperate multiple entries with ,
-  FILES_NEW: "*.cpp,*.h" # seperate multiple entries with ,
+  FILES: "*.cpp *.h" # seperate multiple entries with ,
+  FILES_NEW: "*.cpp *.h" # seperate multiple entries with ,
   # EXTRA: mv USBSID* LICENSE_some_repo # do an extra command like renaming
   USERNAME: ${{ github.actor }}
   ADDRESS_SUFFIX: users.noreply.github.com
