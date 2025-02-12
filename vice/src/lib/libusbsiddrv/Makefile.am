@@ -1,6 +1,6 @@
 ## Vice Automake file
 # Makefile.am for `libusbsiddrv.a'.
-if HAVE_USBSID
+# if HAVE_USBSID
 AM_CPPFLAGS = \
 	@VICE_CPPFLAGS@ \
 	@ARCH_INCLUDES@ \
@@ -53,4 +53,4 @@ noinst_HEADERS = USBSID.h USBSIDInterface.h
 
 # Make sure we actually link the generated object files into the library:
 libusbsiddrv_a_LIBADD = $(USBSIDDRIVER)
-endif HAVE_USBSID
+# endif HAVE_USBSID
