@@ -19,7 +19,6 @@ noinst_LIBRARIES = libsounddrv.a
 # These sources are linked only under certain circumstances.
 EXTRA_libsounddrv_a_SOURCES = \
 	soundalsa.c \
-	soundasid.cc \
 	soundbeos.cc \
 	soundbsp.cc \
 	soundcoreaudio.c \
@@ -32,6 +31,8 @@ EXTRA_libsounddrv_a_SOURCES = \
 	soundvorbis.c \
 	soundwmm.c \
 	lamelib.c
+
+	# soundasid.cc
 
 # These sources are always built.
 libsounddrv_a_SOURCES = \

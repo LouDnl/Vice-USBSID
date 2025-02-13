@@ -87,10 +87,13 @@ static const sound_register_devices_t sound_register_devices[] = {
 #endif
 #ifdef USE_ALSA
     { "alsa", "ALSA sound output", sound_init_alsa_device, SOUND_PLAYBACK_DEVICE },
-    { "asid", "ASID sound output", sound_init_asid_device, SOUND_PLAYBACK_DEVICE },
 #endif /* USE_ALSA */
 #ifdef USE_COREAUDIO
     { "coreaudio", "Mac OS X Audio output", sound_init_coreaudio_device, SOUND_PLAYBACK_DEVICE },
+#endif
+
+#ifdef USE_ASID
+    // { "asid", "ASID sound output", sound_init_asid_device, SOUND_PLAYBACK_DEVICE },
 #endif
 
 /* Don't use the NetBSD/SUN sound driver for OpenBSD */
@@ -106,7 +109,6 @@ static const sound_register_devices_t sound_register_devices[] = {
 #ifdef USE_DXSOUND
     { "dx", "DirectSound sound output", sound_init_dx_device, SOUND_PLAYBACK_DEVICE },
 #endif
-    { "asid", "ASID sound output", sound_init_asid_device, SOUND_PLAYBACK_DEVICE },
     { "wmm", "Windows Waveout sound output", sound_init_wmm_device, SOUND_PLAYBACK_DEVICE },
 #endif
 
@@ -118,7 +120,6 @@ static const sound_register_devices_t sound_register_devices[] = {
     /* SDL driver last, after all platform specific ones */
 #ifdef USE_SDL_AUDIO
     { "sdl", "SDL sound output", sound_init_sdl_device, SOUND_PLAYBACK_DEVICE },
-    { "asid", "ASID sound output", sound_init_asid_device, SOUND_PLAYBACK_DEVICE },
 #endif
 
     /* the dummy device acts as a "guard" against the drivers that create files,

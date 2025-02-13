@@ -33,7 +33,7 @@
 
 #if defined(UNIX_COMPILE) && defined(USE_ALSA)
 #define __LINUX_ALSA__
-#define __UNIX_JACK__
+// #define __UNIX_JACK__
 #endif
 #if defined(WINDOWS_COMPILE)
 #define __WINDOWS_MM__
@@ -41,7 +41,6 @@
 
 
 // #if defined(USE_ALSA) || defined(WINDOWS_COMPILE)
-#include "RtMidi.cpp"
 
 #if defined(UNIX_COMPILE) && defined(__LINUX_ALSA__) || defined(WINDOWS_COMPILE) && defined(__WINDOWS_MM__)
 extern "C" {
@@ -52,12 +51,13 @@ extern "C" {
 #include "log.h"
 #include "sound.h"
 #include "types.h"
-// #include "sid.h"
-// #include "resid.h"
+
 #include "../../sid/sid.h"
 #include "../../sid/resid.h"
 #include "maincpu.h"
 #include "machine.h"
+
+#include "RtMidi.cpp"
 
 #ifdef HAVE_USBSID
 #define ASID_MAXSID SID_ENGINE_USBSID_NUM_SIDS

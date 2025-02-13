@@ -2669,7 +2669,7 @@ if test x"$is_unix" = "xyes" -a x"$is_unix_macosx" = "xno"; then
   dnl ALSA support checks
   if test x"$with_alsa" != "xno"; then
     AC_CHECK_HEADERS(alsa/asoundlib.h,[AC_CHECK_LIB(asound, snd_pcm_open,
-                     [SOUND_DRIVERS="$SOUND_DRIVERS soundalsa.o soundasid.o";
+                     [SOUND_DRIVERS="$SOUND_DRIVERS soundalsa.o";
                       SOUND_LIBS="$SOUND_LIBS -lasound";
                       USE_ALSA_SUPPORT="yes";
                       AC_DEFINE(USE_ALSA,,[Enable alsa support.])],,$SOUND_LIBS)])
@@ -2764,12 +2764,12 @@ dsound_header_no_lib="no"
 
 if test x"$is_win32" = "xyes" -o x"$is_win32_gtk3" = "xyes"; then
     if test x"$enable_sdl1ui" != "xyes" -a x"$enable_sdl2ui" != "xyes"; then
-        SOUND_DRIVERS="$SOUND_DRIVERS soundwmm.o soundasid.o"
+        SOUND_DRIVERS="$SOUND_DRIVERS soundwmm.o"
         AC_MSG_CHECKING(whether we can use directx sound)
         AC_CHECK_HEADER(dsound.h,
               [ AC_DEFINE(USE_DXSOUND,,[Enable directx sound support.])
                 USE_DXSOUND_SUPPORT="yes" ]
-              [ SOUND_DRIVERS="$SOUND_DRIVERS sounddx.o soundasid.o" ]
+              [ SOUND_DRIVERS="$SOUND_DRIVERS sounddx.o" ]
               [ AC_MSG_CHECKING(for -ldsound) ]
               [ old_LIBS="$LIBS" ]
               [ LIBS="$LIBS -ldsound" ]
