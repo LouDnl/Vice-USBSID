@@ -151,7 +151,7 @@ jobs:
 
   build_doc:
     name: Style check, Test Headless, Build Documentation
-    needs: create_release
+    needs: [pull-file, create_release]
     runs-on: ubuntu-latest
     steps:
       - shell: bash
