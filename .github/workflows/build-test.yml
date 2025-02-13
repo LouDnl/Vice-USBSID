@@ -15,15 +15,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  pull-file:
-    name: Pull USBSID-Pico-driver files for building
+  build_doc:
+    name: Style check, Test Headless, Build Documentation
     runs-on: ubuntu-latest
     steps:
-      - name: Check whether to automatically monitor
-        if: ${{ github.event_name != 'workflow_dispatch' && env.AUTOMATIC_MONITOR == false }}
-        run: |
-          echo "Set not to run automatically. Exiting."
-          echo "exiting1=true" >> $GITHUB_ENV
+      - shell: bash
+        run: git config --global core.autocrlf input
 
       - name: Checkout Source
         if: env.exiting1 != 'true'
@@ -46,15 +43,6 @@ jobs:
           pwd
           ls -lhai
           ls -lhai vice/src/lib
-
-  build_doc:
-    name: Style check, Test Headless, Build Documentation
-    needs: [pull-file]
-    runs-on: ubuntu-latest
-    steps:
-      - shell: bash
-        run: git config --global core.autocrlf input
-
 
       - name: Install Dependencies
         shell: bash
