@@ -47,6 +47,7 @@ jobs:
 
   cleanup_previous_builds: # Delete unfinished draft prereleases, and prereleases older than 30 days (but keep at least 10)
     name: Cleanup Previous Builds
+    if: ${{ !github.event.act }} # skip during local actions testing
     runs-on: ubuntu-latest
     steps:
       - uses: actions/github-script@v7
@@ -119,6 +120,7 @@ jobs:
 
   create_release:
     name: Create Draft Release
+    if: ${{ !github.event.act }} # skip during local actions testing
     needs: cleanup_previous_builds
     runs-on: ubuntu-latest
     outputs:
