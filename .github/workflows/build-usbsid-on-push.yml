@@ -40,8 +40,8 @@ jobs:
       - name: Copy files
         if: env.exiting1 != 'true'
         run: |
+          mkdir -p vice/src/lib/libusbsiddrv
           cd $PATH_SOURCE_CHECKOUT
-          mkdir -p ../vice/src/lib/libusbsiddrv
           cp -u $FILES ../vice/src/lib/libusbsiddrv/
           cd ..
 
