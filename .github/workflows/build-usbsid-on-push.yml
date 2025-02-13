@@ -230,21 +230,6 @@ jobs:
           if: env.exiting1 != 'true'
           uses: actions/checkout@v4
 
-        - name: Checkout USBSID-Pico driver
-          if: env.exiting1 != 'true'
-          uses: actions/checkout@v4
-          with:
-            repository: ${{ env.SOURCE_REPO }}
-            path: ${{ env.PATH_SOURCE_CHECKOUT }}
-
-        - name: Copy files
-          if: env.exiting1 != 'true'
-          run: |
-            mkdir -p vice/src/lib/libusbsiddrv
-            cd $PATH_SOURCE_CHECKOUT
-            cp $FILES ../vice/src/lib/libusbsiddrv/
-            cd ..
-
         - name: Download Documentation
           uses: actions/download-artifact@v4
           with:
@@ -370,6 +355,21 @@ jobs:
             make CFLAGS="-Wno-incompatible-pointer-types"
             make install
             cd "$OLDDIR"
+
+        - name: Checkout USBSID-Pico driver
+          if: env.exiting1 != 'true'
+          uses: actions/checkout@v4
+          with:
+            repository: ${{ env.SOURCE_REPO }}
+            path: ${{ env.PATH_SOURCE_CHECKOUT }}
+
+        - name: Copy files
+          shell: msys2 {0}
+          run: |
+            mkdir -p vice/src/lib/libusbsiddrv
+            cd $PATH_SOURCE_CHECKOUT
+            cp $FILES ../vice/src/lib/libusbsiddrv/
+            cd ..
 
         - name: Build
           id: build
