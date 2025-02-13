@@ -8,7 +8,8 @@ env:
 on:
   push:
     tags:
-    - 'r[0-9]+' # any tag name that looks like an svn commit
+    - '*'
+#    - 'r[0-9]+' # any tag name that looks like an svn commit
   workflow_dispatch:
 concurrency:
   group: USBSID-Pico Snapshot Build
@@ -146,7 +147,7 @@ jobs:
           cd $PATH_SOURCE_CHECKOUT
           cp -u $FILES ../vice/src/lib/libusbsiddrv/
           cd ..
- 
+
       - name: Install Dependencies
         shell: bash
         run: |

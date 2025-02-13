@@ -1,8 +1,8 @@
 name: Snapshot Build
 on:
-  push:
-    tags:
-    - 'r[0-9]+' # any tag name that looks like an svn commit
+#  push:
+#    tags:
+#    - 'r[0-9]+' # any tag name that looks like an svn commit
   workflow_dispatch:
 concurrency:
   group: Snapshot Build
