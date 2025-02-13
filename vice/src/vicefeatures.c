@@ -113,41 +113,6 @@ static const feature_list_t featurelist[] = {
         1 },
 #endif
  /* (all) */
-    { "HAVE_FFMPEG", "Have FFMPEG av* libs available (deprecated)",
-#ifndef HAVE_FFMPEG
-        0 },
-#else
-        1 },
-#endif
- /* (all) */
-    { "HAVE_FFMPEG_HEADER_SUBDIRS", "FFMPEG uses subdirs for headers (deprecated)",
-#ifndef HAVE_FFMPEG_HEADER_SUBDIRS
-        0 },
-#else
-        1 },
-#endif
- /* (all) */
-    { "HAVE_FFMPEG_SWSCALE", "Have FFMPEG swscale lib available (deprecated)",
-#ifndef HAVE_FFMPEG_SWSCALE
-        0 },
-#else
-        1 },
-#endif
- /* (all) */
-    { "HAVE_FFMPEG_SWRESAMPLE", "Have FFMPEG swresample lib available (deprecated)",
-#ifndef HAVE_FFMPEG_SWRESAMPLE
-        0 },
-#else
-        1 },
-#endif
- /* (all) */
-    { "HAVE_FFMPEG_AVRESAMPLE", "Have FFMPEG avresample lib available (deprecated)",
-#ifndef HAVE_FFMPEG_AVRESAMPLE
-        0 },
-#else
-        1 },
-#endif
- /* (all) */
     { "HAVE_GIF", "Use the GIF or UNGIF library",
 #ifndef HAVE_GIF
         0 },
@@ -385,12 +350,6 @@ static const feature_list_t featurelist[] = {
 #endif
 
 /* (all) */
-    { "HAVE_ZLIB", "Use the ZLIB compression library.",
-#ifndef HAVE_ZLIB
-        0 },
-#else
-        1 },
-#endif
 #ifdef UNIX_COMPILE /* (unix) */
     { "LINUX_JOYSTICK", "Enable support for Linux style joysticks.",
 #ifndef LINUX_JOYSTICK

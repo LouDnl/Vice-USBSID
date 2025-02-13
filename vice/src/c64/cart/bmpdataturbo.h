@@ -1,10 +1,9 @@
-/** \file   soundsyncwidget.h
- * \brief   Sound synchronization mode widget - header
- *
- * \author  Bas Wassink <b.wassink@ziggo.nl>
- */
-
 /*
+ * bmpdataturbo.h - Cartridge handling, BMP Data Turbo 2000 cart.
+ *
+ * Written by
+ *  groepaz <groepaz@gmx.net>
+ *
  * This file is part of VICE, the Versatile Commodore Emulator.
  * See README for copyright notice.
  *
@@ -22,14 +21,26 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
  *  02111-1307  USA.
+ *
  */
 
-#ifndef VICE_SOUNDSYNCWIDGET_H
-#define VICE_SOUNDSYNCWIDGET_H
+#ifndef VICE_BMPDATATURBO_H
+#define VICE_BMPDATATURBO_H
 
-#include "vice.h"
-#include <gtk/gtk.h>
+#include <stdio.h>
 
-GtkWidget * sound_sync_mode_widget_create(void);
+#include "types.h"
+
+void bmpdataturbo_config_setup(uint8_t *rawcart);
+int bmpdataturbo_bin_attach(const char *filename, uint8_t *rawcart);
+int bmpdataturbo_crt_attach(FILE *fd, uint8_t *rawcart);
+void bmpdataturbo_detach(void);
+void bmpdataturbo_config_init(void);
+void bmpdataturbo_reset(void);
+
+struct snapshot_s;
+
+int bmpdataturbo_snapshot_write_module(struct snapshot_s *s);
+int bmpdataturbo_snapshot_read_module(struct snapshot_s *s);
 
 #endif

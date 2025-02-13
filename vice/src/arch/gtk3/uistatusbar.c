@@ -25,11 +25,11 @@
  *
  * $VICERES SoundVolume         all
  * $VICERES C128ColumnKey       x128
- * $VICERES CrtcHideStatusbar   xcbm2 xpet
- * $VICERES TEDHideStatusbar    xplus4
- * $VICERES VDCHideStatusbar    x128
- * $VICERES VICHideStatusbar    xvic
- * $VICERES VICIIHideStatusbar  x64 x64sc x64dtv xscpu64 x128 xcbm5x0
+ * $VICERES CrtcShowStatusbar   xcbm2 xpet
+ * $VICERES TEDShowStatusbar    xplus4
+ * $VICERES VDCShowStatusbar    x128
+ * $VICERES VICShowStatusbar    xvic
+ * $VICERES VICIIShowStatusbar  x64 x64sc x64dtv xscpu64 x128 xcbm5x0
  * $VICERES DiagPin             xpet
  * $VICERES SpeedSwitch         xscpu64
  * $VICERES JiffySwitch         xscpu64
@@ -105,6 +105,14 @@
 #include "vice_gtk3.h"
 
 #include "uistatusbar.h"
+
+/* #define DEBUG_STATUSBAR */
+
+#ifdef DEBUG_STATUSBAR
+#define DBG(x) log_printf x
+#else
+#define DBG(x)
+#endif
 
 
 /** \brief The maximum number of status bars we will permit to exist at once. */
@@ -2891,7 +2899,7 @@ void ui_display_playback(int playback_status, char *version)
 void ui_display_recording(int recording_status)
 {
     GtkWidget *widget;
-
+    DBG(("ui_display_recording: %d", recording_status));
     /* Ok to call from VICE thread */
     widget = allocated_bars[0].record;
     statusbar_recording_widget_set_recording_status(widget, recording_status);
@@ -3715,7 +3723,7 @@ gboolean ui_statusbar_set_visible_for_window(GtkWidget *window, gboolean visible
 
 /** \brief  Show/Hide statusbar of the **active** window
  *
- * Toggle visibility of statusbar based on "${chip}HideStatusbar" resource.
+ * Toggle visibility of statusbar based on "${chip}ShowStatusbar" resource.
  *
  * \return  TRUE (don't pass event along further)
  */

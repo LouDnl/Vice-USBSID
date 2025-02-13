@@ -265,7 +265,9 @@ void cartridge_sound_chip_init(void);
 #define CARTRIDGE_UC1                  80 /* uc1.c */
 #define CARTRIDGE_UC15                 81 /* uc2.c */
 #define CARTRIDGE_UC2                  82 /* uc2.c */
-#define CARTRIDGE_LAST                 82 /* cartconv: last cartridge in list */
+#define CARTRIDGE_BMPDATATURBO         83 /* bmpdataturbo.c */
+#define CARTRIDGE_PROFIDOS             84 /* profidos.c */
+#define CARTRIDGE_LAST                 84 /* cartconv: last cartridge in list */
 
 /* list of canonical names for the c64 cartridges:
    note: often it is hard to determine "the" official name, let alone the way it
@@ -292,6 +294,7 @@ void cartridge_sound_chip_init(void);
 #define CARTRIDGE_NAME_BLACKBOX4          "Blackbox V4"
 #define CARTRIDGE_NAME_BLACKBOX8          "Blackbox V8"
 #define CARTRIDGE_NAME_BLACKBOX9          "Blackbox V9"
+#define CARTRIDGE_NAME_BMPDATATURBO       "BMP Data Turbo 2000"
 #define CARTRIDGE_NAME_GS                 "C64 Games System" /* http://retro.lonningdal.net/home.php?page=Computers&select=c64gs&image=c64gs4.jpg */
 #define CARTRIDGE_NAME_CAPTURE            "Capture" /* see manual http://rr.pokefinder.org/wiki/Capture */
 #define CARTRIDGE_NAME_COMAL80            "Comal 80" /* http://www.retroport.de/C64_C128_Hardware.html */
@@ -350,6 +353,7 @@ void cartridge_sound_chip_init(void);
 #define CARTRIDGE_NAME_OCEAN              "Ocean"
 #define CARTRIDGE_NAME_PAGEFOX            "Pagefox"
 #define CARTRIDGE_NAME_PARTNER64          "Partner 64"
+#define CARTRIDGE_NAME_PROFIDOS           "Profi-DOS"
 #define CARTRIDGE_NAME_MIDI_PASSPORT      "Passport MIDI"
 #define CARTRIDGE_NAME_P64                "Prophet64" /* see http://www.prophet64.com/ */
 #define CARTRIDGE_NAME_RAMCART            "RamCart" /* see cc65 driver */

@@ -1,5 +1,5 @@
 /*
- * userport_wic64.h:
+ * profidos.h - Cartridge handling, ProfiDOS cart.
  *
  * Written by
  *  groepaz <groepaz@gmx.net>
@@ -24,33 +24,29 @@
  *
  */
 
-#ifndef VICE_USERPORT_WIC64_H
-#define VICE_USERPORT_WIC64_H
+#ifndef VICE_PROFIDOS_H
+#define VICE_PROFIDOS_H
+
+#include <stdio.h>
 
 #include "types.h"
+#include "c64cart.h"
 
-#define WIC64_DEFAULT_TRANSFER_TIMEOUT 1 /* supervise userport transfer */
-#define WIC64_DEFAULT_REMOTE_TIMEOUT 5   /* supervise remote URL fetch */
-#define WIC64_MAXTRACELEVEL 4   /* adjust if needed more */
-/* timezone mapping
-   C64 sends just a number 0-31, bcd little endian in commandbuffer.
-   offsets can then be calculated.
-   TBD, Fixme for day-wraparounds incl. dates
-*/
-typedef struct tzones
-{
-    int idx;
-    char *tz_name;
-    int hour_offs;
-    int min_offs;
-    int dst;                    /* add DST or not, still not perfekt */
-} tzones_t;
+struct snapshot_s;
 
-int  userport_wic64_resources_init(void);
-void userport_wic64_resources_shutdown(void);
-int  userport_wic64_cmdline_options_init(void);
-void userport_wic64_factory_reset(void);
+uint8_t profidos_romh_read_hirom(uint16_t addr);
+int profidos_romh_phi1_read(uint16_t addr, uint8_t *value);
+int profidos_romh_phi2_read(uint16_t addr, uint8_t *value);
+int profidos_peek_mem(export_t *export, uint16_t addr, uint8_t *value);
 
-const tzones_t *userport_wic64_get_timezones(size_t *num_zones);
+void profidos_config_init(void);
+void profidos_reset(void);
+void profidos_config_setup(uint8_t *rawcart);
+int profidos_bin_attach(const char *filename, uint8_t *rawcart);
+int profidos_crt_attach(FILE *fd, uint8_t *rawcart);
+void profidos_detach(void);
+
+int profidos_snapshot_write_module(struct snapshot_s *s);
+int profidos_snapshot_read_module(struct snapshot_s *s);
 
 #endif

@@ -50,6 +50,8 @@ libc64cart_a_SOURCES = \
 	blackbox8.h \
 	blackbox9.c \
 	blackbox9.h \
+	bmpdataturbo.c \
+	bmpdataturbo.h \
 	bisplus.c \
 	bisplus.h \
 	c64-generic.c \
@@ -160,6 +162,8 @@ libc64cart_a_SOURCES = \
 	pagefox.h \
 	partner64.c \
 	partner64.h \
+	profidos.c \
+	profidos.h \
 	prophet64.c \
 	prophet64.h \
 	ramcart.c \

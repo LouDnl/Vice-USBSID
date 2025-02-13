@@ -67,6 +67,7 @@
 #include "blackbox4.h"
 #include "blackbox8.h"
 #include "blackbox9.h"
+#include "bmpdataturbo.h"
 #include "c64-generic.h"
 #include "c64tpi.h"
 #include "comal80.h"
@@ -114,6 +115,7 @@
 #include "pagefox.h"
 #include "partner64.h"
 #include "prophet64.h"
+#include "profidos.h"
 #include "ramlink.h"
 #include "retroreplay.h"
 #include "rexep256.h"
@@ -253,6 +255,7 @@ static cartridge_info_t cartlist[] = {
     { CARTRIDGE_NAME_BLACKBOX4,           CARTRIDGE_BLACKBOX4,           CARTRIDGE_GROUP_UTIL },
     { CARTRIDGE_NAME_BLACKBOX8,           CARTRIDGE_BLACKBOX8,           CARTRIDGE_GROUP_UTIL },
     { CARTRIDGE_NAME_BLACKBOX9,           CARTRIDGE_BLACKBOX9,           CARTRIDGE_GROUP_UTIL },
+    { CARTRIDGE_NAME_BMPDATATURBO,        CARTRIDGE_BMPDATATURBO,        CARTRIDGE_GROUP_UTIL },
     { CARTRIDGE_NAME_CAPTURE,             CARTRIDGE_CAPTURE,             CARTRIDGE_GROUP_FREEZER },
     { CARTRIDGE_NAME_COMAL80,             CARTRIDGE_COMAL80,             CARTRIDGE_GROUP_UTIL },
     { CARTRIDGE_NAME_DELA_EP256,          CARTRIDGE_DELA_EP256,          CARTRIDGE_GROUP_UTIL },
@@ -298,6 +301,7 @@ static cartridge_info_t cartlist[] = {
     { CARTRIDGE_NAME_P64,                 CARTRIDGE_P64,                 CARTRIDGE_GROUP_UTIL },
     { CARTRIDGE_NAME_PAGEFOX,             CARTRIDGE_PAGEFOX,             CARTRIDGE_GROUP_UTIL },
     { CARTRIDGE_NAME_PARTNER64,           CARTRIDGE_PARTNER64,           CARTRIDGE_GROUP_UTIL },
+    { CARTRIDGE_NAME_PROFIDOS,            CARTRIDGE_PROFIDOS,            CARTRIDGE_GROUP_UTIL },
     { CARTRIDGE_NAME_RAMLINK,             CARTRIDGE_RAMLINK,             CARTRIDGE_GROUP_UTIL },
     { CARTRIDGE_NAME_RETRO_REPLAY,        CARTRIDGE_RETRO_REPLAY,        CARTRIDGE_GROUP_FREEZER },
     { CARTRIDGE_NAME_REX,                 CARTRIDGE_REX,                 CARTRIDGE_GROUP_UTIL },
@@ -432,6 +436,7 @@ static int set_cartridge_type(int val, void *param)
         case CARTRIDGE_BLACKBOX4:
         case CARTRIDGE_BLACKBOX8:
         case CARTRIDGE_BLACKBOX9:
+        case CARTRIDGE_BMPDATATURBO:
         case CARTRIDGE_CAPTURE:
         case CARTRIDGE_COMAL80:
         case CARTRIDGE_DELA_EP64:
@@ -477,6 +482,7 @@ static int set_cartridge_type(int val, void *param)
         case CARTRIDGE_P64:
         case CARTRIDGE_PAGEFOX:
         case CARTRIDGE_PARTNER64:
+        case CARTRIDGE_PROFIDOS:
         case CARTRIDGE_RAMLINK:
         case CARTRIDGE_RETRO_REPLAY:
         case CARTRIDGE_REX:
@@ -788,6 +794,9 @@ static int crt_attach(const char *filename, uint8_t *rawcart)
             case CARTRIDGE_BLACKBOX9:
                 rc = blackbox9_crt_attach(fd, rawcart);
                 break;
+            case CARTRIDGE_BMPDATATURBO:
+                rc = bmpdataturbo_crt_attach(fd, rawcart);
+                break;
             case CARTRIDGE_CAPTURE:
                 rc = capture_crt_attach(fd, rawcart);
                 break;
@@ -930,6 +939,9 @@ static int crt_attach(const char *filename, uint8_t *rawcart)
                 break;
             case CARTRIDGE_PARTNER64:
                 rc = partner64_crt_attach(fd, rawcart);
+                break;
+            case CARTRIDGE_PROFIDOS:
+                rc = profidos_crt_attach(fd, rawcart);
                 break;
             case CARTRIDGE_UC1:
                 rc = uc1_crt_attach(fd, rawcart);
