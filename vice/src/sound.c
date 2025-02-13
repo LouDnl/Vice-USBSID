@@ -118,6 +118,7 @@ static const sound_register_devices_t sound_register_devices[] = {
     /* SDL driver last, after all platform specific ones */
 #ifdef USE_SDL_AUDIO
     { "sdl", "SDL sound output", sound_init_sdl_device, SOUND_PLAYBACK_DEVICE },
+    { "asid", "ASID sound output", sound_init_asid_device, SOUND_PLAYBACK_DEVICE },
 #endif
 
     /* the dummy device acts as a "guard" against the drivers that create files,

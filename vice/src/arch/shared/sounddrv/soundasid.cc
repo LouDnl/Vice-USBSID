@@ -26,26 +26,24 @@
 
 #include "vice.h"
 
-// #define MIDI_DEBUG
+/* #define MIDI_DEBUG */
+#if defined(MIDI_DEBUG)
+#define __RTMIDI_DEBUG__
+#endif
 
-// #if defined(UNIX_COMPILE) && defined(USE_ALSA)
-// #define __LINUX_ALSA__
-// #define __UNIX_JACK__
-// #endif
-// #if defined(WINDOWS_COMPILE)
-// #define __WINDOWS_MM__
-// #endif
-// #if defined(MIDI_DEBUG)
-// #define __RTMIDI_DEBUG__
-// #endif
+#if defined(UNIX_COMPILE) && defined(USE_ALSA)
+#define __LINUX_ALSA__
+#define __UNIX_JACK__
+#endif
+#if defined(WINDOWS_COMPILE)
+#define __WINDOWS_MM__
+#endif
 
-// #ifdef WINDOWS_COMPILE
-// #define __WINDOWS_MM__
-// #endif
+
 // #if defined(USE_ALSA) || defined(WINDOWS_COMPILE)
 #include "RtMidi.cpp"
-#if defined(__LINUX_ALSA__) || defined(__WINDOWS_MM__)
 
+#if defined(UNIX_COMPILE) && defined(__LINUX_ALSA__) || defined(WINDOWS_COMPILE) && defined(__WINDOWS_MM__)
 extern "C" {
 
 #include <stdio.h>
@@ -479,4 +477,5 @@ int sound_init_asid_device(void)
 }
 
 } // extern "C"
-#endif
+
+#endif /* UNIX_COMPILE && __LINUX_ALSA__|| WINDOWS_COMPILE && __WINDOWS_MM__ */
