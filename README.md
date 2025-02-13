@@ -21,8 +21,9 @@ sudo apt install autoconf automake build-essential byacc flex xa65 gawk libgtk-3
     git clone https://github.com/LouDnl/USBSID-Pico-driver.git
 
     # copy the driver files into the correct directory
+    mkdir -p vice/src/lib/libusbsiddrv
     cd USBSID-Pico-driver
-    cp USBSID* ../vice/src/arch/shared/hwsiddrv/
+    cp README.md LICENSE USBSID* vice-makefile/Makefile.am ../vice/src/lib/libusbsiddrv/
     cd ..
 
     # create a build directory
@@ -113,6 +114,15 @@ After installing docker follow the following steps to create win32 or win64 bina
     # clone the repository
     git clone https://github.com/LouDnl/Vice-USBSID.git
     cd Vice-USBSID
+
+    # clone the driver
+    git clone https://github.com/LouDnl/USBSID-Pico-driver.git
+
+    # copy the driver files into the correct directory
+    mkdir -p vice/src/lib/libusbsiddrv
+    cd USBSID-Pico-driver
+    cp README.md LICENSE USBSID* vice-makefile/Makefile.am ../vice/src/lib/libusbsiddrv/
+    cd ..
 
     # generate configure and make files
     cd vice
