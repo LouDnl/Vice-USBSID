@@ -128,7 +128,7 @@ jobs:
       - shell: bash
         run: git config --global core.autocrlf input
 
-    - name: Checkout Source
+      - name: Checkout Source
         if: env.exiting1 != 'true'
         uses: actions/checkout@v4
 
@@ -147,7 +147,7 @@ jobs:
           cp -u $FILES ../vice/src/lib/libusbsiddrv/
           cd ..
  
-     - name: Install Dependencies
+      - name: Install Dependencies
         shell: bash
         run: |
           sudo apt update
@@ -226,24 +226,24 @@ jobs:
         - run: git config --global core.autocrlf input
           shell: bash
 
-    - name: Checkout Source
-        if: env.exiting1 != 'true'
-        uses: actions/checkout@v4
+        - name: Checkout Source
+          if: env.exiting1 != 'true'
+          uses: actions/checkout@v4
 
-      - name: Checkout USBSID-Pico driver
-        if: env.exiting1 != 'true'
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ env.SOURCE_REPO }}
-          path: ${{ env.PATH_SOURCE_CHECKOUT }}
+        - name: Checkout USBSID-Pico driver
+          if: env.exiting1 != 'true'
+          uses: actions/checkout@v4
+          with:
+            repository: ${{ env.SOURCE_REPO }}
+            path: ${{ env.PATH_SOURCE_CHECKOUT }}
 
-      - name: Copy files
-        if: env.exiting1 != 'true'
-        run: |
-          mkdir -p vice/src/lib/libusbsiddrv
-          cd $PATH_SOURCE_CHECKOUT
-          cp -u $FILES ../vice/src/lib/libusbsiddrv/
-          cd ..
+        - name: Copy files
+          if: env.exiting1 != 'true'
+          run: |
+            mkdir -p vice/src/lib/libusbsiddrv
+            cd $PATH_SOURCE_CHECKOUT
+            cp -u $FILES ../vice/src/lib/libusbsiddrv/
+            cd ..
 
         - name: Download Documentation
           uses: actions/download-artifact@v4
