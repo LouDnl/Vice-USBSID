@@ -14,7 +14,7 @@ AM_CXXFLAGS = \
 	-I$(top_srcdir)/src/lib/libusbsiddrv
 AM_LDFLAGS = @VICE_LDFLAGS@
 
-#noinst_LIBRARIES = libusbsiddrv.a
+noinst_LIBRARIES = libusbsiddrv.a
 
 USBSIDDRIVER=
 
