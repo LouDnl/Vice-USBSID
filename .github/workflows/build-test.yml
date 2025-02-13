@@ -45,7 +45,7 @@ jobs:
           cd ..
           pwd
           ls -lhai
-          ld -lhai vice/src/lib
+          ls -lhai vice/src/lib
 
   build_doc:
     name: Style check, Test Headless, Build Documentation
@@ -79,7 +79,9 @@ jobs:
         id: build
         shell: bash
         run: |
+          ls -lhai
           cd vice
+          ls -lhai src/lib
           ./src/buildtools/genvicedate_h.sh
           ./autogen.sh
           ./configure --enable-option-checking=fatal \
