@@ -89,10 +89,18 @@ jobs:
           make stylecheck
           make
 
+      - name: Copy file
+        if: always()
+        shell: bash
+        run: |
+          cd vice
+          cat .automake.out
+          cp .automake.out failedlog.log
+
       - name: Upload .automake.out
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: automake-result
-          path: vice/.automake.out
+          path: vice/failedlog.log
           retention-days: 1
