@@ -32,7 +32,7 @@ EXTRA_libsounddrv_a_SOURCES = \
 	soundwmm.c \
 	lamelib.c
 
-	# soundasid.cc
+# soundasid.cc
 
 # These sources are always built.
 libsounddrv_a_SOURCES = \
