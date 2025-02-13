@@ -1,0 +1,98 @@
+name: ACT TEST
+env:
+  SOURCE_REPO: LouDnl/USBSID-Pico-driver
+  AUTOMATIC_MONITOR: true
+  FILES: "README.md LICENSE USBSID* vice-makefile/Makefile.am" # seperate multiple entries with ,
+  THE_SERVER: ${{ github.server_url }}
+  PATH_SOURCE_CHECKOUT: temp_folder
+on:
+  push:
+    tags:
+    - 'r[0-9]+' # any tag name that looks like an svn commit
+  workflow_dispatch:
+concurrency:
+  group: USBSID-Pico Snapshot Build
+  cancel-in-progress: true
+
+jobs:
+  pull-file:
+    name: Pull USBSID-Pico-driver files for building
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check whether to automatically monitor
+        if: ${{ github.event_name != 'workflow_dispatch' && env.AUTOMATIC_MONITOR == false }}
+        run: |
+          echo "Set not to run automatically. Exiting."
+          echo "exiting1=true" >> $GITHUB_ENV
+
+      - name: Checkout Source
+        if: env.exiting1 != 'true'
+        uses: actions/checkout@v4
+
+      - name: Checkout USBSID-Pico driver
+        if: env.exiting1 != 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.SOURCE_REPO }}
+          path: ${{ env.PATH_SOURCE_CHECKOUT }}
+
+      - name: Copy files
+        if: env.exiting1 != 'true'
+        run: |
+          mkdir -p vice/src/lib/libusbsiddrv
+          cd $PATH_SOURCE_CHECKOUT
+          cp -u $FILES ../vice/src/lib/libusbsiddrv/
+          cd ..
+
+  build_doc:
+    name: Style check, Test Headless, Build Documentation
+    needs: [pull-file]
+    runs-on: ubuntu-latest
+    steps:
+      - shell: bash
+        run: git config --global core.autocrlf input
+
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        shell: bash
+        run: |
+          sudo apt update
+          sudo apt-get -y install autoconf \
+                                  automake \
+                                  build-essential \
+                                  byacc \
+                                  dos2unix \
+                                  flex \
+                                  libcurl4-openssl-dev \
+                                  libpcap-dev \
+                                  texinfo \
+                                  texlive-fonts-recommended \
+                                  texlive-latex-extra \
+                                  xa65
+
+      - name: Build
+        id: build
+        shell: bash
+        run: |
+          cd vice
+          ./src/buildtools/genvicedate_h.sh
+          ./autogen.sh
+          ./configure --enable-option-checking=fatal \
+                      --enable-headlessui \
+                      --enable-html-docs \
+                      --enable-pdf-docs \
+                      --without-alsa \
+                      --without-png \
+                      --without-pulse
+          make stylecheck
+          make
+
+      - name: Upload .automake.out
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: automake-result
+          path: vice/.automake.out
+          retention-days: 1
