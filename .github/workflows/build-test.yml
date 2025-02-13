@@ -43,6 +43,9 @@ jobs:
           cd $PATH_SOURCE_CHECKOUT
           cp -u $FILES ../vice/src/lib/libusbsiddrv/
           cd ..
+          pwd
+          ls -lhai
+          ld -lhai vice/src/lib
 
   build_doc:
     name: Style check, Test Headless, Build Documentation
