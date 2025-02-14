@@ -6,92 +6,125 @@ env:
   THE_SERVER: ${{ github.server_url }}
   PATH_SOURCE_CHECKOUT: temp_folder
 on:
-#  push:
-#    tags:
-#    - 'r[0-9]+' # any tag name that looks like an svn commit
   workflow_dispatch:
 concurrency:
-  group: USBSID-Pico Snapshot Build
+  group: USBSID-Pico TEST Build
   cancel-in-progress: true
 
 jobs:
-  build_doc:
-    name: Style check, Test Headless, Build Documentation
-    runs-on: ubuntu-latest
+  build_deb:
+    name: Build MacOs Package
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+          ui: [ { name: 'GTK3',
+                  conf: '--enable-gtk3ui --with-pulse',
+                  deps: 'libevdev-dev libglew-dev libgtk-3-dev libpulse-dev' },
+                # { name: 'SDL2',
+                #   conf: '--enable-sdl2ui --with-sdlsound --without-pulse',
+                #   deps: 'libsdl2-dev libsdl2-image-dev' },
+                # { name: 'SDL1',
+                #   conf: '--enable-sdl1ui --with-sdlsound --without-pulse',
+                #   deps: 'libsdl1.2-dev libsdl-image1.2-dev' },
+                # { name: 'Headless',
+                #   conf: '--enable-headlessui --with-pulse',
+                #   deps: 'libpulse-dev' }
+                  ]
     steps:
-      - shell: bash
-        run: git config --global core.autocrlf input
 
       - name: Checkout Source
-        if: env.exiting1 != 'true'
         uses: actions/checkout@v4
 
       - name: Checkout USBSID-Pico driver
-        if: env.exiting1 != 'true'
         uses: actions/checkout@v4
         with:
           repository: ${{ env.SOURCE_REPO }}
           path: ${{ env.PATH_SOURCE_CHECKOUT }}
 
       - name: Copy files
-        if: env.exiting1 != 'true'
         run: |
           mkdir -p vice/src/lib/libusbsiddrv
           cd $PATH_SOURCE_CHECKOUT
           cp -u $FILES ../vice/src/lib/libusbsiddrv/
           cd ..
           pwd
-          ls -lhai
-          ls -lhai vice/src/lib
 
-      - name: Install Dependencies
-        shell: bash
+      - name: deps [macOS]
+        if: runner.os == 'macOS'
         run: |
-          sudo apt update
-          sudo apt-get -y install autoconf \
-                                  automake \
-                                  build-essential \
-                                  byacc \
-                                  dos2unix \
-                                  flex \
-                                  libcurl4-openssl-dev \
-                                  libpcap-dev \
-                                  texinfo \
-                                  texlive-fonts-recommended \
-                                  texlive-latex-extra \
-                                  xa65
-
+          export HOMEBREW_NO_INSTALL_CLEANUP=1
+          brew update
+          brew upgrade || true
+          brew uninstall --ignore-dependencies --force pkg-config@0.29.2
+          brew install \
+            autoconf \
+            automake \
+            build-essential \
+            libtool \
+            pkgconf \
+            coreutils \
+            gnu-sed \
+            libgcrypt \
+            xa \
+            libusb \
+            libusb-compat \
+            byacc \
+            devscripts \
+            dos2unix \
+            fakeroot \
+            flex \
+            libasound-dev \
+            libcap-dev \
+            libcurl4-openssl-dev \
+            libflac-dev \
+            libgif-dev \
+            libieee1284-3-dev \
+            libmp3lame-dev \
+            libmpg123-dev \
+            libpcap-dev \
+            libpng-dev \
+            libvorbis-dev \
+            portaudio19-dev \
+            texinfo \
+            texlive-fonts-recommended \
+            texlive-latex-extra \
+            xa65 \
+            libevdev-dev \
+            libglew-dev \
+            libgtk-3-dev \
+            libpulse-dev
       - name: Build
-        id: build
-        shell: bash
         run: |
-          ls -lhai
+          mkdir -p build/usr
           cd vice
-          ls -lhai src/lib
           ./src/buildtools/genvicedate_h.sh
           ./autogen.sh
+          # ALSA is required for SDL2 as well for midi support
           ./configure --enable-option-checking=fatal \
-                      --enable-headlessui \
-                      --enable-html-docs \
+                      --prefix=/usr \
+                      --enable-gtk3ui \
+                      --with-pulse \
+                      --disable-arch \
+                      --disable-html-docs \
+                      --enable-usbsid \
+                      --enable-catweasel \
+                      --enable-cpuhistory \
+                      --enable-ethernet \
+                      --enable-midi \
+                      --enable-parsid \
                       --enable-pdf-docs \
-                      --without-alsa \
-                      --without-png \
-                      --without-pulse
-          make stylecheck
-          make
-
-      - name: Copy file
-        if: always()
-        shell: bash
-        run: |
-          cd vice
-          cat .automake.out
-          cp .automake.out failedlog.log
-
-      - name: Upload .automake.out
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: automake-result
-          path: vice/failedlog.log
-          retention-days: 1
+                      --with-alsa \
+                      --with-fastsid \
+                      --with-flac \
+                      --with-gif \
+                      --with-lame \
+                      --with-libcurl \
+                      --with-libieee1284 \
+                      --with-mpg123 \
+                      --with-png \
+                      --with-portaudio \
+                      --with-resid \
+                      --with-vorbis
+          make -j2 -s --no-print-directory
+          make DESTDIR=$HOME/build install
