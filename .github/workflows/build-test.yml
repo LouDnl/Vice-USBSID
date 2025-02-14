@@ -60,7 +60,6 @@ jobs:
           brew install \
             autoconf \
             automake \
-            build-essential \
             libtool \
             pkgconf \
             coreutils \
