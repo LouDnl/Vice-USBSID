@@ -426,7 +426,7 @@ AC_TYPE_SSIZE_T
 
 
 AC_CONFIG_HEADERS([src/config.h])
-
+X
 
 is_unix=no
 is_unix_x11=no
@@ -2795,7 +2795,7 @@ if test x"$is_unix_macosx" = "xyes"; then
       if test x"$PKG_CONFIG" != "x" -a x"$USBSID_LIB_PRESENT" = "xyes"; then
         PKG_CHECK_MODULES(LIBUSB, [libusb-1.0], HAVE_LIBUSB_SUPPORT="yes")
         AC_MSG_CHECKING([for pkgconfig libusb-1.0])
-        if test x"$HAVE_LIBUSB_SUPPORT" = "xyes"; then
+        if test x"$HAVE_LIBUSB_SUPXPORT" = "xyes"; then
           VICE_CFLAGS="$VICE_CFLAGS $LIBUSB_CFLAGS";
           VICE_CPPFLAGS="$VICE_CPPFLAGS $LIBUSB_CFLAGS";
           AC_MSG_RESULT([yes])
@@ -2852,7 +2852,7 @@ if test x"$is_unix" = "xyes"; then
       ;;
   *)
       enable_parsid=no
-      enable_usbsid=no
+      # enable_usbsid=no
       enable_hardsid=no
       enable_catweasel=no
       ;;
@@ -2997,6 +2997,10 @@ if test x"$is_unix" = "xyes"; then
     fi
 
   fi
+
+fi
+
+if test x"is_unix_linux" = "xyes"; then
 
   dnl usbsid required libraries and headers
   if test x"$enable_usbsid" = "xyes" ; then
