@@ -83,7 +83,8 @@ jobs:
           ./configure --enable-option-checking=fatal \
                       --prefix=/usr \
                       --disable-arch \
-                       \
+                      --enable-gtk3ui \
+                      --enable-usbsid \
                       --enable-cpuhistory \
                       --enable-parsid \
                       --with-pulse \
