@@ -479,6 +479,15 @@ static char *build_sid_engine_cmdline_option(int sid_type)
 #endif
 #endif
 
+#ifdef HAVE_USBSID
+    /* add hardsid options if available */
+    if (usbsid_available()) {
+        new = util_concat(old, ", 5: HardSID", NULL);
+        lib_free(old);
+        old = new;
+    }
+#endif
+
     /* add ending bracket */
     new = util_concat(old, ")", NULL);
     lib_free(old);
