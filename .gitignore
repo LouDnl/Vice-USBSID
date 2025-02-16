@@ -4,7 +4,12 @@
 !*.cc
 !*.cpp
 !*.h
+!*.yml
 !*/
+!.github
+!.github/**
+!.github/workflows
+!.github/workflows/*
 !builds/*
 !vice/build/mingw/docker/*
 !vice/build/github-actions/*
