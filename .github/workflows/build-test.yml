@@ -93,9 +93,11 @@ jobs:
                       --with-resid
           make -j2 -s --no-print-directory
           make DESTDIR=$HOME/build install
+          cd $HOME
+          tar cvzf vice.tgz -C $HOME/build .
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: MacOsTestBuild
-          path: $HOME/build
+          path: $HOME/vice.tgz
