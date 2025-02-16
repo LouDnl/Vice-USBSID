@@ -2961,10 +2961,6 @@ if test x"$is_unix" = "xyes"; then
 
   fi
 
-fi
-
-if test x"is_unix_linux" = "xyes" -o x"is_unix_macos" = "xyes"; then
-
   dnl usbsid required libraries and headers
   if test x"$enable_usbsid" = "xyes" ; then
     PKG_PROG_PKG_CONFIG
