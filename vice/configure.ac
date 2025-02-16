@@ -2785,43 +2785,6 @@ if test x"$is_unix_macosx" = "xyes"; then
     fi
   fi
 
-  dnl usbsid required libraries and headers
-  if test x"$enable_usbsid" = "xyes" ; then
-    PKG_PROG_PKG_CONFIG
-    MACOS_USBSID_HEADER_PRESENT=yes
-    AC_CHECK_HEADERS(libusb-1.0/libusb.h,,[MACOS_USBSID_HEADER_PRESENT=no],)
-    if test x"$MACOS_USBSID_HEADER_PRESENT" = "xyes"; then
-      AC_CHECK_LIB(usb-1.0, libusb_init,[LIBS="-lusb-1.0 $LIBS"; USBSID_LIB_PRESENT=yes],,)
-      if test x"$PKG_CONFIG" != "x" -a x"$USBSID_LIB_PRESENT" = "xyes"; then
-        PKG_CHECK_MODULES(LIBUSB, [libusb-1.0], HAVE_LIBUSB_SUPPORT="yes")
-        AC_MSG_CHECKING([for pkgconfig libusb-1.0])
-        if test x"$HAVE_LIBUSB_SUPXPORT" = "xyes"; then
-          VICE_CFLAGS="$VICE_CFLAGS $LIBUSB_CFLAGS";
-          VICE_CPPFLAGS="$VICE_CPPFLAGS $LIBUSB_CFLAGS";
-          AC_MSG_RESULT([yes])
-        else
-          AC_MSG_RESULT([no])
-        fi
-      fi
-    fi
-  fi
-
-  dnl usbsid support
-  AM_CONDITIONAL(HAVE_USBSID, false)
-  AC_MSG_CHECKING([for USBSID-Pico support])
-  if test x"$enable_usbsid" = "xyes" ; then
-    if test x"$HAVE_LIBUSB_SUPPORT" = "xyes"; then
-      AC_DEFINE([HAVE_USBSID],,[Support for USBSID])
-      HAVE_USBSID_SUPPORT="yes"
-      AM_CONDITIONAL(HAVE_USBSID, true)
-      AC_MSG_RESULT([yes])
-    else
-      AC_MSG_RESULT([no (LIBUSB not found!!)])
-    fi
-  else
-    AC_MSG_RESULT([no (USBSID-Pico disabled)])
-  fi
-
   dnl --- check for CoreMIDI ---
   if test x"$enable_midi" = "xyes"; then
     AC_MSG_CHECKING(whether we can link the CoreMIDI framework)
@@ -3000,14 +2963,14 @@ if test x"$is_unix" = "xyes"; then
 
 fi
 
-if test x"is_unix_linux" = "xyes"; then
+if test x"is_unix_linux" = "xyes" -o x"is_unix_macos" = "xyes"; then
 
   dnl usbsid required libraries and headers
   if test x"$enable_usbsid" = "xyes" ; then
     PKG_PROG_PKG_CONFIG
-    LINUX_USBSID_HEADER_PRESENT=yes
-    AC_CHECK_HEADERS(libusb-1.0/libusb.h,,[LINUX_USBSID_HEADER_PRESENT=no],)
-    if test x"$LINUX_USBSID_HEADER_PRESENT" = "xyes"; then
+    UNIX_USBSID_HEADER_PRESENT=yes
+    AC_CHECK_HEADERS(libusb-1.0/libusb.h,,[UNIX_USBSID_HEADER_PRESENT=no],)
+    if test x"$UNIX_USBSID_HEADER_PRESENT" = "xyes"; then
       AC_CHECK_LIB(usb-1.0, libusb_init,[LIBS="-lusb-1.0 $LIBS"; USBSID_LIB_PRESENT=yes],,)
       if test x"$PKG_CONFIG" != "x" -a x"$USBSID_LIB_PRESENT" = "xyes"; then
         PKG_CHECK_MODULES(LIBUSB, [libusb-1.0], HAVE_LIBUSB_SUPPORT="yes")
