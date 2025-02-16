@@ -46,7 +46,7 @@ jobs:
         run: |
           mkdir -p vice/src/lib/libusbsiddrv
           cd $PATH_SOURCE_CHECKOUT
-          cp -u $FILES ../vice/src/lib/libusbsiddrv/
+          cp $FILES ../vice/src/lib/libusbsiddrv/
           cd ..
           pwd
 
