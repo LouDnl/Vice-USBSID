@@ -29,7 +29,7 @@
 
 #include "vice.h"
 
-#if defined(UNIX_COMPILE) || defined(WINDOWS_COMPILE)
+#if defined(UNIX_COMPILE) || defined(WINDOWS_COMPILE) || defined(WINDOWS_COMPILE)
 
 #ifdef HAVE_USBSID
 
