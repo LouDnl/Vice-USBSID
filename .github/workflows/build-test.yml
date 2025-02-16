@@ -94,6 +94,7 @@ jobs:
                       --with-resid
           make -j2 -s --no-print-directory
           make DESTDIR=$HOME/build install
+          cd ..
           mkdir $PATH_ARTIFACTS
           cd $PATH_ARTIFACTS
           tar cvzf vice.tgz -C $HOME/build .
