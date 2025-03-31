@@ -141,9 +141,6 @@ VICE_ARG_ENABLE_LIST(experimental-devices,  [  --enable-experimental-devices    
 dnl Needed for WIC64
 VICE_ARG_WITH_LIST(libcurl,                 [  --without-libcurl       disable libcurl support [[default=no]]])
 
-dnl Linux evdev joysticks
-VICE_ARG_WITH_LIST(evdev,                   [  --without-evdev         disable Linux evdev joystick driver [[default=no]]])
-
 dnl
 dnl UI options
 dnl
@@ -1792,30 +1789,38 @@ dnl XDG .desktop files are only supported for the Gtk3 UI on Unix (excl. MacOS)
 dnl
 AM_CONDITIONAL(INSTALL_DESKTOP_FILES, false)
 if test x"$enable_desktop_files" = "xyes"; then
-    dnl Check Gtk3 UI
-    if test x"$enable_gtk3ui" != "xyes"; then
-        AC_MSG_ERROR([XDG desktop files requested but UI is not Gtk3.])
-    fi
-    dnl Check OS (Unix)
-    if test x"$is_unix_x11" != "xyes"; then
-        AC_MSG_ERROR([XDG desktop files requested but OS is not Unix.])
-    fi
-    dnl Check OS (not MacOS)
-    if test x"$is_unix_macos" = "xyes"; then
-        AC_MSG_ERROR([XDG desktop files requested but OS is MacOS.])
-    fi
-    dnl Check for xdg-desktop-menu
-    AC_CHECK_PROG(XDG_DESKTOP_MENU, xdg-desktop-menu, xdg-desktop-menu, no)
-    echo "$XDG_DESKTOP_MENU"
-    if test x"$XDG_DESKTOP_MENU" = "xno"; then
-        AC_MSG_ERROR([XDG desktop files requested but required tool xdg-desktop-menu is missing. Please install xgd-utils.])
-    fi
+  dnl Check Gtk3 UI
+  if test x"$enable_gtk3ui" != "xyes"; then
+    AC_MSG_ERROR([XDG desktop files requested but UI is not Gtk3.])
+  fi
+  dnl Check OS (Unix)
+  if test x"$is_unix_x11" != "xyes"; then
+    AC_MSG_ERROR([XDG desktop files requested but OS is not Unix.])
+  fi
+  dnl Check OS (not MacOS)
+  if test x"$is_unix_macos" = "xyes"; then
+    AC_MSG_ERROR([XDG desktop files requested but OS is MacOS.])
+  fi
+  dnl Check for desktop-file-install
+  AC_CHECK_PROG(DESKTOP_FILE_INSTALL, desktop-file-install, desktop_file_install, no)
+  if test x"$DESKTOP_FILE_INSTALL" = "xno"; then
+    AC_MSG_ERROR([XDG desktop files requested but required tool desktop-file-install is missing. Please install desktop-file-utils.])
+  fi
+  dnl Check for xdg-icon-resource
+  AC_CHECK_PROG(XDG_ICON_RESOURCE, xdg-icon-resource, xdg-icon-resource, no)
+  if test x"$XDG_ICON_RESOURCE" = "xno"; then
+    AC_MSG_ERROR([XDG desktop files requested but required tool xdg-icon-resource is missing. Please install xdg-utils.])
+  fi
+  dnl Check for update-desktop-database
+  AC_CHECK_PROG(UPDATE_DESKTOP_DATABASE, update-desktop-database, update-desktop-database, no)
+  if test x"$UPDATE_DESKTOP_DATABASE" = "xno"; then
+    AC_MSG_ERROR([XDG desktop files requested but required tool update-desktop-database is missing. Please install desktop-file-utils.])
+  fi
 
-    dnl We got the UI + OS + tools:
-    USE_DESKTOP_FILES="yes"
-    AM_CONDITIONAL(INSTALL_DESKTOP_FILES, true)
-    AC_SUBST([XDG_DESKTOP_MENU], ["$XDG_DESKTOP_MENU"])
-
+  dnl We got the UI + OS + tools:
+  USE_DESKTOP_FILES="yes"
+  AC_DEFINE(INSTALL_DESKTOP_FILES, , [Install XDG desktop files and icons])
+  AM_CONDITIONAL(INSTALL_DESKTOP_FILES, true)
 fi
 
 
@@ -2094,22 +2099,14 @@ dnl ----- Joystick support -----
 JOY_LIBS=
 AM_CONDITIONAL(HAVE_LINUX_EVDEV, false)
 if test x"$is_unix_x11" = "xyes" -a x"$enable_sdl1ui" != "xyes" -a x"$enable_sdl2ui" != "xyes" -a x"$enable_headlessui" != "xyes"; then
-  AC_CHECK_HEADER(linux/joystick.h,
-                  [
-                   AC_CHECK_DECL(JS_VERSION,[
-                       LINUX_JOYSTICK_SUPPORT="yes";
-                        AC_DEFINE(LINUX_JOYSTICK,,
-                              [Enable support for Linux style joysticks.])
-                        JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS joystick_linux.o";
-                   ],[],[#include <linux/joystick.h>])],)
   dnl Linux evdev joystick driver
-  if test x"$with_evdev" != "xno" -a x"$is_unix_linux" = "xyes"; then
+  if test x"$is_unix_linux" = "xyes"; then
     PKG_CHECK_MODULES([libevdev],
                       [libevdev],
                       [AC_DEFINE(HAVE_LINUX_EVDEV,,[Enable support for Linux evdev joysticks.])
                        JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS joystick_linux_evdev.o"
                        HAVE_LINUX_EVDEV_SUPPORT="yes"],
-                      [AC_MSG_ERROR([Linux evdev joystick driver requested (--with-evdev) but the libevdev headers are missing.])])
+                      [AC_MSG_ERROR([Please install libevdev headers.])])
     VICE_CFLAGS="$VICE_CFLAGS $libevdev_CFLAGS"
     VICE_CXXFLAGS="$VICE_CXXFLAGS $libevdev_CXXFLAGS"
     LIBS="$LIBS $libevdev_LIBS"
@@ -2476,7 +2473,7 @@ if test x"$enable_ethernet" = "xyes"; then
         AC_DEFINE(HAVE_PCAP,,[Support for PCAP library.])
         AC_DEFINE(HAVE_RAWNET,,[Support for CS8900A ethernet controller.])
         HAVE_RAWNET_SUPPORT="yes";
-        AC_DEFINE(VICE_USE_LIBNET_1_1,,[Support for The Final Ethernet])
+        AC_DEFINE(HAVE_LIBNET,,[Support for libnet library])
         TFE_LIBS="-lpcap `libnet-config --libs`"
         libnet_cflags="`libnet-config --defines`"
     ],,$LIBS)],,$LIBS)
@@ -2487,6 +2484,7 @@ if test x"$enable_ethernet" = "xyes"; then
         AC_DEFINE(HAVE_PCAP,,[Support for PCAP library.])
         AC_DEFINE(HAVE_RAWNET,,[Support for CS8900A ethernet controller.])
         HAVE_RAWNET_SUPPORT="yes";
+        AC_DEFINE(HAVE_LIBNET,,[Support for libnet library])
         TFE_LIBS="-lpcap `libnet-config --libs`"
         libnet_cflags="`libnet-config --defines`"
     ],,$LIBS)],,$LIBS)
@@ -3493,7 +3491,6 @@ AC_OUTPUT([Makefile
            src/arch/gtk3/Makefile
            src/arch/gtk3/data/Makefile
            src/arch/gtk3/data/macos/Makefile
-           src/arch/gtk3/data/unix/Makefile
            src/arch/gtk3/data/win32/Makefile
            src/arch/gtk3/joystickdrv/Makefile
            src/arch/gtk3/novte/Makefile
@@ -3834,7 +3831,6 @@ echo "Build old x64 emulator        : $X64_INCLUDED (--enable/--disable-x64)"
 echo "Install XDG .desktop files    : $USE_DESKTOP_FILES"
 echo "icotool for Windows found     : $ICOTOOL"
 echo "Experimental devices emulation: $HAVE_EXPERIMENTAL_DEVICES_SUPPORT (--enable-experimental-devices)"
-echo "Linux evdev joystick driver   : $HAVE_LINUX_EVDEV_SUPPORT (--with-evdev)"
 
 echo ""
 echo "User CPPFLAGS:  $CPPFLAGS"
