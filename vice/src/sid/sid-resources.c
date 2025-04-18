@@ -179,6 +179,10 @@ static int set_sid_stereo(int val, void *param)
             machine_sid2_enable(val);
         }
     }
+    #ifdef HAVE_USBSID
+    usbsid_set_audio(val);  /* Set mono or stereo by no. sids */
+    // usbsid_set_audio(sid_stereo);  /* Set mono or stereo by config setting */
+    #endif
     return 0;
 }
 

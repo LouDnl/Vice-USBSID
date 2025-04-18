@@ -141,6 +141,13 @@ int usbsid_available(void)
     return usbsid_is_open;
 }
 
+void usbsid_set_audio(int val)
+{
+    if (!usbsid_is_open) {
+        usbsid_drv_set_audio(val);
+    }
+}
+
 /* ---------------------------------------------------------------------*/
 
 void usbsid_state_read(int chipno, struct sid_us_snapshot_state_s *sid_state)

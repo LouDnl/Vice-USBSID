@@ -88,6 +88,7 @@ void us_device_reset(bool us_reset)
         alarm_set(usid_alarm, (usid_main_clk + raster_rate));
         if (us_reset) {
             reset_USBSID(usbsid);
+            log_message(LOG_DEFAULT, "[USBSID] reset sent!\r");
         }
         log_message(LOG_DEFAULT, "[USBSID] clocks reset!\r");
     }
@@ -117,7 +118,7 @@ int us_device_open(void)
     }
 
     usid_alarm = alarm_new(maincpu_alarm_context, "usbsid", usbsid_alarm_handler, NULL);
-    sids_found = 1;
+    sids_found = getnumsids_USBSID(usbsid);
     log_message(LOG_DEFAULT, "[USBSID] alarm set, reset sids\r");
     us_device_reset(false);  /* No reset on init! */
     log_message(LOG_DEFAULT, "[USBSID] opened\r");
@@ -129,6 +130,7 @@ int us_device_close(void)
 {
     log_message(LOG_DEFAULT, "[USBSID] Start device closing\r");
     if (usbsid) {
+        mute_USBSID(usbsid);
         close_USBSID(usbsid);
     }
 
@@ -191,7 +193,15 @@ void us_set_machine_parameter(long cycles_per_sec)
 unsigned int us_device_available(void)
 {
     log_message(LOG_DEFAULT, "[USBSID] %d SIDs found\r", sids_found);
-    return (sids_found == 1) ? 4 : 1;
+    // return (sids_found == 1) ? 4 : 1;
+    return sids_found;
+}
+
+void us_set_audio(int val)
+{
+    log_message(LOG_DEFAULT, "[USBSID] Set audio %d\r", val);
+    int stereo = (val >= 1 && sids_found > 2) ? 0 : val;
+    setstereo_USBSID(usbsid, (val >= 1 ? 1 : 0));
 }
 
 static void usbsid_alarm_handler(CLOCK offset, void *data)

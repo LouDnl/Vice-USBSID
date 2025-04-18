@@ -41,6 +41,7 @@ int usbsid_read(uint16_t addr, int chipno);
 void usbsid_store(uint16_t addr, uint8_t val, int chipno);
 void usbsid_set_machine_parameter(long cycles_per_sec);
 int usbsid_available(void);
+void usbsid_set_audio(int val);
 
 int usbsid_drv_open(void);
 int usbsid_drv_close(void);
@@ -49,6 +50,7 @@ int usbsid_drv_read(uint16_t addr, int chipno);
 void usbsid_drv_store(uint16_t addr, uint8_t val, int chipno);
 void usbsid_drv_set_machine_parameter(long cycles_per_sec);
 int usbsid_drv_available(void);
+void usbsid_drv_set_audio(int val);
 
 void usbsid_state_read(int chipno, struct sid_us_snapshot_state_s *sid_state);
 void usbsid_state_write(int chipno, struct sid_us_snapshot_state_s *sid_state);
