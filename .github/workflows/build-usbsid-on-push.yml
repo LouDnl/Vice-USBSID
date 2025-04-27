@@ -577,6 +577,92 @@ jobs:
               data: fs.readFileSync(ASSET_PATH)
             });
 
+  build_mac:
+    name: Build MacOs Package
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+          ui: [ { name: 'GTK3',
+                  conf: '--enable-gtk3ui --enable-usbsid',
+                  deps: 'libevdev-dev libglew-dev libgtk-3-dev libpulse-dev' },
+              ]
+    steps:
+
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Checkout USBSID-Pico driver
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.SOURCE_REPO }}
+          path: ${{ env.PATH_SOURCE_CHECKOUT }}
+
+      - name: Copy files
+        run: |
+          mkdir -p vice/src/lib/libusbsiddrv
+          cd $PATH_SOURCE_CHECKOUT
+          cp $FILES ../vice/src/lib/libusbsiddrv/
+          cd ..
+          pwd
+
+      - name: deps [macOS]
+        if: runner.os == 'macOS'
+        run: |
+          export HOMEBREW_NO_INSTALL_CLEANUP=1
+          brew update
+          brew upgrade || true
+          brew uninstall --ignore-dependencies --force pkg-config@0.29.2
+          brew install \
+            dos2unix \
+            autoconf \
+            automake \
+            libtool \
+            pkgconf \
+            coreutils \
+            gnu-sed \
+            libgcrypt \
+            xa \
+            gtk+3 \
+            librsvg \
+            adwaita-icon-theme \
+            glew \
+            libusb \
+            libusb-compat
+
+      - name: Build
+        run: |
+          mkdir -p build/usr
+          cd vice
+          ./src/buildtools/genvicedate_h.sh
+          ./autogen.sh
+          # ALSA is required for SDL2 as well for midi support
+          ./configure --enable-option-checking=fatal \
+                      --prefix=/usr \
+                      --disable-arch \
+                      --enable-gtk3ui \
+                      --enable-usbsid \
+                      --enable-cpuhistory \
+                      --enable-parsid \
+                      --with-pulse \
+                      --with-alsa \
+                      --with-fastsid \
+                      --with-resid
+          make -j2 -s --no-print-directory
+          make DESTDIR=$HOME/build install
+          cd ..
+          mkdir $PATH_ARTIFACTS
+          cd $PATH_ARTIFACTS
+          tar cvzf vice.tgz -C $HOME/build .
+          pwd
+          ls -l
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: MacOsBuild
+          path: ${{ env.PATH_ARTIFACTS }}
+
   publish_release:
     name: Publish Release
     needs: [create_release, build_win, build_deb]
