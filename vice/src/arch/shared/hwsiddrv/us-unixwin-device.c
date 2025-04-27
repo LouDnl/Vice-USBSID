@@ -201,7 +201,7 @@ void us_set_audio(int val)
 {
     log_message(LOG_DEFAULT, "[USBSID] Set audio %d\r", val);
     int stereo = (val >= 1 && sids_found > 2) ? 0 : val;
-    setstereo_USBSID(usbsid, (val >= 1 ? 1 : 0));
+    setstereo_USBSID(usbsid, stereo);
 }
 
 static void usbsid_alarm_handler(CLOCK offset, void *data)
@@ -211,7 +211,7 @@ static void usbsid_alarm_handler(CLOCK offset, void *data)
     if (cycles < raster_rate) {
         usid_alarm_clk = usid_main_clk + raster_rate;
     } else {
-        flush_USBSID(usbsid);
+        setflush_USBSID(usbsid);
         usid_main_clk   = maincpu_clk - offset;
         usid_alarm_clk  = usid_main_clk + raster_rate;
     }
