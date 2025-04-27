@@ -10,6 +10,12 @@ add `--enable-usbsid` to `./configure` for [USBSID-Pico](https://github.com/LouD
 ```bash
 sudo apt install autoconf automake build-essential byacc flex xa65 gawk libgtk-3-dev texinfo texlive-fonts-recommended texlive-latex-extra dos2unix libpulse-dev libasound2-dev libglew-dev libcurl4-openssl-dev libevdev-dev libpng-dev libgif-dev libpcap-dev libusb-1.0-0 libusb-1.0-0-dev libusb-dev libmpg123-dev libmp3lame-dev
 ```
+For GTK3 Install these dependencies:
+??
+For SDL2 Install these dependencies:
+libsdl2-2.0-0 libsdl2-image-2.0-0
+For SDL1 Install these dependencies:
+libsdl-image1.2
 
 ## My build sequence for Linux
 ```bash
