@@ -97,6 +97,6 @@ jobs:
           cd ..
           mkdir $PATH_ARTIFACTS
           cd $PATH_ARTIFACTS
-          tar cvzf vice-${{ matrix.ui.name }}.tgz -C $HOME/build .
+          tar cvzf vice-macos-${{ matrix.ui.name }}.tgz -C $HOME/build .
           pwd
           ls -l
