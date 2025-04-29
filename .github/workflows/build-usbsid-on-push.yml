@@ -671,7 +671,7 @@ jobs:
         uses: actions/github-script@v7
         env:
           UPLOAD_URL: ${{ needs.create_release.outputs.upload_url }}
-          ASSET_PATH: $PATH_ARTIFACTS/ice-macos-${{ matrix.ui.name }}.tgz
+          ASSET_PATH: ${{ env.PATH_ARTIFACTS}}/vice-macos-${{ matrix.ui.name }}.tgz
           ASSET_NAME: vice-macos-${{ matrix.ui.name }}.tgz
           ASSET_CONTENT_TYPE: application/vnd.debian.binary-package
         with:
