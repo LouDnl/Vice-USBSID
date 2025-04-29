@@ -26,9 +26,9 @@ jobs:
                 { name: 'SDL2',
                   conf: '--enable-sdl2ui --with-sdlsound --without-pulse',
                   deps: 'sdl2 sdl2_image' },
-                { name: 'SDL1',
-                  conf: '--enable-sdl1ui --with-sdlsound --without-pulse',
-                  deps: 'sdl sdl12-compat sdl2_image' },
+                # { name: 'SDL1',
+                #   conf: '--enable-sdl1ui --with-sdlsound --without-pulse',
+                #   deps: 'sdl sdl12-compat sdl2_image' },
                 { name: 'Headless',
                   conf: '--enable-headlessui --with-pulse',
                   deps: '' }
