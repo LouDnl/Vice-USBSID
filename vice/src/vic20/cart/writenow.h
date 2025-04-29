@@ -1,5 +1,5 @@
 /*
- * c128model.h - C64 model detection and setting.
+ * writenow.h -- VIC20 "Write NOW" Cartridge emulation.
  *
  * Written by
  *  groepaz <groepaz@gmx.net>
@@ -24,38 +24,26 @@
  *
  */
 
-#ifndef VICE_C128MODEL_H
-#define VICE_C128MODEL_H
+#ifndef VICE_WRITENOW_H
+#define VICE_WRITENOW_H
+
+#include <stdio.h>
 
 #include "types.h"
 
-enum {
-    C128MODEL_C128_PAL = 0,
-    C128MODEL_C128D_PAL,
-    C128MODEL_C128DCR_PAL,
+void writenow_config_setup(uint8_t *rawcart);
+int writenow_bin_attach(const char *filename);
 
-    C128MODEL_C128_NTSC,
-    C128MODEL_C128D_NTSC,
-    C128MODEL_C128DCR_NTSC,
+/* int writenow_bin_attach(const char *filename, uint8_t *rawcart); */
 
-/* This entry always needs to be at the end */
-    C128MODEL_NUM
-};
+int writenow_crt_attach(FILE *fd, uint8_t *rawcart);
+void writenow_detach(void);
 
-#define C128MODEL_UNKNOWN 99
+uint8_t writenow_blk5_read(uint16_t addr);
 
-#include "c64model.h" /* for the BOARD_ constants */
+struct snapshot_s;
 
-#define OLD_CIA   0
-#define NEW_CIA   1
-
-#define OLD_SID   0
-#define NEW_SID   1
-
-#define VDC16K   0
-#define VDC64K   1
-
-int c128model_get(void);
-void c128model_set(int model);
+int writenow_snapshot_write_module(struct snapshot_s *s);
+int writenow_snapshot_read_module(struct snapshot_s *s);
 
 #endif
