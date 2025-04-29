@@ -67,6 +67,7 @@ jobs:
             gnu-sed \
             libgcrypt \
             xa \
+            platypus \
             gtk+3 \
             sdl \
             sdl2 \
