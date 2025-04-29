@@ -6,6 +6,7 @@ env:
   THE_SERVER: ${{ github.server_url }}
   PATH_SOURCE_CHECKOUT: temp_folder
   DEPS_PREFIX: /opt/homebrew
+  PATH_ARTIFACTS: dist
 on:
   workflow_dispatch:
 concurrency:
@@ -20,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
           ui: [ { name: 'GTK3',
-                  conf: '--enable-gtk3ui --enable-usbsid',
+                  conf: '--enable-gtk3ui',
                   deps: 'libevdev-dev libglew-dev libgtk-3-dev libpulse-dev' },
                 { name: 'SDL2',
                   conf: '--enable-sdl2ui --with-sdlsound --without-pulse',
@@ -75,7 +76,6 @@ jobs:
             glew \
             libusb \
             libusb-compat
-          brew install platypus
       - name: Build
         run: |
           mkdir -p build/usr
@@ -86,13 +86,19 @@ jobs:
           ./configure --enable-option-checking=fatal \
                       --prefix=/usr \
                       --disable-arch \
-                      --enable-gtk3ui \
                       --enable-usbsid \
                       --enable-cpuhistory \
                       --enable-parsid \
                       --with-pulse \
                       --with-alsa \
                       --with-fastsid \
-                      --with-resid
+                      --with-resid \
+                      ${{ matrix.conf }}
           make -j $(sysctl -n hw.ncpu) -s
-          make bindistzip
+          make DESTDIR=$HOME/build install
+          cd ..
+          mkdir $PATH_ARTIFACTS
+          cd $PATH_ARTIFACTS
+          tar cvzf vice-${{ matrix.name }}.tgz -C $HOME/build .
+          pwd
+          ls -l
