@@ -93,12 +93,12 @@ jobs:
                       --with-alsa \
                       --with-fastsid \
                       --with-resid \
-                      ${{ matrix.conf }}
+                      ${{ matrix.ui.conf }}
           make -j $(sysctl -n hw.ncpu) -s
           make DESTDIR=$HOME/build install
           cd ..
           mkdir $PATH_ARTIFACTS
           cd $PATH_ARTIFACTS
-          tar cvzf vice-${{ matrix.name }}.tgz -C $HOME/build .
+          tar cvzf vice-${{ matrix.ui.name }}.tgz -C $HOME/build .
           pwd
           ls -l
