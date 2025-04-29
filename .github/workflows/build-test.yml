@@ -67,7 +67,6 @@ jobs:
             gnu-sed \
             libgcrypt \
             xa \
-            platypus \
             gtk+3 \
             sdl \
             sdl2 \
@@ -76,6 +75,7 @@ jobs:
             glew \
             libusb \
             libusb-compat
+          brew install platypus
       - name: Build
         run: |
           mkdir -p build/usr
