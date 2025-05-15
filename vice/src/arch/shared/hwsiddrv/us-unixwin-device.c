@@ -55,6 +55,7 @@
 #include "log.h"
 #include "maincpu.h"
 #include "machine.h"
+#include "resources.h"
 #include "sid-resources.h"
 #include "types.h"
 
@@ -65,7 +66,7 @@
 #pragma GCC optimize ("O3")
 #endif
 
-static int rc = -1, sids_found = -1;
+static int rc = -1, sids_found = -1, no_sids = -1, soc_audio = -1;
 static uint8_t sidbuf[0x20 * US_MAXSID];
 
 static CLOCK usid_main_clk;
@@ -73,6 +74,7 @@ static CLOCK usid_alarm_clk;
 static alarm_t *usid_alarm = NULL;
 static long raster_rate;
 
+static log_t usbsid_log = LOG_DEFAULT;
 
 /* pre declarations */
 static void usbsid_alarm_handler(CLOCK offset, void *data);
@@ -88,15 +90,18 @@ void us_device_reset(bool us_reset)
         alarm_set(usid_alarm, (usid_main_clk + raster_rate));
         if (us_reset) {
             reset_USBSID(usbsid);
-            log_message(LOG_DEFAULT, "[USBSID] reset sent!\r");
+            log_message(usbsid_log, "Reset sent\r");
         }
-        log_message(LOG_DEFAULT, "[USBSID] clocks reset!\r");
+        no_sids = -1;
+        log_message(usbsid_log, "Clocks reset\r");
     }
     return;
 }
 
 int us_device_open(void)
 {
+    usbsid_log = log_open("USBSID");
+
     if (!sids_found) {
         return -1;
     }
@@ -107,7 +112,7 @@ int us_device_open(void)
 
     sids_found = 0;
 
-    log_message(LOG_DEFAULT, "[USBSID] Detecting boards\r");
+    log_message(usbsid_log, "Detecting boards\r");
 
     if (usbsid == NULL) {
         usbsid = create_USBSID();
@@ -119,16 +124,17 @@ int us_device_open(void)
 
     usid_alarm = alarm_new(maincpu_alarm_context, "usbsid", usbsid_alarm_handler, NULL);
     sids_found = getnumsids_USBSID(usbsid);
-    log_message(LOG_DEFAULT, "[USBSID] alarm set, reset sids\r");
+    no_sids = 0;
+    log_message(usbsid_log, "Alarm set, reset sids\r");
     us_device_reset(false);  /* No reset on init! */
-    log_message(LOG_DEFAULT, "[USBSID] opened\r");
+    log_message(usbsid_log, "Opened\r");
 
     return rc;
 }
 
 int us_device_close(void)
 {
-    log_message(LOG_DEFAULT, "[USBSID] Start device closing\r");
+    log_message(usbsid_log, "Start device closing\r");
     if (usbsid) {
         mute_USBSID(usbsid);
         close_USBSID(usbsid);
@@ -138,9 +144,10 @@ int us_device_close(void)
     alarm_destroy(usid_alarm);
     usid_alarm = 0;
     sids_found = -1;
+    no_sids = -1;
     rc = -1;
     usbsid = NULL;
-    log_message(LOG_DEFAULT, "[USBSID] closed\r");
+    log_message(usbsid_log, "Closed\r");
     return 0;
 }
 
@@ -186,21 +193,37 @@ void us_set_machine_parameter(long cycles_per_sec)
 {
     setclockrate_USBSID(usbsid, cycles_per_sec, true); /* TESTING */
     raster_rate = getrasterrate_USBSID(usbsid);
-    log_message(LOG_DEFAULT, "[USBSID] clockspeed set to: %ld and rasterrate set to: %ld\r", cycles_per_sec, raster_rate);
+    log_message(usbsid_log, "Clockspeed set to: %ld and rasterrate set to: %ld\r", cycles_per_sec, raster_rate);
     return;
 }
 
 unsigned int us_device_available(void)
 {
-    log_message(LOG_DEFAULT, "[USBSID] %d SIDs found\r", sids_found);
-    // return (sids_found == 1) ? 4 : 1;
+    log_message(usbsid_log, "%d SIDs available\r", sids_found);
     return sids_found;
 }
 
 void us_set_audio(int val)
-{
-    log_message(LOG_DEFAULT, "[USBSID] Set audio %d\r", val);
-    int stereo = (val >= 1 && sids_found > 2) ? 0 : val;
+{   /* Gets set by x64sc from SID settings and by VSID at SID file change */
+    resources_get_int("SoundOutput", &soc_audio);
+    log_message(usbsid_log, "Global audio type is '%s'\r", (soc_audio == 2 ? "Stereo" : soc_audio == 1 ? "Mono" : "System"));
+
+
+    int stereo = 0;
+    no_sids = val+1; /* Number of SIDs requested +1 (val = 0 if 1 single SID is requested) */
+
+    log_message(usbsid_log, "Set requested audio type for no. SIDs %d (No. SIDs available: %d)\r", no_sids, sids_found);
+
+    stereo
+        /* Number of requested SIDs equals no. available SIDs */
+        = (no_sids == sids_found && soc_audio != 1)
+        ? (no_sids == 2 || no_sids == 4)  /* 2 or 4 SIDs requested */
+        ? 1  /* then Stereo */
+        : 0  /* else Mono */
+        /* else number of requested SIDs does not equal no. available SIDs */
+        : 0; /* fallback to Mono */
+
+    log_message(usbsid_log, "Audio type set to '%s' for %d requested SIDs\r", (stereo == 1 ? "Stereo" : "Mono"), no_sids);
     setstereo_USBSID(usbsid, stereo);
 }
 
@@ -223,7 +246,7 @@ static void usbsid_alarm_handler(CLOCK offset, void *data)
 
 void us_device_state_read(int chipno, struct sid_us_snapshot_state_s *sid_state)
 {
-    log_message(LOG_DEFAULT, "[USBSID] %s\r", __func__);
+    log_message(usbsid_log, "%s\r", __func__);
     sid_state->usid_main_clk = (uint32_t)usid_main_clk;
     sid_state->usid_alarm_clk = (uint32_t)usid_alarm_clk;
     sid_state->lastaccess_clk = 0;
@@ -238,7 +261,7 @@ void us_device_state_read(int chipno, struct sid_us_snapshot_state_s *sid_state)
 
 void us_device_state_write(int chipno, struct sid_us_snapshot_state_s *sid_state)
 {
-    log_message(LOG_DEFAULT, "[USBSID] %s\r", __func__);
+    log_message(usbsid_log, "%s\r", __func__);
     usid_main_clk = (CLOCK)sid_state->usid_main_clk;
     usid_alarm_clk = (CLOCK)sid_state->usid_alarm_clk;
 }

@@ -66,7 +66,7 @@
 
 static int usbsid_is_open = -1;
 
-/* buffer containing current register state of SIDs */
+/* Buffer containing current register state of SIDs */
 static uint8_t sidbuf[0x20 * US_MAXSID];
 
 int usbsid_open(void)
