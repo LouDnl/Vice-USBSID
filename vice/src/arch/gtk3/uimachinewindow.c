@@ -50,6 +50,7 @@
 
 #ifdef WINDOWS_COMPILE
 #include "directx_renderer.h"
+#include "directx_renderer_impl.h"
 #else
 #include "opengl_renderer.h"
 #endif
@@ -294,6 +295,7 @@ static gboolean event_box_motion_cb(GtkWidget *widget,
 
 #elif defined(WINDOWS_COMPILE)
 
+        /* scale is a uniform scaling applied to eg high dpi widgets by gtk */
         int scale = gtk_widget_get_scale_factor(widget);
         POINT pt;
         /* mouse_host_moved(motion->x_root * scale, motion->y_root * scale); */
@@ -308,6 +310,7 @@ static gboolean event_box_motion_cb(GtkWidget *widget,
 
 #else /* Xlib, warp is relative to window */
 
+        /* scale is a uniform scaling applied to eg high dpi widgets by gtk */
         int scale = gtk_widget_get_scale_factor(widget);
         mouse_host_moved(
             (widget_x + motion->x) * scale,
@@ -322,8 +325,35 @@ static gboolean event_box_motion_cb(GtkWidget *widget,
     /*
      * Mouse isn't captured, so we update the pen position.
      */
-
+#if 0
+    /* FIXME: this value is wrong in (at least) xvic, it is always the full
+              width of produced video, not just the width of the shown window */
     double render_w = canvas->geometry->screen_size.width;
+#else
+    /* get width from render context instead */
+#ifdef WINDOWS_COMPILE
+    vice_directx_renderer_context_t *context = (vice_directx_renderer_context_t *)canvas->renderer_context;
+    double render_w = context->bitmap_width;
+    if (canvas->videoconfig->double_size_enabled) {
+        render_w /= 2.0f;
+    }
+#else
+    vice_opengl_renderer_context_t *context = (vice_opengl_renderer_context_t *)canvas->renderer_context;
+    double render_w = context->current_frame_width;
+    if (canvas->videoconfig->double_size_enabled) {
+        render_w /= 2.0f;
+    }
+#endif
+    /* sanity check */
+    if (render_w != canvas->geometry->screen_size.width) {
+        static int once = 0;
+        if (!once) {
+            log_warning(LOG_DEFAULT, "geometry->screen_size.width (%u) does not match actual rendered width (%f)",
+                        canvas->geometry->screen_size.width, render_w);
+            once++;
+        }
+    }
+#endif
     double render_h = canvas->geometry->last_displayed_line - canvas->geometry->first_displayed_line + 1;
 
     /* There might be some sweet off-by-0.5 bugs here */
@@ -370,10 +400,10 @@ static gboolean event_box_mouse_button_cb(GtkWidget *widget, GdkEvent *event, gp
         pthread_mutex_lock(&canvas->lock);
         if (button == 1) {
             /* Left mouse button */
-            canvas->pen_buttons |= LP_HOST_BUTTON_1;
+            canvas->pen_buttons |= LP_HOST_BUTTON_LEFT;
         } else if (button == 3) {
             /* Right mouse button */
-            canvas->pen_buttons |= LP_HOST_BUTTON_2;
+            canvas->pen_buttons |= LP_HOST_BUTTON_RIGHT;
         }
         pthread_mutex_unlock(&canvas->lock);
 
@@ -387,10 +417,10 @@ static gboolean event_box_mouse_button_cb(GtkWidget *widget, GdkEvent *event, gp
         pthread_mutex_lock(&canvas->lock);
         if (button == 1) {
             /* Left mouse button */
-            canvas->pen_buttons &= ~LP_HOST_BUTTON_1;
+            canvas->pen_buttons &= ~LP_HOST_BUTTON_LEFT;
         } else if (button == 3) {
             /* Right mouse button */
-            canvas->pen_buttons &= ~LP_HOST_BUTTON_2;
+            canvas->pen_buttons &= ~LP_HOST_BUTTON_RIGHT;
         }
         pthread_mutex_unlock(&canvas->lock);
 
