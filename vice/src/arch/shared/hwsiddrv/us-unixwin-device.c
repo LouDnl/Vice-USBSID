@@ -66,7 +66,7 @@
 #pragma GCC optimize ("O3")
 #endif
 
-static int rc = -1, sids_found = -1, no_sids = -1, soc_audio = -1;
+static int rc = -1, sids_found = -1, no_sids = -1, soc_audio = -1, r_readmode = -1, readmode = -1;
 static uint8_t sidbuf[0x20 * US_MAXSID];
 
 static CLOCK usid_main_clk;
@@ -116,7 +116,20 @@ int us_device_open(void)
 
     if (usbsid == NULL) {
         usbsid = create_USBSID();
-        rc = init_USBSID(usbsid, true, true);  /* NOTICE: Digitunes only play with threaded cycles */
+        if (usbsid) {
+            resources_get_int("SidUSBSIDReadMode", &r_readmode);
+            log_message(usbsid_log, "SidUSBSIDReadMode: %d, readmode: %d\r", r_readmode, readmode);
+            readmode = r_readmode;
+        }
+          /* NOTICE: Digitunes only play with threaded cycles */
+        if (readmode == 0) {
+            log_message(usbsid_log, "Starting in normal mode\r");
+            rc = init_USBSID(usbsid, true, true);  /* threading and cycles enabled */
+        } else if (readmode == 1) {
+            log_message(usbsid_log, "Starting in read mode\r");
+            rc = init_USBSID(usbsid, false, false);  /* threading and cycles disabled */
+        }
+
         if (rc < 0) {
             return -1;
         }
@@ -154,9 +167,13 @@ int us_device_close(void)
 int us_device_read(uint16_t addr, int chipno)
 {   /* NOTICE: Disabled, unneeded */
     if (chipno < US_MAXSID) {
-        addr = ((addr & 0x1F) + (chipno * 0x20));
-        /* return (uint8_t)sidbuf[addr]; */
-        return 0x0;
+        if (readmode == 1) {
+            uint8_t n_addr = ((addr & 0x1F) + (chipno * 0x20));
+            sidbuf[addr] = read_USBSID(usbsid, n_addr);
+            return sidbuf[addr];
+        } else {
+            return 0x0;
+        }
     }
     return 0x0;
 }
@@ -181,8 +198,12 @@ void us_device_store(uint16_t addr, uint8_t val, int chipno) /* max chipno = 1 *
 {
     if (chipno < US_MAXSID) {  /* remove 0x20 address limitation */
         addr = ((addr & 0x1F) + (chipno * 0x20));
-        uint_fast32_t cycles = us_delay();
-        writeringcycled_USBSID(usbsid, addr, val, cycles);
+        if (readmode == 0) {
+            uint_fast32_t cycles = us_delay();
+            writeringcycled_USBSID(usbsid, addr, val, cycles);
+        } else if (readmode == 1) {
+            write_USBSID(usbsid, addr, val);
+        }
         sidbuf[addr] = val;
         return;
     }
@@ -225,6 +246,18 @@ void us_set_audio(int val)
 
     log_message(usbsid_log, "Audio type set to '%s' for %d requested SIDs\r", (stereo == 1 ? "Stereo" : "Mono"), no_sids);
     setstereo_USBSID(usbsid, stereo);
+}
+
+void us_set_readmode(int val)
+{
+    resources_get_int("SidUSBSIDReadMode", &r_readmode);
+    if (readmode != val) {
+        log_message(usbsid_log, "Set read mode from %d to %d (resource: %d)\r", readmode, val, r_readmode);
+        readmode = val;
+        if (val == 0) enablethread_USBSID(usbsid);
+        if (val == 1) disablethread_USBSID(usbsid);
+    }
+    return;
 }
 
 static void usbsid_alarm_handler(CLOCK offset, void *data)

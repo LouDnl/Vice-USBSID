@@ -55,6 +55,7 @@
 #define usbsid_drv_store(addr, val, chipno) printf("[USBSID] usbsid_drv_store addr:%02x val:%02x chip:%d\n", addr, val, chipno)
 #define usbsid_drv_state_read(chipno, sid_state) printf("[USBSID] usbsid_drv_state_read chip:%d sid_state:%p\n", chipno, sid_state)
 #define usbsid_drv_state_write(chipno, sid_state) printf("[USBSID] usbsid_drv_state_write chip:%d sid_state:%p\n", chipno, sid_state)
+#define usbsid_drv_set_readmode(val) printf("[USBSID] usbsid_drv_set_readmode read_mode:%p\n", val)
 
 #endif
 
@@ -145,6 +146,13 @@ void usbsid_set_audio(int val)
 {
     if (!usbsid_is_open) {
         usbsid_drv_set_audio(val);
+    }
+}
+
+void usbsid_set_readmode(int val)
+{
+    if (!usbsid_is_open) {
+        usbsid_drv_set_readmode(val);
     }
 }
 

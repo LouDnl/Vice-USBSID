@@ -108,6 +108,13 @@ void usbsid_drv_set_audio(int val)
     }
 }
 
+void usbsid_drv_set_readmode(int val)
+{
+    if (use_us_device) {
+        us_set_readmode(val);
+    }
+}
+
 void usbsid_drv_state_read(int chipno, struct sid_us_snapshot_state_s *sid_state)
 {
     if (use_us_device) {

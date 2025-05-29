@@ -87,6 +87,9 @@ static int sid_engine;
 static int sid_hardsid_main;
 static int sid_hardsid_right;
 #endif
+#ifdef HAVE_USBSID
+static int sid_usbsid_readmode;
+#endif
 
 static int set_sid_engine(int set_engine, void *param)
 {
@@ -363,6 +366,16 @@ static int set_sid_hardsid_right(int val, void *param)
 }
 #endif
 
+#ifdef HAVE_USBSID
+static int set_sid_usbsid_main(int val, void *param)
+{
+    sid_usbsid_readmode = (unsigned int)val;
+    usbsid_set_readmode(sid_usbsid_readmode);
+
+    return 0;
+}
+#endif
+
 
 #ifdef HAVE_RESID
 static int sid_enabled = 1;
@@ -446,6 +459,14 @@ static const resource_int_t hardsid_resources_int[] = {
 };
 #endif
 
+#ifdef HAVE_USBSID
+static const resource_int_t usbsid_resources_int[] = {
+    { "SidUSBSIDReadMode", 0, RES_EVENT_NO, NULL,
+      &sid_usbsid_readmode, set_sid_usbsid_main, NULL },
+    RESOURCE_INT_LIST_END
+};
+#endif
+
 
 static const resource_int_t stereo_resources_int[] = {
     { "SidStereo", 0, RES_EVENT_SAME, NULL,
@@ -483,6 +504,12 @@ int sid_common_resources_init(void)
         if (resources_register_int(hardsid_resources_int) < 0) {
             return -1;
         }
+    }
+#endif
+
+#ifdef HAVE_USBSID
+    if (resources_register_int(usbsid_resources_int) < 0) {
+        return -1;
     }
 #endif
 

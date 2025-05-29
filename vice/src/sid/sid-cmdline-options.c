@@ -237,6 +237,16 @@ static const cmdline_option_t hardsid_cmdline_options[] =
 };
 #endif
 
+#ifdef HAVE_USBSID
+static const cmdline_option_t usbsid_cmdline_options[] =
+{
+    { "-usbsidreadmode", SET_RESOURCE, CMDLINE_ATTRIB_NEED_ARGS,
+      NULL, NULL, "SidUSBSIDReadMode", NULL,
+      "<1 or 0>", "Enable USBSID read mode (disables cycled writing & digiplay)" },
+    CMDLINE_LIST_END
+};
+#endif
+
 static cmdline_option_t stereo_cmdline_options[] =
 {
     { "-sidextra", SET_RESOURCE, CMDLINE_ATTRIB_NEED_ARGS,
@@ -569,6 +579,12 @@ int sid_cmdline_options_init(int sid_type)
 
 #ifdef HAVE_RESID
     if (cmdline_register_options(resid_cmdline_options) < 0) {
+        return -1;
+    }
+#endif
+
+#ifdef HAVE_USBSID
+    if (cmdline_register_options(usbsid_cmdline_options) < 0) {
         return -1;
     }
 #endif
