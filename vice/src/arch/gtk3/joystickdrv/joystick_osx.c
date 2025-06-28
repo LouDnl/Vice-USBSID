@@ -304,8 +304,7 @@ static int joy_hidlib_get_value(joy_hid_device_t *device,
     }
 }
 
-// static void osx_joystick_read(int joyport, void* priv) {
-static void osx_joystick_read(void* priv) {
+static void osx_joystick_read(int joyport, void* priv) {
     joy_hid_device_t *device = priv;
     int i;
     int value;
@@ -325,14 +324,11 @@ static void osx_joystick_read(void* priv) {
                                         &e,
                                         &value, 1) >= 0) {
                         if (value < e.min_pvalue*3/4 + e.max_pvalue/4) {
-                            /* joy_axis_event(joyport, e.ordinal, JOY_AXIS_NEGATIVE); */
-                            joy_axis_event(e.ordinal, JOY_AXIS_NEGATIVE);
+                            joy_axis_event(joyport, e.ordinal, JOY_AXIS_NEGATIVE);
                         } else if (value > e.min_pvalue/4 + e.max_pvalue*3/4) {
-                            /* joy_axis_event(joyport, e.ordinal, JOY_AXIS_POSITIVE); */
-                            joy_axis_event(e.ordinal, JOY_AXIS_POSITIVE);
+                            joy_axis_event(joyport, e.ordinal, JOY_AXIS_POSITIVE);
                         } else {
-                            /* joy_axis_event(joyport, e.ordinal, JOY_AXIS_MIDDLE); */
-                            joy_axis_event(e.ordinal, JOY_AXIS_MIDDLE);
+                            joy_axis_event(joyport, e.ordinal, JOY_AXIS_MIDDLE);
                         }
                     }
                     break;
@@ -360,15 +356,13 @@ static void osx_joystick_read(void* priv) {
                         }
 
                         if (value >= 0 && value <= MAX_HAT_MAP_INDEX) {
-                            /* joy_hat_event(joyport, e.ordinal, hat_map[value]); */
-                            joy_hat_event(e.ordinal, hat_map[value]);
+                            joy_hat_event(joyport, e.ordinal, hat_map[value]);
                         }
                     }
                 }
             } else if (e.usage_page == kHIDPage_Button) {
                 if (joy_hidlib_get_value(device, &e, &value, 0) >= 0) {
-                    /* joy_button_event(joyport, e.ordinal, value); */
-                    joy_button_event(e.ordinal, value);
+                    joy_button_event(joyport, e.ordinal, value);
                 }
             }
         }
