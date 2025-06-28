@@ -1442,7 +1442,8 @@ and after doing so revert all settings to what they were before autostarting.
 If you want to allow the started program to access the host file system, you will
 have to enable "virtual device traps". If you want the autostart logic to disable
 true drive emulation temporarily to speed up the autostart, then enable "handle
-TDE at autostart.
+TDE at autostart (this is required if true drive emulation would be enabled
+otherwise - as is the default).
 
 @xref{Disk and tape images}. for more information about images and
 autostart.
@@ -3431,7 +3432,7 @@ use the ``Autostart'' button in the file selector window after selecting
 a proper disk or tape image file.
 
 If true drive emulation is turned on, and the @dfn{Handle TDE at Autostart}
-setting is enabled, true drive emulation will be turned off before running 
+setting is enabled, true drive emulation will be turned off before loading
 the program and then turned on again after it has been
 loaded.  This way, you get the maximum possible speed while loading the
 file, but you do not lose compatibility once the program itself is
@@ -3603,7 +3604,7 @@ reset settings to default first.}
 @item
 To speed up loading .prg files, enable
 Options->Host->Autostart->Autostart PRG Settings->Autostart mode->Inject into RAM
-(@code{AutostartPrgMode} = 0)
+(@code{AutostartPrgMode} = 1)
 
 @item
 To speed up loading .d64 files,
@@ -3786,7 +3787,8 @@ Boolean, if true put a colon after the load command when autostarting
 @item AutostartHandleTrueDriveEmulation
 Boolean, if true handle (enable/disable) True Drive Emulation on autostart
 (all emulators except vsid). This is disabled by default to ensure maximum
-compatibility.
+compatibility. It @emph{must} be enabled, if true drive emulation is enabled, and
+@code{AutostartPrgMode} is 0.
 
 @vindex AutostartWarp
 @item AutostartWarp
@@ -3798,6 +3800,8 @@ Boolean, if true temporarily enable warp mode when autostarting
 Integer specifying the autostart mode for prg files
 (all emulators except vsid).
 (0: virtual filesystem, 1: inject to RAM, 2: copy to D64)
+Note that @code{AutostartHandleTrueDriveEmulation} must be enabled, if true drive
+emulation is enabled.
 
 @vindex AutostartDelayRandom
 @item AutostartDelayRandom
@@ -9759,6 +9763,8 @@ MACH 5
 @item
 Magic Desk
 @item
+Magic Desk 16
+@item
 Magic Formel
 @item
 MAX Basic
@@ -10196,11 +10202,18 @@ The following cartridge types are valid:
 83: BMP Data Turbo
 @item
 84: Profi-DOS
+@item
+85: Magic Desk 16
 @end itemize
 
 @vindex CartridgeFile
 @item CartridgeFile
 String specifying the filename of the image for the cartridge emulated in the "main" slot.
+
+@vindex Comal80Revision
+@item Comal80Revision
+Integer specifying the Comal 80 hardware revision.
+(0: Grey, 1: Commodore/Black)
 
 @vindex DQBB
 @item DQBB
@@ -10719,6 +10732,12 @@ Attach raw 8KiB Capture cartridge image.
 @item -cartcomal <name>
 Attach raw 64KiB Comal 80 cartridge image.
 
+@findex -comal80rev
+@item -comal80rev <Revision>
+Set the Comal 80 hardware revision
+(@code{Comal80Revision}).
+(0: Grey, 1: Commodore/Black)
+
 @findex -cartdep256
 @item -cartdep256 <name>
 Attach raw Dela EP256 cartridge image.
@@ -11155,6 +11174,10 @@ Attach raw 8KiB MACH 5 cartridge image.
 @findex -cartmd
 @item -cartmd <name>
 Attach raw 32/64/128KiB Magic Desk cartridge image.
+
+@findex -cartmd16
+@item -cartmd16 <name>
+Attach raw up to 2048KiB Magic Desk 16K cartridge image.
 
 @findex -cartmf
 @item -cartmf <name>
@@ -23778,6 +23801,8 @@ Lt. Kernal Host Adaptor .crt file
 MACH 5 .crt file
 @item md
 Magic Desk .crt file
+@item md16
+Magic Desk 16 .crt file
 @item mf
 Magic Formel .crt file
 @item max
@@ -31375,10 +31400,9 @@ E0C0: 4D 46 37 8D 00 DF 60 8D 01 DF 60 8D 02 DF 60 8D  MF7...`...`...`.
 @end example
 
     ROM memory is organized in 8KiB ($2000) banks  located  at  $8000-$9FFF.
-    Bank switching is done by writing to address $DE00+X, where  X  is  the
+    Bank switching is done by accessing address $DE00+X, where  X  is  the
     bank number (STA $DE00,X). For instance, to read from bank  3,  address
-    $DE03 is written to. Reading from anywhere  in  the  I/O-1  range  will
-    disable the cart.
+    $DE03 is read from, or written to.
 
     The CRT file contains a string of CHIP blocks, each block with a  start
     address of $8000, length $2000 and the bank number in the  bank  field.
@@ -31670,18 +31694,52 @@ C080: 7B C8 7E C8 C3 C2 CD 38 30 43 4F 4D 41 4C 80 93  @{.~....80COMAL..
     banks of ROM memory and the cart has 1 (write-only) bank control register which
     is located at $DE00 and mirrored throughout the $DE00-$DEFF range.
 
+    Two variants of this Cartridge existed:
+
+    1. Grey Cartridge (Comal Users Group, USA)
+       Produced around 1984-1985, likely with UniComal Denmarks approval.
+       Approx. 2,000 units distributed (according to COMAL Today).
+
+@itemize @bullet
+@item 4 sockets populated with 16 KB EPROMs (27128)
+@item NO additional socket, but it was possible to piggyback a fifth EPROM via
+      minor hardware mod
+@end itemize
+
 @example
     bit  meaning
     ---  -------
-    7    exrom?
-    6    game?
-    5    unknown function (used by the software to disable the cartridge)
-    4    unused?
-    3    unused?
-    2    unknown function (used by the software however)
-    0-1  selects bank
+    7    -
+    6    GAME
+    5    EXROM
+    4    -
+    3    -
+    2    -
+    0-1  selects EPROM (16k bank)
 @end example
 
+    2. Black Cartridge (Official Commodore Release)
+       Used internationally and with a different hardware configuration.
+
+@itemize @bullet
+@item Two fixed 32 KB ROMs (Commodore) and one socket for a 32 KB (or with
+      hardware modification 64 KB ) EPROM
+@end itemize
+
+@example
+    bit  meaning
+    ---  -------
+    7    -
+    6    GAME + EXROM
+    5    -
+    4    -
+    3    -
+    2    switches to the optional third socket (additional 2x16k)
+    0-1  selects EPROM+bank (4x16k bank)
+@end example
+
+If the Cartridge Hardware Subtype/Revision (Offset 0x1A in the CRT Header) is 1,
+then VICE emulates the older "Grey" cartridge variant.
 
 @c @node FIXME
 @subsubsection 22 - Structured Basic
@@ -34920,6 +34978,47 @@ E0C0: 2C CA 91 AD 0A 03 AE 0B 03 8D B8 02 8E B9 02 A9  ,...............
     makes it hard to dump (you'll have to know the addresses where this happens)
 
     Any access (read or write) to IO2 ($dfxx) will disable the cartridge again.
+
+@c @node FIXME
+@subsubsection 85 - Magic Desk 16
+
+@multitable @columnfractions .3 .7
+@item Size
+@tab 32KiB, 64KiB ... up to 2048KiB sizes (4 to 128 banks of 16KiB each)
+@item EXROM
+@tab active (lo) (0)
+@item GAME
+@tab active (hi) (0)
+@item Startup mode
+@tab 16KiB Game
+@item Load address
+@tab (banks 0-127) - $8000-BFFF
+@end multitable
+
+@example
+        00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F       ASCII
+        -----------------------------------------------  ----------------
+000000: 43 36 34 20 43 41 52 54 52 49 44 47 45 20 20 20  C64 CARTRIDGE
+000010: 00 00 00 40 01 00 00 55 00 00 00 00 00 00 00 00  ...@...U........
+000020: 4d 61 67 69 63 20 44 65 73 6b 20 31 36 4b 00 00  Magic Desk 16K..
+000030: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+000040: 43 48 49 50 00 00 40 10 00 00 00 00 80 00 40 00  CHIP..@.......@.
+000050: 09 80 09 80 c3 c2 cd 38 30 78 a2 ff 9a d8 a9 08  .......80x......
+..
+200820: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+200830: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+
+@end example
+
+Very similar to the classic "Magic Desk" cartridge, except that it uses
+16KiB banks instead and operates in "16k Game" mode.
+
+Bank switching is done by writing the bank number to $DE00.
+Bit 7 is cleared for selecting one of the ROM banks. If bit
+7 is set ($DE00 = $80), the GAME/EXROM lines are disabled,  turning  on
+RAM at $8000-B9FFF instead of ROM.
+
+used by "SNK vs CAPCOM - Stronger Edition"
 
 @c @node FIXME
 @subsection C128 Cartridge Specifics

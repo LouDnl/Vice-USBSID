@@ -1,8 +1,8 @@
 /*
- * comal80.h - Cartridge handling, Comal80 cart.
+ * magicdesk16.h - Cartridge handling, Magic Desk 16 cart.
  *
  * Written by
- *  Marco van den Heuvel <blackystardust68@yahoo.com>
+ *  Salvo Cristaldi <crystal@unict.it>
  *
  * This file is part of VICE, the Versatile Commodore Emulator.
  * See README for copyright notice.
@@ -24,26 +24,22 @@
  *
  */
 
-#ifndef VICE_COMAL80_H
-#define VICE_COMAL80_H
+#ifndef VICE_MAGICDESK16_H
+#define VICE_MAGICDESK16_H
 
 #include <stdio.h>
 
 #include "types.h"
 
-void comal80_config_init(void);
-void comal80_config_setup(uint8_t *rawcart);
-int comal80_bin_attach(const char *filename, uint8_t *rawcart);
-int comal80_crt_attach(FILE *fd, uint8_t *rawcart, int variant);
-void comal80_detach(void);
-
-int comal80_cmdline_options_init(void);
-int comal80_resources_init(void);
-void comal80_resources_shutdown(void);
+void magicdesk16_config_init(void);
+void magicdesk16_config_setup(uint8_t *rawcart);
+int magicdesk16_bin_attach(const char *filename, uint8_t *rawcart);
+int magicdesk16_crt_attach(FILE *fd, uint8_t *rawcart);
+void magicdesk16_detach(void);
 
 struct snapshot_s;
 
-int comal80_snapshot_write_module(struct snapshot_s *s);
-int comal80_snapshot_read_module(struct snapshot_s *s);
+int magicdesk16_snapshot_write_module(struct snapshot_s *s);
+int magicdesk16_snapshot_read_module(struct snapshot_s *s);
 
 #endif
