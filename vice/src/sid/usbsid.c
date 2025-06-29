@@ -142,19 +142,20 @@ int usbsid_available(void)
     return usbsid_is_open;
 }
 
-void usbsid_set_audio(int val)
-{
-    if (!usbsid_is_open) {
-        usbsid_drv_set_audio(val);
-    }
-}
-
 void usbsid_set_readmode(int val)
 {
     if (!usbsid_is_open) {
         usbsid_drv_set_readmode(val);
     }
 }
+
+void usbsid_set_audiomode(int val)
+{
+    if (!usbsid_is_open) {
+        usbsid_drv_set_audiomode(val);
+    }
+}
+
 
 /* ---------------------------------------------------------------------*/
 

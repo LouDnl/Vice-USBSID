@@ -240,9 +240,12 @@ static const cmdline_option_t hardsid_cmdline_options[] =
 #ifdef HAVE_USBSID
 static const cmdline_option_t usbsid_cmdline_options[] =
 {
-    { "-usbsidreadmode", SET_RESOURCE, CMDLINE_ATTRIB_NEED_ARGS,
+    { "-usreadmode", SET_RESOURCE, CMDLINE_ATTRIB_NEED_ARGS,
       NULL, NULL, "SidUSBSIDReadMode", NULL,
       "<1 or 0>", "Enable USBSID read mode (disables cycled writing & digiplay)" },
+    { "-usaudiomode", SET_RESOURCE, CMDLINE_ATTRIB_NEED_ARGS,
+      NULL, NULL, "SidUSBSIDAudioMode", NULL,
+      "<1 or 0>", "Set audio to Stereo(1) or Mono(0) (Default)" },
     CMDLINE_LIST_END
 };
 #endif

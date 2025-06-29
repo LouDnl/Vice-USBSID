@@ -2,6 +2,15 @@
 This fork has built-in support for USBSID-Pico. \
 USBSID-Pico is a RPi Pico based board for interfacing one or two MOS SID chips and/or hardware SID emulators with your PC over USB.
 
+# Usage
+Use `-usreadmode 1` with to enable readmode for FPGASID, default is disabled.  
+Use `-usaudiomode 1` to enable Stereo mode, default is Mono mode. Works on PCB v1.3 only!
+```shell
+   # Examples
+   x64sc -usreadmode 1 -usaudiomode 1
+   vsid -usreadmode 1 -usaudiomode 1
+```
+
 # Linux Building and installing
 For building you can mostly follow the instructions in the [Linux-GTK3-Howto](vice/doc/building/Linux-GTK3-Howto.txt) \
 add `--enable-usbsid` to `./configure` for [USBSID-Pico](https://github.com/LouDnl/USBSID-Pico) support
@@ -59,7 +68,6 @@ libsdl-image1.2
     ../../vice/configure \
        --prefix=/usr \
        --enable-option-checking=fatal \
-       --enable-gtk3ui \
        --enable-usbsid \
        --disable-arch \
        --disable-html-docs \
@@ -153,13 +161,3 @@ After installing docker follow the following steps to create win32 or win64 bina
     # depending on the container type you created this will create a zip file in the current directory
     ./dock-run.sh $(pwd)
 ```
-
-
-# VICE GitHub Mirror
-This is the official git mirror of the [VICE subversion repo](https://sourceforge.net/p/vice-emu/code/HEAD/tree/).
-
-For news, documentation, developer information, [visit the VICE website](https://vice-emu.sourceforge.io/).
-
-## Download VICE
-* [Official Releases](https://vice-emu.sourceforge.io/#download)
-* [Snapshot builds of the latest code](https://github.com/VICE-Team/svn-mirror/releases)

@@ -101,17 +101,17 @@ int usbsid_drv_available(void)
     return 0;
 }
 
-void usbsid_drv_set_audio(int val)
-{
-    if (use_us_device) {
-        us_set_audio(val);
-    }
-}
-
 void usbsid_drv_set_readmode(int val)
 {
     if (use_us_device) {
         us_set_readmode(val);
+    }
+}
+
+void usbsid_drv_set_audiomode(int val)
+{
+    if (use_us_device) {
+        us_set_audiomode(val);
     }
 }
 

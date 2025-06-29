@@ -89,6 +89,7 @@ static int sid_hardsid_right;
 #endif
 #ifdef HAVE_USBSID
 static int sid_usbsid_readmode;
+static int sid_usbsid_audiomode;
 #endif
 
 static int set_sid_engine(int set_engine, void *param)
@@ -182,9 +183,9 @@ static int set_sid_stereo(int val, void *param)
             machine_sid2_enable(val);
         }
     }
-#ifdef HAVE_USBSID
-    usbsid_set_audio(val);  /* Set mono or stereo by no. sids */
-#endif
+// #ifdef HAVE_USBSID
+//     usbsid_set_audio(val);  /* Set mono or stereo by no. sids */
+// #endif
     return 0;
 }
 
@@ -367,10 +368,18 @@ static int set_sid_hardsid_right(int val, void *param)
 #endif
 
 #ifdef HAVE_USBSID
-static int set_sid_usbsid_main(int val, void *param)
+static int set_sid_usbsid_readmode(int val, void *param)
 {
     sid_usbsid_readmode = (unsigned int)val;
     usbsid_set_readmode(sid_usbsid_readmode);
+
+    return 0;
+}
+
+static int set_sid_usbsid_audiomode(int val, void *param)
+{
+    sid_usbsid_audiomode = (unsigned int)val;
+    usbsid_set_audiomode(sid_usbsid_readmode);
 
     return 0;
 }
@@ -462,7 +471,9 @@ static const resource_int_t hardsid_resources_int[] = {
 #ifdef HAVE_USBSID
 static const resource_int_t usbsid_resources_int[] = {
     { "SidUSBSIDReadMode", 0, RES_EVENT_NO, NULL,
-      &sid_usbsid_readmode, set_sid_usbsid_main, NULL },
+      &sid_usbsid_readmode, set_sid_usbsid_readmode, NULL },
+    { "SidUSBSIDAudioMode", 0, RES_EVENT_NO, NULL,
+      &sid_usbsid_audiomode, set_sid_usbsid_audiomode, NULL },
     RESOURCE_INT_LIST_END
 };
 #endif
@@ -508,9 +519,11 @@ int sid_common_resources_init(void)
 #endif
 
 #ifdef HAVE_USBSID
+    // if (usbsid_available()) {
     if (resources_register_int(usbsid_resources_int) < 0) {
         return -1;
     }
+    // }
 #endif
 
     return resources_register_int(common_resources_int);

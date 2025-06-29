@@ -66,7 +66,9 @@
 #pragma GCC optimize ("O3")
 #endif
 
-static int rc = -1, sids_found = -1, no_sids = -1, soc_audio = -1, r_readmode = -1, readmode = -1;
+static int rc = -1, sids_found = -1, no_sids = -1;
+static int r_audiomode = -1, audiomode = -1;
+static int r_readmode = -1, readmode = -1;
 static uint8_t sidbuf[0x20 * US_MAXSID];
 
 static CLOCK usid_main_clk;
@@ -118,22 +120,28 @@ int us_device_open(void)
         usbsid = create_USBSID();
         if (usbsid) {
             resources_get_int("SidUSBSIDReadMode", &r_readmode);
-            log_message(usbsid_log, "SidUSBSIDReadMode: %d, readmode: %d\r", r_readmode, readmode);
+            // log_message(usbsid_log, "SidUSBSIDReadMode: %d, readmode: %d\r", r_readmode, readmode);
             readmode = r_readmode;
-        }
-          /* NOTICE: Digitunes only play with threaded cycles */
-        if (readmode == 0) {
-            log_message(usbsid_log, "Starting in normal mode\r");
-            rc = init_USBSID(usbsid, true, true);  /* threading and cycles enabled */
-        } else if (readmode == 1) {
-            log_message(usbsid_log, "Starting in read mode\r");
-            rc = init_USBSID(usbsid, false, false);  /* threading and cycles disabled */
+            resources_get_int("SidUSBSIDAudioMode", &r_audiomode);
+            // log_message(usbsid_log, "SidUSBSIDAudioMode: %d, readmode: %d\r", r_audiomode, audiomode);
+            audiomode = r_audiomode;
         }
 
+        if (readmode == 1) {
+            log_message(usbsid_log, "Starting in read mode\r");
+            rc = init_USBSID(usbsid, false, false);  /* threading and cycles disabled */
+        } else {  /*  (readmode == 0 || readmode == -1) */
+            /* NOTICE: Digitunes only play with threaded cycles */
+            log_message(usbsid_log, "Starting in normal mode\r");
+            rc = init_USBSID(usbsid, true, true);  /* threading and cycles enabled */
+        }
         if (rc < 0) {
             return -1;
         }
     }
+
+    log_message(usbsid_log, "Set audio mode to %s\r", (audiomode == 1 ? "Stereo" : "Mono"));
+    setstereo_USBSID(usbsid, (audiomode == 1 ? audiomode : 0));
 
     usid_alarm = alarm_new(maincpu_alarm_context, "usbsid", usbsid_alarm_handler, NULL);
     sids_found = getnumsids_USBSID(usbsid);
@@ -224,30 +232,6 @@ unsigned int us_device_available(void)
     return sids_found;
 }
 
-void us_set_audio(int val)
-{   /* Gets set by x64sc from SID settings and by VSID at SID file change */
-    resources_get_int("SoundOutput", &soc_audio);
-    log_message(usbsid_log, "Global audio type is '%s'\r", (soc_audio == 2 ? "Stereo" : soc_audio == 1 ? "Mono" : "System"));
-
-
-    int stereo = 0;
-    no_sids = val+1; /* Number of SIDs requested +1 (val = 0 if 1 single SID is requested) */
-
-    log_message(usbsid_log, "Set requested audio type for no. SIDs %d (No. SIDs available: %d)\r", no_sids, sids_found);
-
-    stereo
-        /* Number of requested SIDs equals no. available SIDs */
-        = (no_sids == sids_found && soc_audio != 1)
-        ? (no_sids == 2 || no_sids == 4)  /* 2 or 4 SIDs requested */
-        ? 1  /* then Stereo */
-        : 0  /* else Mono */
-        /* else number of requested SIDs does not equal no. available SIDs */
-        : 0; /* fallback to Mono */
-
-    log_message(usbsid_log, "Audio type set to '%s' for %d requested SIDs\r", (stereo == 1 ? "Stereo" : "Mono"), no_sids);
-    setstereo_USBSID(usbsid, stereo);
-}
-
 void us_set_readmode(int val)
 {
     resources_get_int("SidUSBSIDReadMode", &r_readmode);
@@ -258,6 +242,15 @@ void us_set_readmode(int val)
         if (val == 1) disablethread_USBSID(usbsid);
     }
     return;
+}
+
+void us_set_audiomode(int val)
+{   /* Gets set by x64sc from SID settings and by VSID at SID file change */
+    resources_get_int("SidUSBSIDAudioMode", &r_audiomode);
+    log_message(usbsid_log, "Audio mode is '%s'\r", (r_audiomode == 1 ? "Stereo" : "Mono"));
+    audiomode = r_audiomode;
+
+    setstereo_USBSID(usbsid, audiomode);
 }
 
 static void usbsid_alarm_handler(CLOCK offset, void *data)

@@ -54,9 +54,9 @@ void us_set_machine_parameter(long cycles_per_sec);
 
 unsigned int us_device_available(void);
 
-void us_set_audio(int val);
-
 void us_set_readmode(int val);
+
+void us_set_audiomode(int val);
 
 void us_device_state_read(int chipno, struct sid_us_snapshot_state_s *sid_state);
 
