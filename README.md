@@ -1,5 +1,5 @@
 # Vice [USBSID-Pico](https://github.com/LouDnl/USBSID-Pico) fork
-This fork has built-in support for USBSID-Pico. \
+This is a fork of the official [Vice svn-mirror](https://github.com/VICE-Team/svn-mirror) and has built-in support for USBSID-Pico. \
 USBSID-Pico is a RPi Pico based board for interfacing one or two MOS SID chips and/or hardware SID emulators with your PC over USB.
 
 # Usage
@@ -19,6 +19,13 @@ Use `-usbuffsize 8192` to set the buffer size
    x64sc -usdiffsize 64 -usbuffsize 512
    vsid -usdiffsize 64 -usbuffsize 512
 ```
+
+# Updates
+I try to keep the repo in sync with the main Vice repo. See anything missing? Send me a message.
+
+# Releases
+Updated builds can be found in the [TAGS](https://github.com/VICE-Team/svn-mirror/tags) section and  \
+Releases can be found in the [RELEASES](https://github.com/LouDnl/Vice-USBSID/releases) section.
 
 # Linux Building and installing
 For building you can mostly follow the instructions in the [Linux-GTK3-Howto](vice/doc/building/Linux-GTK3-Howto.txt) \
