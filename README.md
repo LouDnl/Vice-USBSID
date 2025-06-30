@@ -132,7 +132,7 @@ libsdl-image1.2
     sudo make install
     # Now you can run vice directly
     x64sc
-    vice
+    vsid
     # Optional commandline options
     -sidenginemodel usbsid  # enables USBSID (available in settings menu too)
 ```
