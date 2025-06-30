@@ -1,9 +1,10 @@
 # USBSID-Pico-driver
-Driver for USBSID-Pico
+This repo contains the driver code for USBSID-Pico in C, Java and Javascript.
 
-This repo is a work-in-progress and still in early crude form!
+For more information about [USBSID-Pico](https://github.com/LouDnl/USBSID-Pico) visit the main [repo](https://github.com/LouDnl/USBSID-Pico).  
 
-Compilation test
-```shell
-rm *.o ; g++ $(pkg-config --cflags --libs libusb-1.0) -c *.cpp $(pkg-config --cflags --libs libusb-1.0) -Wall
-```
+# API
+For information about the use of this driver, read [USBSID.h](USBSID.h)
+
+# Usage
+This driver code is used in (forks of) Vice, SidBerry, JSidplay2, RetroDebugger, goattracker2, gt2ultra, sidfactoryii, deepsid, libsidplayfp
