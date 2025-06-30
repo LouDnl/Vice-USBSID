@@ -1,8 +1,6 @@
 name: USBSID-Pico Snapshot Build
 env:
-  SOURCE_REPO: LouDnl/USBSID-Pico-driver
   AUTOMATIC_MONITOR: true
-  FILES: "README.md LICENSE USBSID* vice-makefile/Makefile.am" # seperate multiple entries with ,
   THE_SERVER: ${{ github.server_url }}
   PATH_SOURCE_CHECKOUT: temp_folder
   PATH_ARTIFACTS: dist
@@ -133,21 +131,6 @@ jobs:
       - name: Checkout Source
         if: env.exiting1 != 'true'
         uses: actions/checkout@v4
-
-      - name: Checkout USBSID-Pico driver
-        if: env.exiting1 != 'true'
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ env.SOURCE_REPO }}
-          path: ${{ env.PATH_SOURCE_CHECKOUT }}
-
-      - name: Copy files
-        if: env.exiting1 != 'true'
-        run: |
-          mkdir -p vice/src/lib/libusbsiddrv
-          cd $PATH_SOURCE_CHECKOUT
-          cp -u $FILES ../vice/src/lib/libusbsiddrv/
-          cd ..
 
       - name: Install Dependencies
         shell: bash
@@ -358,21 +341,6 @@ jobs:
             make install
             cd "$OLDDIR"
 
-        - name: Checkout USBSID-Pico driver
-          if: env.exiting1 != 'true'
-          uses: actions/checkout@v4
-          with:
-            repository: ${{ env.SOURCE_REPO }}
-            path: ${{ env.PATH_SOURCE_CHECKOUT }}
-
-        - name: Copy files
-          shell: msys2 {0}
-          run: |
-            mkdir -p vice/src/lib/libusbsiddrv
-            cd $PATH_SOURCE_CHECKOUT
-            cp $FILES ../vice/src/lib/libusbsiddrv/
-            cd ..
-
         - name: Build
           id: build
           shell: msys2 {0}
@@ -457,22 +425,6 @@ jobs:
       - name: Checkout Source
         if: env.exiting1 != 'true'
         uses: actions/checkout@v4
-
-      - name: Checkout USBSID-Pico driver
-        if: env.exiting1 != 'true'
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ env.SOURCE_REPO }}
-          path: ${{ env.PATH_SOURCE_CHECKOUT }}
-
-      - name: Copy files
-        if: env.exiting1 != 'true'
-        run: |
-          mkdir -p vice/src/lib/libusbsiddrv
-          cd $PATH_SOURCE_CHECKOUT
-          cp -u $FILES ../vice/src/lib/libusbsiddrv/
-          cd ..
-          pwd
 
       - name: Download Documentation
         uses: actions/download-artifact@v4
@@ -601,20 +553,6 @@ jobs:
     steps:
       - name: Checkout Source
         uses: actions/checkout@v4
-
-      - name: Checkout USBSID-Pico driver
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ env.SOURCE_REPO }}
-          path: ${{ env.PATH_SOURCE_CHECKOUT }}
-
-      - name: Copy files
-        run: |
-          mkdir -p vice/src/lib/libusbsiddrv
-          cd $PATH_SOURCE_CHECKOUT
-          cp $FILES ../vice/src/lib/libusbsiddrv/
-          cd ..
-          pwd
 
       - name: deps [macOS]
         if: runner.os == 'macOS'
