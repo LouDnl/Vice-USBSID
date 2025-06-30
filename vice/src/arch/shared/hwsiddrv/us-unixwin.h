@@ -58,6 +58,12 @@ void us_set_readmode(int val);
 
 void us_set_audiomode(int val);
 
+void us_restart_ringbuffer(void);
+
+void us_set_buffsize(int val);
+
+void us_set_diffsize(int val);
+
 void us_device_state_read(int chipno, struct sid_us_snapshot_state_s *sid_state);
 
 void us_device_state_write(int chipno, struct sid_us_snapshot_state_s *sid_state);

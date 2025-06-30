@@ -10,6 +10,15 @@ Use `-usaudiomode 1` to enable Stereo mode, default is Mono mode. Works on PCB v
    x64sc -usreadmode 1 -usaudiomode 1
    vsid -usreadmode 1 -usaudiomode 1
 ```
+# Optional tuning of write buffer and it's head->tail difference size
+Buffer and difference size must always be a multiple of 8!  
+Use `-usdiffsize 64` to set the head->tail difference size  
+Use `-usbuffsize 8192` to set the buffer size  
+```shell
+   # Examples
+   x64sc -usdiffsize 64 -usbuffsize 512
+   vsid -usdiffsize 64 -usbuffsize 512
+```
 
 # Linux Building and installing
 For building you can mostly follow the instructions in the [Linux-GTK3-Howto](vice/doc/building/Linux-GTK3-Howto.txt) \

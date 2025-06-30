@@ -43,6 +43,9 @@ void usbsid_set_machine_parameter(long cycles_per_sec);
 int usbsid_available(void);
 void usbsid_set_audiomode(int val);
 void usbsid_set_readmode(int val);
+void usbsid_restart_ringbuffer(void);
+void usbsid_set_buffsize(int val);
+void usbsid_set_diffsize(int val);
 
 int usbsid_drv_open(void);
 int usbsid_drv_close(void);
@@ -53,6 +56,9 @@ void usbsid_drv_set_machine_parameter(long cycles_per_sec);
 int usbsid_drv_available(void);
 void usbsid_drv_set_audiomode(int val);
 void usbsid_drv_set_readmode(int val);
+void usbsid_drv_restart_ringbuffer(void);
+void usbsid_drv_set_buffsize(int val);
+void usbsid_drv_set_diffsize(int val);
 
 void usbsid_state_read(int chipno, struct sid_us_snapshot_state_s *sid_state);
 void usbsid_state_write(int chipno, struct sid_us_snapshot_state_s *sid_state);

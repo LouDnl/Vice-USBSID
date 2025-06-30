@@ -69,6 +69,9 @@
 static int rc = -1, sids_found = -1, no_sids = -1;
 static int r_audiomode = -1, audiomode = -1;
 static int r_readmode = -1, readmode = -1;
+static int buffsize = -1, diffsize = -1;
+static int r_buffsize = -1, r_diffsize = -1;
+const int d_buffsize = 8192, d_diffsize = 64;
 static uint8_t sidbuf[0x20 * US_MAXSID];
 
 static CLOCK usid_main_clk;
@@ -125,6 +128,12 @@ int us_device_open(void)
             resources_get_int("SidUSBSIDAudioMode", &r_audiomode);
             // log_message(usbsid_log, "SidUSBSIDAudioMode: %d, readmode: %d\r", r_audiomode, audiomode);
             audiomode = r_audiomode;
+            resources_get_int("SidUSBSIDDiffSize", &r_readmode);
+            // log_message(usbsid_log, "SidUSBSIDReadMode: %d, readmode: %d\r", r_readmode, readmode);
+            diffsize = r_diffsize;
+            resources_get_int("SidUSBSIDBufferSize", &r_diffsize);
+            // log_message(usbsid_log, "SidUSBSIDAudioMode: %d, readmode: %d\r", r_audiomode, audiomode);
+            buffsize = r_buffsize;
         }
 
         if (readmode == 1) {
@@ -247,10 +256,40 @@ void us_set_readmode(int val)
 void us_set_audiomode(int val)
 {   /* Gets set by x64sc from SID settings and by VSID at SID file change */
     resources_get_int("SidUSBSIDAudioMode", &r_audiomode);
-    log_message(usbsid_log, "Audio mode is '%s'\r", (r_audiomode == 1 ? "Stereo" : "Mono"));
+    log_message(usbsid_log, "Audio mode is '%s' (resource:%d val:%d)\r", (r_audiomode == 1 ? "Stereo" : "Mono"), r_audiomode, val);
     audiomode = r_audiomode;
 
     setstereo_USBSID(usbsid, audiomode);
+}
+
+void us_restart_ringbuffer(void)
+{   /* Restarts the ringbuffer with a new value */
+    if (buffsize != d_buffsize) {
+        log_message(usbsid_log, "Restarting ringbuffer with buffer size:%d & diff size:%d\r", buffsize, diffsize);
+        restartringbuffer_USBSID(usbsid);
+    }
+}
+
+void us_set_buffsize(int val)
+{   /* Set the ringbuffer size */
+    resources_get_int("SidUSBSIDBufferSize", &r_buffsize);
+    buffsize = r_buffsize;
+    if (r_buffsize != d_buffsize) {
+        log_message(usbsid_log, "Setting ringbuffer size to: %d (val:%d default:%d)\r", buffsize, val, d_buffsize);
+        setbuffsize_USBSID(usbsid, buffsize);
+        us_restart_ringbuffer();
+    }
+}
+
+void us_set_diffsize(int val)
+{   /* Set the ringbuffer head to tail difference size */
+    resources_get_int("SidUSBSIDDiffSize", &r_diffsize);
+    diffsize = r_diffsize;
+    if (r_diffsize != d_diffsize) {
+        log_message(usbsid_log, "Setting ringbuffer diff size to: %d  (val:%d default:%d)\r", diffsize, val, d_diffsize);
+        setdiffsize_USBSID(usbsid, diffsize);
+    }
+
 }
 
 static void usbsid_alarm_handler(CLOCK offset, void *data)

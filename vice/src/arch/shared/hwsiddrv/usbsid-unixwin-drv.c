@@ -115,6 +115,27 @@ void usbsid_drv_set_audiomode(int val)
     }
 }
 
+void usbsid_drv_restart_ringbuffer(void)
+{
+    if (use_us_device) {
+        us_restart_ringbuffer();
+    }
+}
+
+void usbsid_drv_set_buffsize(int val)
+{
+    if (use_us_device) {
+        us_set_buffsize(val);
+    }
+}
+
+void usbsid_drv_set_diffsize(int val)
+{
+    if (use_us_device) {
+        us_set_diffsize(val);
+    }
+}
+
 void usbsid_drv_state_read(int chipno, struct sid_us_snapshot_state_s *sid_state)
 {
     if (use_us_device) {

@@ -132,6 +132,38 @@ static const struct engine_s engine_match[] = {
     { NULL, -1 }
 };
 
+#ifdef HAVE_USBSID
+int us_setparam(const char *param, void *extra_param)
+{
+    printf("KUT: %s %s %s\n", param, (char *)&extra_param, (char *)extra_param);
+    if ((!strcmp(((char *)extra_param), "rw")) && (strlen(param) >= 1)) {
+        int r = atoi(param);
+        printf("R: %d\n", r);
+        resources_set_int("SidUSBSIDReadMode", r);
+        usbsid_set_readmode(r);
+    }
+    if ((!strcmp(((char *)extra_param), "audio")) && (strlen(param) >= 1)) {
+        int a = atoi(param);
+        printf("A: %d\n", a);
+        resources_set_int("SidUSBSIDAudioMode", a);
+        usbsid_set_audiomode(a);
+    }
+    if ((!strcmp(((char *)extra_param), "diff")) && (strlen(param) >= 1)) {
+        int d = atoi(param);
+        printf("D: %d\n", d);
+        resources_set_int("SidUSBSIDDiffSize", d);
+        usbsid_set_diffsize(d);
+    }
+    if ((!strcmp(((char *)extra_param), "buff")) && (strlen(param) >= 1)) {
+        int b = atoi(param);
+        printf("B: %d\n", b);
+        resources_set_int("SidUSBSIDBufferSize", b);
+        usbsid_set_buffsize(b);
+    }
+    return 0;
+}
+#endif
+
 int sid_common_set_engine_model(const char *param, void *extra_param)
 {
     int engine;
@@ -240,12 +272,32 @@ static const cmdline_option_t hardsid_cmdline_options[] =
 #ifdef HAVE_USBSID
 static const cmdline_option_t usbsid_cmdline_options[] =
 {
+
     { "-usreadmode", SET_RESOURCE, CMDLINE_ATTRIB_NEED_ARGS,
       NULL, NULL, "SidUSBSIDReadMode", NULL,
       "<1 or 0>", "Enable USBSID read mode (disables cycled writing & digiplay)" },
     { "-usaudiomode", SET_RESOURCE, CMDLINE_ATTRIB_NEED_ARGS,
       NULL, NULL, "SidUSBSIDAudioMode", NULL,
       "<1 or 0>", "Set audio to Stereo(1) or Mono(0) (Default)" },
+    { "-usdiffsize", SET_RESOURCE, CMDLINE_ATTRIB_NEED_ARGS,
+      NULL, NULL, "SidUSBSIDDiffSize", NULL,
+      "<n divisable by 8>", "Write buffer head -> tail diff size (default: 64)" },
+    { "-usbuffsize", SET_RESOURCE, CMDLINE_ATTRIB_NEED_ARGS,
+      NULL, NULL, "SidUSBSIDBufferSize", NULL,
+      "<n divisable by 8>", "Write buffer size (default: 8192)" },
+
+    // { "-usreadmode", CALL_FUNCTION, CMDLINE_ATTRIB_NEED_ARGS,
+    //   us_setparam, "rw", "SidUSBSIDReadMode", NULL,
+    //   "<1 or 0>", "Enable USBSID read mode (disables cycled writing & digiplay)" },
+    // { "-usaudiomode", CALL_FUNCTION, CMDLINE_ATTRIB_NEED_ARGS,
+    //   us_setparam, "audio", "SidUSBSIDAudioMode", NULL,
+    //   "<1 or 0>", "Set audio to Stereo(1) or Mono(0) (Default)" },
+    // { "-usbuffsize", CALL_FUNCTION, CMDLINE_ATTRIB_NEED_ARGS,
+    //   us_setparam, "buff", "SidUSBSIDBufferSize", NULL,
+    //   "<n divisable by 8>", "Write buffer size (default: 8192)" },
+    // { "-usdiffsize", CALL_FUNCTION, CMDLINE_ATTRIB_NEED_ARGS,
+    //   us_setparam, "diff", "SidUSBSIDDiffSize", NULL,
+    //   "<n divisable by 8>", "Write buffer head -> tail diff size (default: 64)" },
     CMDLINE_LIST_END
 };
 #endif
@@ -493,7 +545,7 @@ static char *build_sid_engine_cmdline_option(int sid_type)
 #endif
 
 #ifdef HAVE_USBSID
-    /* add hardsid options if available */
+    /* add usbsid options if available */
     if (usbsid_available()) {
         new = util_concat(old, ", 5: USBSID", NULL);
         lib_free(old);

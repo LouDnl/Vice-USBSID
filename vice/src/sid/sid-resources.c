@@ -90,6 +90,8 @@ static int sid_hardsid_right;
 #ifdef HAVE_USBSID
 static int sid_usbsid_readmode;
 static int sid_usbsid_audiomode;
+static int sid_usbsid_buffsize;
+static int sid_usbsid_diffsize;
 #endif
 
 static int set_sid_engine(int set_engine, void *param)
@@ -383,6 +385,22 @@ static int set_sid_usbsid_audiomode(int val, void *param)
 
     return 0;
 }
+
+static int set_sid_usbsid_buffsize(int val, void *param)
+{
+    sid_usbsid_buffsize = (unsigned int)val;
+    usbsid_drv_set_buffsize(sid_usbsid_buffsize);
+
+    return 0;
+}
+
+static int set_sid_usbsid_diffsize(int val, void *param)
+{
+    sid_usbsid_diffsize = (unsigned int)val;
+    usbsid_drv_set_diffsize(sid_usbsid_diffsize);
+
+    return 0;
+}
 #endif
 
 
@@ -474,6 +492,10 @@ static const resource_int_t usbsid_resources_int[] = {
       &sid_usbsid_readmode, set_sid_usbsid_readmode, NULL },
     { "SidUSBSIDAudioMode", 0, RES_EVENT_NO, NULL,
       &sid_usbsid_audiomode, set_sid_usbsid_audiomode, NULL },
+    { "SidUSBSIDDiffSize", 64, RES_EVENT_NO, NULL,
+      &sid_usbsid_diffsize, set_sid_usbsid_diffsize, NULL },
+    { "SidUSBSIDBufferSize", 8192, RES_EVENT_NO, NULL,
+      &sid_usbsid_buffsize, set_sid_usbsid_buffsize, NULL },
     RESOURCE_INT_LIST_END
 };
 #endif
@@ -519,11 +541,9 @@ int sid_common_resources_init(void)
 #endif
 
 #ifdef HAVE_USBSID
-    // if (usbsid_available()) {
     if (resources_register_int(usbsid_resources_int) < 0) {
         return -1;
     }
-    // }
 #endif
 
     return resources_register_int(common_resources_int);

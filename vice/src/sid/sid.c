@@ -639,7 +639,7 @@ void sid_sound_machine_reset(sound_t *psid, CLOCK cpu_clk)
 {
     sid_engine.reset(psid, cpu_clk);
     #ifdef HAVE_USBSID
-    usbsid_reset(false); /* This is called when the STOP button is pressed */
+    usbsid_reset(true); /* This is called when the STOP button is pressed */
     #endif
 }
 

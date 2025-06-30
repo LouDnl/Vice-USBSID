@@ -156,6 +156,27 @@ void usbsid_set_audiomode(int val)
     }
 }
 
+void usbsid_restart_ringbuffer(void)
+{
+    if (!usbsid_is_open) {
+        usbsid_drv_restart_ringbuffer();
+    }
+}
+
+void usbsid_set_buffsize(int val)
+{
+    if (!usbsid_is_open) {
+        usbsid_drv_set_buffsize(val);
+    }
+}
+
+void usbsid_set_diffsize(int val)
+{
+    if (!usbsid_is_open) {
+        usbsid_drv_set_diffsize(val);
+    }
+}
+
 
 /* ---------------------------------------------------------------------*/
 
