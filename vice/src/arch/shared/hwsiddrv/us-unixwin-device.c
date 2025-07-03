@@ -203,9 +203,10 @@ int_fast32_t us_delay(void)
         usid_main_clk = maincpu_clk;
         return 0;
     }
-    /* Without substracting 1 cycle this can cause a clicking noise in cycle exact tunes */
-    // int_fast32_t cycles = maincpu_clk - usid_main_clk - 1;
-    int_fast32_t cycles = maincpu_clk - usid_main_clk;
+    /* Without substracting 1 cycle this
+     * can cause a clicking noise in cycle exact tunes
+     * create audible skips in digitunes like Sky Buster */
+    int_fast32_t cycles = maincpu_clk - usid_main_clk - 1;
     while (cycles > 0xffff)
     {
         cycles -= 0xffff;
