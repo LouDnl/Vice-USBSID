@@ -616,16 +616,13 @@ void* USBSID_Class::USBSID_Thread(void)
     if (flush_buffer == 1) {
       USBSID_FlushBuffer();
     }
-    if (us_ringbuffer.ring_read != us_ringbuffer.ring_write) {
-      if (USBSID_RingDiff() > diff_size) {
+    while ((us_ringbuffer.ring_read != us_ringbuffer.ring_write)
+           && (USBSID_RingDiff() > diff_size)) {
         if (withcycles) {
-            USBSID_RingPopCycled();
+          USBSID_RingPopCycled();
         } else {
           USBSID_RingPop();
         }
-      }
-      /* USBSID_FillMemory(); */
-      /* USBSID_DebugPrint(); */
     }
   }
   USBDBG(stdout, "[USBSID] Thread finished\r\n");
