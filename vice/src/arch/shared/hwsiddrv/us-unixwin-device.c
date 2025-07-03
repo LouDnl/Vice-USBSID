@@ -131,9 +131,11 @@ int us_device_open(void)
             resources_get_int("SidUSBSIDDiffSize", &r_readmode);
             // log_message(usbsid_log, "SidUSBSIDReadMode: %d, readmode: %d\r", r_readmode, readmode);
             diffsize = r_diffsize;
+            if (diffsize >= 16) setdiffsize_USBSID(usbsid, diffsize);
             resources_get_int("SidUSBSIDBufferSize", &r_diffsize);
             // log_message(usbsid_log, "SidUSBSIDAudioMode: %d, readmode: %d\r", r_audiomode, audiomode);
             buffsize = r_buffsize;
+            if (buffsize >= 256) setbuffsize_USBSID(usbsid, buffsize);
         }
 
         if (readmode == 1) {
