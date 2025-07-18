@@ -55,7 +55,7 @@
 #include "parsid.h"
 #endif
 
-#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+#ifdef HAVE_USBSID
 #include "usbsid.h"
 #endif
 
@@ -123,7 +123,7 @@ static const struct engine_s engine_match[] = {
     { "lpt", SID_PARSID },
 #endif
 #endif
-#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+#ifdef HAVE_USBSID
     { "1792", SID_USBSID },
     { "usbsid", SID_USBSID },
     { "usbs", SID_USBSID },
