@@ -101,7 +101,7 @@ extern "C"
     return ((USBSID_Class*)p)->us_Initialised;
   }
   bool portisopen_USBSID(USBSIDitf p) {
-    return ((USBSID_Class*)p)->us_PortIsOpen;
+    return ((USBSID_Class*)p)->USBSID_isOpen();
   }
   int found_USBSID(USBSIDitf p) {
     return ((USBSID_Class*)p)->us_Found;

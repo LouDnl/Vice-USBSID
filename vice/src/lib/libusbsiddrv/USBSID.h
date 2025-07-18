@@ -77,9 +77,6 @@
 // #define USBSID_DEBUG
 #ifdef USBSID_DEBUG
   #define USBDBG(...) fprintf(__VA_ARGS__)
-  #ifdef USBSID_MEMDEBUG
-    #define DEBUG_USBSID_MEMORY
-  #endif
 #else
   #define USBDBG(...) ((void)0)
 #endif
@@ -243,6 +240,10 @@ namespace USBSID_NS
   static int pcbversion = -1;
   static int socketconfig = -1;
 
+  /* Object related */
+  static bool us_PortIsOpen = false;
+  static int instance = -1;
+
   /* Timing related */
   typedef std::nano                                      ratio_t;      /* 1000000000 */
   typedef std::chrono::high_resolution_clock::time_point timestamp_t;  /* Point in time */
@@ -297,12 +298,6 @@ namespace USBSID_NS
       /* Ringbuffer reads & writes*/
       void USBSID_RingPopCycled(void);  /* Threaded writer with cycles */
       void USBSID_RingPop(void);  /* Threaded writer */
-      uint8_t * USBSID_RingPop(bool return_busvalue);  /* Threaded writer with return value */
-
-      /* SID memory ~ Unused at the moment */
-      void USBSID_FlushMemory(void);
-      void USBSID_FillMemory(void);
-      void USBSID_DebugPrint(void);
 
     public:
 
@@ -311,15 +306,15 @@ namespace USBSID_NS
 
       bool us_Available;
       bool us_Initialised;
-      bool us_PortIsOpen;
       int us_Found;
-      #ifdef DEBUG_USBSID_MEMORY
-      bool us_DebugMemory = false;
-      #endif
+      int us_InstanceID;
 
       /* USBSID */
       int USBSID_Init(bool start_threaded, bool with_cycles);
       int USBSID_Close(void);
+      bool USBSID_isOpen(void);
+
+      /* USBSID & SID control */
       void USBSID_Pause(void);                                            /* Pause playing by releasing chipselect pins */
       void USBSID_Reset(void);                                            /* Reset all SID chips */
       void USBSID_ResetAllRegisters(void);                                /* Reset register for all SID chips */

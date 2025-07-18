@@ -66,19 +66,14 @@ extern "C" {
 USBSID_Class::USBSID_Class() :
   us_Available(false),
   us_Initialised(false),
-  us_PortIsOpen(false),
-  us_Found(0)
+  us_Found(0),
+  us_InstanceID(0)
 {
-  #ifdef DEBUG_USBSID_MEMORY
-  us_DebugMemory = true;
-  #endif
   USBDBG(stdout, "[USBSID] Driver init start\n");
 
-  #ifdef DEBUG_USBSID_MEMORY
-  memset(sid_memory, 0, (sizeof(sid_memory) / sizeof(sid_memory[0])));
-  memset(sid_memory_changed, 0, (sizeof(sid_memory_changed) / sizeof(sid_memory_changed[0])));
-  #endif
-
+  if (us_PortIsOpen && (instance == 0)) USBSID_GetNumSIDs();  /* Retrieve numsids on 2nd class init when port is open */
+  if (instance >= numsids) instance = (numsids - 1);  /* Don't count above maximum sids the board has */
+  us_InstanceID = ++instance;  /* Current object id */
   us_Initialised = true;
 }
 
@@ -93,12 +88,6 @@ USBSID_Class::~USBSID_Class()
   thread_buffer = NULL;
   write_buffer = NULL;
   result = NULL;
-  #ifdef DEBUG_USBSID_MEMORY
-  if (temp_buffer) us_free(temp_buffer);
-  #endif
-  #ifdef DEBUG_USBSID_MEMORY
-  temp_buffer = NULL;
-  #endif
 }
 
 int USBSID_Class::USBSID_Init(bool start_threaded, bool with_cycles)
@@ -135,6 +124,11 @@ int USBSID_Class::USBSID_Close(void)
   if (us_PortIsOpen) us_PortIsOpen = false;
   USBDBG(stdout, "[USBSID] De-init finished\n");
   return 0;
+}
+
+bool USBSID_Class::USBSID_isOpen(void)
+{
+  return us_PortIsOpen;
 }
 
 void USBSID_Class::USBSID_Pause(void)
@@ -618,11 +612,11 @@ void* USBSID_Class::USBSID_Thread(void)
     }
     while ((us_ringbuffer.ring_read != us_ringbuffer.ring_write)
            && (USBSID_RingDiff() > diff_size)) {
-        if (withcycles) {
-          USBSID_RingPopCycled();
-        } else {
-          USBSID_RingPop();
-        }
+      if (withcycles) {
+        USBSID_RingPopCycled();
+      } else {
+        USBSID_RingPop();
+      }
     }
   }
   USBDBG(stdout, "[USBSID] Thread finished\r\n");
@@ -639,7 +633,6 @@ int USBSID_Class::USBSID_InitThread(void)
   flush_buffer = 0;
   run_thread = buffer_pos = 1;
   pthread_mutex_lock(&us_mutex);
-  // USBSID_InitRingBuffer();
   USBSID_InitRingBuffer(ring_size, diff_size);
   us_thread++;
   pthread_mutex_unlock(&us_mutex);
@@ -905,26 +898,6 @@ void USBSID_Class::USBSID_RingPop(void)
   return;
 }
 
-uint8_t * USBSID_Class::USBSID_RingPop(bool return_busvalue)
-{ /* Unused at the moment */
-#ifdef DEBUG_USBSID_MEMORY
-  write_completed = 0;
-
-  /* Ex: 0xD418 */
-  out_buffer[0] = 0x0;
-  out_buffer[1] = USBSID_RingGet();  /* register */
-  out_buffer[2] = USBSID_RingGet();  /* value */
-  libusb_submit_transfer(transfer_out);
-  libusb_handle_events_completed(ctx, NULL);
-
-  if (threaded && return_busvalue) {  /* return value for DebugPrint */
-    memcpy(temp_buffer, out_buffer, 3);
-    return temp_buffer;
-  }
-#endif
-  return 0x0;
-}
-
 
 /* BUS */
 
@@ -959,96 +932,6 @@ uint8_t USBSID_Class::USBSID_Address(uint16_t addr)
       break;
   }
   return a;
-}
-
-
-/* SID MEMORY RELATED */
-
-void USBSID_Class::USBSID_FlushMemory(void)
-{ /* Unused at the moment */
-  #ifdef DEBUG_USBSID_MEMORY
-  int pos = 1;
-  out_buffer[0] = 0xFF; /* ID This as fast writes */
-  for (uint8_t i = 1; i < 64; i++) {
-    if (pos == 63) { /* Emergency flush? */
-      libusb_submit_transfer(transfer_out);
-      libusb_handle_events_completed(ctx, &write_completed);
-      out_buffer[0] = 0xFF; /* ID This as fast writes */
-      pos = 1;
-    }
-    if (sid_memory_changed[i] == 1) {
-      write_completed = 0;
-      out_buffer[pos++] = i; /* register */
-      out_buffer[pos++] = sid_memory[i]; /* value */
-      out_buffer[pos++] = (sid_memory_cycles[i] >> 8);  /* n cycles high */
-      out_buffer[pos++] = (sid_memory_cycles[i] & 0xFF);  /* n cycles low */
-      printf("[M%02X]$%02X:%02X[C]%d\n", out_buffer[0], i, sid_memory[i], sid_memory_cycles[i]);
-    }
-  }
-  libusb_submit_transfer(transfer_out);
-  libusb_handle_events_completed(ctx, &write_completed);
-  memset(sid_memory, 0, (sizeof(sid_memory) / sizeof(sid_memory[0])));
-  memset(sid_memory_changed, 0, (sizeof(sid_memory_changed) / sizeof(sid_memory_changed[0])));
-  memset(sid_memory_cycles, 0, (sizeof(sid_memory_cycles) / sizeof(sid_memory_cycles[0])));
-  #endif
-  return;
-}
-
-void USBSID_Class::USBSID_FillMemory(void)
-{ /* Unused at the moment */
-  #ifdef DEBUG_USBSID_MEMORY
-  uint8_t reg = USBSID_RingGet();
-  uint8_t val = USBSID_RingGet();
-  /* int c = ((us_ringbuffer.ringpop & 0x8000) == 0x8000); */
-  uint16_t cycles = (((USBSID_RingGet() << 8) | USBSID_RingGet()) ^ 0x8000);
-  if (sid_memory_changed[reg] == 0) {
-    sid_memory[reg] = val;
-    sid_memory_changed[reg]++;
-    sid_memory_cycles[reg] = cycles;
-    if ((reg & 0x1f) > 0x16) USBSID_FlushMemory();
-  } else {  /* We're updating a previously filled register, flush immediately */
-    USBSID_FlushMemory();
-    sid_memory[reg] = val;
-    sid_memory_changed[reg]++;
-    sid_memory_cycles[reg] = cycles;
-  }
-  #endif
-  return;
-}
-
-void USBSID_Class::USBSID_DebugPrint(void)
-{ /* Unused at the moment */
-  #ifdef DEBUG_USBSID_MEMORY
-  printf("[SID1]\
-  [V1]$%02x$%02x$%02x$%02x$%02x$%02x$%02x\
-  [V2]$%02x$%02x$%02x$%02x$%02x$%02x$%02x\
-  [V3]$%02x$%02x$%02x$%02x$%02x$%02x$%02x\
-  [F]$%02x$%02x$%02x$%02x\
-  [M]$%02x$%02x$%02x$%02x\n",
-    /* Voice 1 */
-    sid_memory[0x00],sid_memory[0x01],
-    sid_memory[0x02],sid_memory[0x03],
-    sid_memory[0x04],sid_memory[0x05],
-    sid_memory[0x06],
-    /* Voice 2 */
-    sid_memory[0x07],sid_memory[0x08],
-    sid_memory[0x09],sid_memory[0x0A],
-    sid_memory[0x0B],sid_memory[0x0C],
-    sid_memory[0x0D],
-    /* Voice 3 */
-    sid_memory[0x0E],sid_memory[0x0F],
-    sid_memory[0x10],sid_memory[0x11],
-    sid_memory[0x12],sid_memory[0x13],
-    sid_memory[0x14]
-    /* Filter */,
-    sid_memory[0x15],sid_memory[0x16],
-    sid_memory[0x17],sid_memory[0x18],
-    /* Misc */
-    sid_memory[0x19],sid_memory[0x1A],
-    sid_memory[0x1B],sid_memory[0x1C]
-  );
-  #endif
-  return;
 }
 
 
@@ -1311,9 +1194,6 @@ int USBSID_Class::LIBUSB_Setup(bool start_threaded, bool with_cycles)
   write_buffer = us_alloc(2 * len_out_buffer, (sizeof(uint8_t)) * (len_out_buffer));
   thread_buffer = us_alloc(2 * len_out_buffer, (sizeof(uint8_t)) * (len_out_buffer));
   result = us_alloc(2 * LEN_IN_BUFFER, (sizeof(uint8_t)) * (LEN_IN_BUFFER));
-  #ifdef DEBUG_USBSID_MEMORY
-  temp_buffer = us_alloc(2 * LEN_TMP_BUFFER, (sizeof(uint8_t)) * (LEN_TMP_BUFFER));
-  #endif
 
   /* Initialize libusb */
   rc = libusb_init(&ctx);
