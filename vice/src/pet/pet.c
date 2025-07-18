@@ -931,17 +931,15 @@ void pet_crtc_set_screen(void)
     /* mem_initialize_memory(); */
 
     if (!cols) {
+        /* FIXME this guesswork should never be needed!
+         * petmem_check_info() already does something like this. */
         cols = petres.rom_video;
         if (!cols) {
             cols = PET_COLS;
         }
-        vmask = (cols == 40) ? 0x3ff : 0x7ff;
+        vmask = (petres.map == PET_MAP_8296) ? 0x0fff : 0x3ff;
     }
 
-    /* when switching 8296 to 40 columns, CRTC ends up at $9000 otherwise...*/
-    if (cols == 40) {
-        vmask = 0x3ff;
-    }
 /*
     log_message(pet_mem_log, "set_screen(vmask=%04x, cols=%d, crtc=%d)",
                 vmask, cols, petres.model.crtc);
@@ -957,7 +955,11 @@ void pet_crtc_set_screen(void)
     /* On the 8296 we do not (invert the screen by clearing MA12). */
     vrevmask = petres.map == PET_MAP_8296 ? vmask : 0x1000;
 
-    crtc_set_screen_options(cols, 25 * 10);
+    /*
+     * Vertical nr of pixels: max(25*10, 256), for 25 text lines of 10 px,
+     * or 256 for the HRE.
+     */
+    crtc_set_screen_options(cols, 256);
     crtc_set_screen_addr(mem_ram + 0x8000);
     crtc_set_hw_options(hwflag,
                         vmask,
