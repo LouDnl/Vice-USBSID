@@ -45,7 +45,7 @@ enum {
     SID_ENGINE_CATWEASELMKIII,
     SID_ENGINE_HARDSID,
     SID_ENGINE_PARSID,
-    SID_ENGINE_USBSID
+    SID_ENGINE_USBSID = 7
 };
 
 #define SID_ENGINE_DEFAULT       99
@@ -99,7 +99,7 @@ enum {
 #define SID_CATWEASELMKIII        (SID_ENGINE_CATWEASELMKIII << 8)
 #define SID_HARDSID               (SID_ENGINE_HARDSID << 8)
 #define SID_PARSID                (SID_ENGINE_PARSID << 8)
-#define SID_USBSID                (SID_ENGINE_USBSID << 8)  // 1280
+#define SID_USBSID                (SID_ENGINE_USBSID << 8)
 
 #define SIDTYPE_SID       0
 #define SIDTYPE_SIDDTV    1

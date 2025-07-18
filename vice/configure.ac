@@ -96,11 +96,11 @@ VICE_ARG_WITH_LIST(lame,                    [  --with-lame             use LAME 
 VICE_ARG_WITH_LIST(static-lame,             [  --with-static-lame      statically link LAME MP3])
 VICE_ARG_WITH_LIST(portaudio,               [  --with-portaudio        use PortAudio for sound input])
 VICE_ARG_ENABLE_LIST(catweasel,             [  --enable-catweasel      enables CatWeasel (PCI/Zorro/Clockport SID card) support])
-VICE_ARG_ENABLE_LIST(usbsid,                [  --enable-usbsid         enables usbsid support])
 VICE_ARG_ENABLE_LIST(hardsid,               [  --disable-hardsid       disables HardSID support])
 VICE_ARG_ENABLE_LIST(midi,                  [  --enable-midi           enable MIDI support])
 VICE_ARG_ENABLE_LIST(new8580filter,         [  --disable-new8580filter disable new 8580 filters])
 VICE_ARG_ENABLE_LIST(parsid,                [  --enable-parsid         enables ParSID support])
+VICE_ARG_ENABLE_LIST(usbsid,                [  --enable-usbsid         enables USBSID-Pico support])
 
 dnl
 dnl Graphics options
@@ -2810,7 +2810,7 @@ if test x"$is_unix" = "xyes"; then
       ;;
   *)
       enable_parsid=no
-      # enable_usbsid=no
+      enable_usbsid=no
       enable_hardsid=no
       enable_catweasel=no
       ;;
@@ -3693,11 +3693,11 @@ fi
 
 if test x"$real_arch" = "xUnix" -o x"$real_arch" = "xOSX" -o x"$real_arch" = "xWin32"; then
     echo "MIDI support                 : $HAVE_MIDI_SUPPORT (--enable/disable-midi)"
+    echo "USBSID-Pico support          : $HAVE_USBSID_SUPPORT (--enable/disable-usbsid)"
 fi
 
 if test x"$real_arch" != "xOSX" -a x"$real_arch" != "xBeOS"; then
     echo "Catweasel MK3 support        : $HAVE_CATWEASELMKIII_SUPPORT (--enable/disable-catweasel)"
-    echo "USBSID support               : $HAVE_USBSID_SUPPORT (--enable/disable-usbsid)"
     echo "HardSID support              : $HAVE_HARDSID_SUPPORT (--enable/disable-hardsid)"
 fi
 

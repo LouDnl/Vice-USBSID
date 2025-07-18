@@ -124,7 +124,7 @@ static const struct engine_s engine_match[] = {
 #endif
 #endif
 #ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
-    { "1280", SID_USBSID },
+    { "1792", SID_USBSID },
     { "usbsid", SID_USBSID },
     { "usbs", SID_USBSID },
     { "us", SID_USBSID },
@@ -135,7 +135,6 @@ static const struct engine_s engine_match[] = {
 #ifdef HAVE_USBSID
 int us_setparam(const char *param, void *extra_param)
 {
-    printf("KUT: %s %s %s\n", param, (char *)&extra_param, (char *)extra_param);
     if ((!strcmp(((char *)extra_param), "rw")) && (strlen(param) >= 1)) {
         int r = atoi(param);
         printf("R: %d\n", r);
@@ -285,19 +284,6 @@ static const cmdline_option_t usbsid_cmdline_options[] =
     { "-usbuffsize", SET_RESOURCE, CMDLINE_ATTRIB_NEED_ARGS,
       NULL, NULL, "SidUSBSIDBufferSize", NULL,
       "<n divisable by 8>", "Write buffer size (default: 8192)" },
-
-    // { "-usreadmode", CALL_FUNCTION, CMDLINE_ATTRIB_NEED_ARGS,
-    //   us_setparam, "rw", "SidUSBSIDReadMode", NULL,
-    //   "<1 or 0>", "Enable USBSID read mode (disables cycled writing & digiplay)" },
-    // { "-usaudiomode", CALL_FUNCTION, CMDLINE_ATTRIB_NEED_ARGS,
-    //   us_setparam, "audio", "SidUSBSIDAudioMode", NULL,
-    //   "<1 or 0>", "Set audio to Stereo(1) or Mono(0) (Default)" },
-    // { "-usbuffsize", CALL_FUNCTION, CMDLINE_ATTRIB_NEED_ARGS,
-    //   us_setparam, "buff", "SidUSBSIDBufferSize", NULL,
-    //   "<n divisable by 8>", "Write buffer size (default: 8192)" },
-    // { "-usdiffsize", CALL_FUNCTION, CMDLINE_ATTRIB_NEED_ARGS,
-    //   us_setparam, "diff", "SidUSBSIDDiffSize", NULL,
-    //   "<n divisable by 8>", "Write buffer head -> tail diff size (default: 64)" },
     CMDLINE_LIST_END
 };
 #endif
@@ -469,7 +455,7 @@ static char *build_sid_cmdline_option(int sid_type)
 #ifdef HAVE_USBSID
     /* add usbsid options if available */
     if (usbsid_available()) {
-        new = util_concat(old, ", 1280: USBSID", NULL);
+        new = util_concat(old, ", 1792: USBSID-Pico", NULL);
         lib_free(old);
         old = new;
     }
@@ -547,7 +533,7 @@ static char *build_sid_engine_cmdline_option(int sid_type)
 #ifdef HAVE_USBSID
     /* add usbsid options if available */
     if (usbsid_available()) {
-        new = util_concat(old, ", 5: USBSID", NULL);
+        new = util_concat(old, ", 7: USBSID-Pico", NULL);
         lib_free(old);
         old = new;
     }

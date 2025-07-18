@@ -124,7 +124,7 @@ static int set_sid_engine(int set_engine, void *param)
         case SID_ENGINE_PARSID:
 #endif
 #endif
-#ifdef HAVE_USBSID  // TODO: CHECK AND FINISH
+#ifdef HAVE_USBSID
         case SID_ENGINE_USBSID:
 #endif
             break;
@@ -185,9 +185,6 @@ static int set_sid_stereo(int val, void *param)
             machine_sid2_enable(val);
         }
     }
-// #ifdef HAVE_USBSID
-//     usbsid_set_audio(val);  /* Set mono or stereo by no. sids */
-// #endif
     return 0;
 }
 

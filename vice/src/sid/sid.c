@@ -1162,12 +1162,12 @@ int sid_engine_get_max_sids(int engine)
             return SID_ENGINE_CATWEASELMKIII_NUM_SIDS;
         case SID_ENGINE_HARDSID:
             return SID_ENGINE_HARDSID_NUM_SIDS;
-        case SID_ENGINE_USBSID:
-            return SID_ENGINE_USBSID_NUM_SIDS;
 #if !defined(WINDOWS_COMPILE) || (defined(WINDOWS_COMPILE) && defined(HAVE_LIBIEEE1284))
         case SID_ENGINE_PARSID:
             return SID_ENGINE_PARSID_NUM_SIDS;
 #endif
+        case SID_ENGINE_USBSID:
+            return SID_ENGINE_USBSID_NUM_SIDS;
         default:
             /* unknow engine */
             return -1;
