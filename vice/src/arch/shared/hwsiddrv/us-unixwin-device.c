@@ -242,8 +242,12 @@ void us_set_readmode(int val)
     if (readmode != val) {
         log_message(usbsid_log, "Set read mode from %d to %d (resource: %d)", readmode, val, r_readmode);
         readmode = val;
-        if (val == 0) enablethread_USBSID(usbsid);
-        if (val == 1) disablethread_USBSID(usbsid);
+        if (val == 0) {
+            enablethread_USBSID(usbsid);
+        }
+        if (val == 1) {
+            disablethread_USBSID(usbsid);
+        }
     }
     return;
 }
