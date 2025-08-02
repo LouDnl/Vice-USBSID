@@ -7,7 +7,7 @@
  * This file is part of USBSID-Pico (https://github.com/LouDnl/USBSID-Pico-driver)
  * File author: LouD
  *
- * Copyright (c) 2024 LouD
+ * Copyright (c) 2024-2025 LouD
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@
 extern "C" {
 #endif
 
-  /* USBSID */
+  /* USBSID Interface for use in STD C applications */
   typedef void * USBSIDitf;
   USBSIDitf create_USBSID(void);
   int init_USBSID(USBSIDitf, bool start_threaded, bool with_cycles);
@@ -56,8 +56,8 @@ extern "C" {
   void togglestereo_USBSID(USBSIDitf);
 
   /* Helpers */
-  bool available_USBSID(USBSIDitf);
   bool initialised_USBSID(USBSIDitf);
+  bool available_USBSID(USBSIDitf);
   bool portisopen_USBSID(USBSIDitf);
   int found_USBSID(USBSIDitf);
 
