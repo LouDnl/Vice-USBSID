@@ -29,8 +29,6 @@
 
 #include "vice.h"
 
-#if defined(UNIX_COMPILE) || defined(WINDOWS_COMPILE) || defined(WINDOWS_COMPILE)
-
 #ifdef HAVE_USBSID
 
 #include "usbsid.h"
@@ -41,13 +39,13 @@ static int use_us_device = 0;
 
 int usbsid_drv_open(void)
 {
-
-    if (!us_device_open()) {
+    int rc = 0;
+    if (!(rc = us_device_open())) {
         use_us_device = 1;
         return 0;
     }
 
-    return -1;
+    return rc;
 }
 
 int usbsid_drv_close(void)
@@ -151,4 +149,3 @@ void usbsid_drv_state_write(int chipno, struct sid_us_snapshot_state_s *sid_stat
 }
 
 #endif /* HAVE_USBSID */
-#endif /* UNIX_COMPILE || WINDOWS_COMPILE */

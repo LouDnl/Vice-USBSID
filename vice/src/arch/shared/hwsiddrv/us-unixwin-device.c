@@ -29,15 +29,7 @@
 
 #include "vice.h"
 
-#if defined(UNIX_COMPILE) || defined(WINDOWS_COMPILE) || defined(WINDOWS_COMPILE)
 #if defined(HAVE_USBSID)
-
-/* #define USBSID_DEBUG */
-#ifdef USBSID_DEBUG
-#define DBG(...) printf(__VA_ARGS__)
-#else
-#define DBG(...) ((void)0)
-#endif
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -60,11 +52,6 @@
 #include "types.h"
 
 #include "USBSIDInterface.h"
-
-#ifdef US_NOOPT
-#pragma GCC push_options
-#pragma GCC optimize ("O3")
-#endif
 
 static int rc = -1, sids_found = -1, no_sids = -1;
 static int r_audiomode = -1, audiomode = -1;
@@ -95,10 +82,10 @@ void us_device_reset(bool us_reset)
         alarm_set(usid_alarm, (usid_main_clk + raster_rate));
         if (us_reset) {
             reset_USBSID(usbsid);
-            log_message(usbsid_log, "Reset sent\r");
+            log_message(usbsid_log, "Reset sent");
         }
         no_sids = -1;
-        log_message(usbsid_log, "Clocks reset\r");
+        log_message(usbsid_log, "Clocks reset");
     }
     return;
 }
@@ -117,56 +104,63 @@ int us_device_open(void)
 
     sids_found = 0;
 
-    log_message(usbsid_log, "Detecting boards\r");
+    log_message(usbsid_log, "Detecting boards");
 
     if (usbsid == NULL) {
         usbsid = create_USBSID();
         if (usbsid) {
+            /* Gather settings from resources */
             resources_get_int("SidUSBSIDReadMode", &r_readmode);
-            // log_message(usbsid_log, "SidUSBSIDReadMode: %d, readmode: %d\r", r_readmode, readmode);
-            readmode = r_readmode;
             resources_get_int("SidUSBSIDAudioMode", &r_audiomode);
-            // log_message(usbsid_log, "SidUSBSIDAudioMode: %d, readmode: %d\r", r_audiomode, audiomode);
-            audiomode = r_audiomode;
             resources_get_int("SidUSBSIDDiffSize", &r_readmode);
-            // log_message(usbsid_log, "SidUSBSIDReadMode: %d, readmode: %d\r", r_readmode, readmode);
-            diffsize = r_diffsize;
-            if (diffsize >= 16) setdiffsize_USBSID(usbsid, diffsize);
             resources_get_int("SidUSBSIDBufferSize", &r_diffsize);
-            // log_message(usbsid_log, "SidUSBSIDAudioMode: %d, readmode: %d\r", r_audiomode, audiomode);
+            /* Apply settings to local variables */
+            readmode = r_readmode;
+            audiomode = r_audiomode;
+            diffsize = r_diffsize;
             buffsize = r_buffsize;
-            if (buffsize >= 256) setbuffsize_USBSID(usbsid, buffsize);
+            /* Update diff and buff size if needed */
+            if (diffsize >= 16) {
+                setdiffsize_USBSID(usbsid, diffsize);
+            }
+            if (buffsize >= 256) {
+                setbuffsize_USBSID(usbsid, buffsize);
+            }
         }
 
         if (readmode == 1) {
-            log_message(usbsid_log, "Starting in read mode\r");
             rc = init_USBSID(usbsid, false, false);  /* threading and cycles disabled */
+            if (rc >= 0) {
+                log_message(usbsid_log, "Starting in read mode");
+            }
         } else {  /*  (readmode == 0 || readmode == -1) */
             /* NOTICE: Digitunes only play with threaded cycles */
-            log_message(usbsid_log, "Starting in normal mode\r");
             rc = init_USBSID(usbsid, true, true);  /* threading and cycles enabled */
+            if (rc >= 0) {
+                log_message(usbsid_log, "Starting in normal mode");
+            }
         }
         if (rc < 0) {
-            return -1;
+            return rc;
         }
     }
 
-    log_message(usbsid_log, "Set audio mode to %s\r", (audiomode == 1 ? "Stereo" : "Mono"));
+    log_message(usbsid_log, "Set audio mode to %s", (audiomode == 1 ? "Stereo" : "Mono"));
     setstereo_USBSID(usbsid, (audiomode == 1 ? audiomode : 0));
 
     usid_alarm = alarm_new(maincpu_alarm_context, "usbsid", usbsid_alarm_handler, NULL);
     sids_found = getnumsids_USBSID(usbsid);
     no_sids = 0;
-    log_message(usbsid_log, "Alarm set, reset sids\r");
+    log_message(usbsid_log, "Alarm set, reset sids");
     us_device_reset(false);  /* No reset on init! */
-    log_message(usbsid_log, "Opened\r");
+    log_message(usbsid_log, "Opened");
 
     return rc;
 }
 
 int us_device_close(void)
 {
-    log_message(usbsid_log, "Start device closing\r");
+    log_message(usbsid_log, "Start device closing");
     if (usbsid) {
         mute_USBSID(usbsid);
         close_USBSID(usbsid);
@@ -179,25 +173,23 @@ int us_device_close(void)
     no_sids = -1;
     rc = -1;
     usbsid = NULL;
-    log_message(usbsid_log, "Closed\r");
+    log_message(usbsid_log, "Closed");
     return 0;
 }
 
 int us_device_read(uint16_t addr, int chipno)
 {   /* NOTICE: Disabled, unneeded */
     if (chipno < US_MAXSID) {
+        addr = ((addr & 0x1F) + (chipno * 0x20));
         if (readmode == 1) {
-            uint8_t n_addr = ((addr & 0x1F) + (chipno * 0x20));
-            sidbuf[addr] = read_USBSID(usbsid, n_addr);
-            return sidbuf[addr];
-        } else {
-            return 0x0;
+            sidbuf[addr] = read_USBSID(usbsid, addr);
         }
+        return sidbuf[addr];
     }
     return 0x0;
 }
 
-int_fast32_t us_delay(void)
+CLOCK us_delay(void)
 {   /* ISSUE: This should return an unsigned 64 bit integer but that makes vice stall indefinately on negative integers */
     if (maincpu_clk < usid_main_clk) {  /* Sync reset */
         usid_main_clk = maincpu_clk;
@@ -206,9 +198,8 @@ int_fast32_t us_delay(void)
     /* Without substracting 1 cycle this
      * can cause a clicking noise in cycle exact tunes
      * create audible skips in digitunes like Sky Buster */
-    int_fast32_t cycles = maincpu_clk - usid_main_clk - 1;
-    while (cycles > 0xffff)
-    {
+    CLOCK cycles = maincpu_clk - usid_main_clk - 1;
+    while (cycles > 0xffff) {
         cycles -= 0xffff;
     }
     usid_main_clk = maincpu_clk;
@@ -220,8 +211,8 @@ void us_device_store(uint16_t addr, uint8_t val, int chipno) /* max chipno = 1 *
     if (chipno < US_MAXSID) {  /* remove 0x20 address limitation */
         addr = ((addr & 0x1F) + (chipno * 0x20));
         if (readmode == 0) {
-            uint_fast32_t cycles = us_delay();
-            writeringcycled_USBSID(usbsid, addr, val, cycles);
+            CLOCK cycles = us_delay();
+            writeringcycled_USBSID(usbsid, addr, val, (uint16_t)cycles);
         } else if (readmode == 1) {
             write_USBSID(usbsid, addr, val);
         }
@@ -233,15 +224,15 @@ void us_device_store(uint16_t addr, uint8_t val, int chipno) /* max chipno = 1 *
 
 void us_set_machine_parameter(long cycles_per_sec)
 {
-    setclockrate_USBSID(usbsid, cycles_per_sec, true); /* TESTING */
+    setclockrate_USBSID(usbsid, cycles_per_sec, true);
     raster_rate = getrasterrate_USBSID(usbsid);
-    log_message(usbsid_log, "Clockspeed set to: %ld and rasterrate set to: %ld\r", cycles_per_sec, raster_rate);
+    log_message(usbsid_log, "Clockspeed set to: %ld and rasterrate set to: %ld", cycles_per_sec, raster_rate);
     return;
 }
 
 unsigned int us_device_available(void)
 {
-    log_message(usbsid_log, "%d SIDs available\r", sids_found);
+    log_message(usbsid_log, "%d SIDs available", sids_found);
     return sids_found;
 }
 
@@ -249,7 +240,7 @@ void us_set_readmode(int val)
 {
     resources_get_int("SidUSBSIDReadMode", &r_readmode);
     if (readmode != val) {
-        log_message(usbsid_log, "Set read mode from %d to %d (resource: %d)\r", readmode, val, r_readmode);
+        log_message(usbsid_log, "Set read mode from %d to %d (resource: %d)", readmode, val, r_readmode);
         readmode = val;
         if (val == 0) enablethread_USBSID(usbsid);
         if (val == 1) disablethread_USBSID(usbsid);
@@ -260,7 +251,7 @@ void us_set_readmode(int val)
 void us_set_audiomode(int val)
 {   /* Gets set by x64sc from SID settings and by VSID at SID file change */
     resources_get_int("SidUSBSIDAudioMode", &r_audiomode);
-    log_message(usbsid_log, "Audio mode is '%s' (resource:%d val:%d)\r", (r_audiomode == 1 ? "Stereo" : "Mono"), r_audiomode, val);
+    log_message(usbsid_log, "Audio mode is '%s' (resource:%d val:%d)", (r_audiomode == 1 ? "Stereo" : "Mono"), r_audiomode, val);
     audiomode = r_audiomode;
 
     setstereo_USBSID(usbsid, audiomode);
@@ -269,7 +260,7 @@ void us_set_audiomode(int val)
 void us_restart_ringbuffer(void)
 {   /* Restarts the ringbuffer with a new value */
     if (buffsize != d_buffsize) {
-        log_message(usbsid_log, "Restarting ringbuffer with buffer size:%d & diff size:%d\r", buffsize, diffsize);
+        log_message(usbsid_log, "Restarting ringbuffer with buffer size:%d & diff size:%d", buffsize, diffsize);
         restartringbuffer_USBSID(usbsid);
     }
 }
@@ -279,7 +270,7 @@ void us_set_buffsize(int val)
     resources_get_int("SidUSBSIDBufferSize", &r_buffsize);
     buffsize = r_buffsize;
     if (r_buffsize != d_buffsize) {
-        log_message(usbsid_log, "Setting ringbuffer size to: %d (val:%d default:%d)\r", buffsize, val, d_buffsize);
+        log_message(usbsid_log, "Setting ringbuffer size to: %d (val:%d default:%d)", buffsize, val, d_buffsize);
         setbuffsize_USBSID(usbsid, buffsize);
         us_restart_ringbuffer();
     }
@@ -290,7 +281,7 @@ void us_set_diffsize(int val)
     resources_get_int("SidUSBSIDDiffSize", &r_diffsize);
     diffsize = r_diffsize;
     if (r_diffsize != d_diffsize) {
-        log_message(usbsid_log, "Setting ringbuffer diff size to: %d  (val:%d default:%d)\r", diffsize, val, d_diffsize);
+        log_message(usbsid_log, "Setting ringbuffer diff size to: %d  (val:%d default:%d)", diffsize, val, d_diffsize);
         setdiffsize_USBSID(usbsid, diffsize);
     }
 
@@ -315,7 +306,6 @@ static void usbsid_alarm_handler(CLOCK offset, void *data)
 
 void us_device_state_read(int chipno, struct sid_us_snapshot_state_s *sid_state)
 {
-    log_message(usbsid_log, "%s\r", __func__);
     sid_state->usid_main_clk = (uint32_t)usid_main_clk;
     sid_state->usid_alarm_clk = (uint32_t)usid_alarm_clk;
     sid_state->lastaccess_clk = 0;
@@ -330,13 +320,8 @@ void us_device_state_read(int chipno, struct sid_us_snapshot_state_s *sid_state)
 
 void us_device_state_write(int chipno, struct sid_us_snapshot_state_s *sid_state)
 {
-    log_message(usbsid_log, "%s\r", __func__);
     usid_main_clk = (CLOCK)sid_state->usid_main_clk;
     usid_alarm_clk = (CLOCK)sid_state->usid_alarm_clk;
 }
 
-#ifdef US_NOOPT
-#pragma GCC pop_options
-#endif
 #endif /* HAVE_USBSID */
-#endif /* UNIX_COMPILE || WINDOWS_COMPILE */

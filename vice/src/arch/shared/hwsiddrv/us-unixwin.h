@@ -33,9 +33,6 @@
 #include "sid-snapshot.h"
 #include "types.h"
 
-#pragma GCC push_options
-#pragma GCC optimize ("O3")
-
 #define US_MAXSID 4
 
 int us_device_open(void);
@@ -46,7 +43,7 @@ void us_device_reset(bool us_reset);
 
 int us_device_read(uint16_t addr, int chipno);
 
-int_fast32_t us_delay(void);
+CLOCK us_delay(void);
 
 void us_device_store(uint16_t addr, uint8_t val, int chipno);
 
@@ -67,7 +64,5 @@ void us_set_diffsize(int val);
 void us_device_state_read(int chipno, struct sid_us_snapshot_state_s *sid_state);
 
 void us_device_state_write(int chipno, struct sid_us_snapshot_state_s *sid_state);
-
-#pragma GCC pop_options
 
 #endif /* VICE_US_UNIXWIN_H */
