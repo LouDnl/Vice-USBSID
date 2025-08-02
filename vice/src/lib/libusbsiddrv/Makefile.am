@@ -18,23 +18,9 @@ noinst_LIBRARIES = libusbsiddrv.a
 
 USBSIDDRIVER=
 
-# Windows drivers
-# if WINDOWS_COMPILE
-# if HAVE_USBSID
-# USBSIDDRIVER += \
-  # USBSID.o \
-  # USBSIDInterface.o
-# endif HAVE_USBSID
-# endif WINDOWS_COMPILE
-
-# if UNIX_COMPILE
-# if HAVE_USBSID
 USBSIDDRIVER += \
   USBSID.o \
   USBSIDInterface.o
-# endif HAVE_USBSID
-# endif UNIX_COMPILE
-
 
 # Built depending on configure options:
 EXTRA_libusbsiddrv_a_SOURCES = \
